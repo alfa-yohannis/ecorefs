@@ -22,3 +22,31 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+eval/datasets
+eval/custom_generator/output
+eval/jdk8
+core-plugin/target/
+eval/custom_generator/target/
+
+# IPFS Daemons and Archives
+eval/kubo/
+eval/.ipfs/
+*.tar.gz
+*.tar.zst
+
+# Benchmark Output Logs
+*.log
+*.csv
+
+# IDE Configurations
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/
+
+# OS / Temporary
+.DS_Store
+*~
