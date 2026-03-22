@@ -50,3 +50,6 @@ eval/.ipfs/
 # OS / Temporary
 .DS_Store
 *~
+
+target/*.txt
+core-plugin/*.txt

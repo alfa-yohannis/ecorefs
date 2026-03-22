@@ -15,13 +15,30 @@ public class IPFSModelPersister {
 
     /**
      * Implements the "Git-like" recursive save for content-addressed models.
-     * When a resource is saved, its CID changes. This method finds all resources 
-     * in the active ResourceSet that point to the modified resource, updates their 
-     * internal cross-references to the new CID, and saves them (which changes their
-     * CIDs recursively).
+     * <p>
+     * Behavior depends on the {@link ReferenceMode} option:
+     * <ul>
+     *   <li>{@link ReferenceMode#CID} (default) — saves the target, then cascades to all
+     *       referencing resources in the ResourceSet, using a visited set to prevent infinite
+     *       loops on circular dependencies.</li>
+     *   <li>{@link ReferenceMode#IPNS} — saves only the target resource. IPNS pointers are
+     *       mutable, so referencing resources do not need to be re-saved.</li>
+     * </ul>
      */
     public static void cascadeSave(Resource targetResource, Map<?, ?> options) throws IOException {
-        cascadeSave(targetResource, options, new HashSet<>());
+        ReferenceMode mode = ReferenceMode.CID;
+        if (options != null && options.containsKey(IPFSResourceOptions.REFERENCE_MODE)) {
+            mode = (ReferenceMode) options.get(IPFSResourceOptions.REFERENCE_MODE);
+        }
+
+        if (mode == ReferenceMode.IPNS) {
+            // IPNS mode: just save the target. The mutable pointer update is sufficient —
+            // all resources referencing this one via ipns:// automatically see the new CID.
+            targetResource.save(options);
+        } else {
+            // CID mode: full cascade with cycle detection
+            cascadeSave(targetResource, options, new HashSet<>());
+        }
     }
 
     private static void cascadeSave(Resource targetResource, Map<?, ?> options, Set<Resource> alreadySaved) throws IOException {

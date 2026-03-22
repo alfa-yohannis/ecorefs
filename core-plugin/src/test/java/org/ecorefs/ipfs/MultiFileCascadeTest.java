@@ -35,8 +35,11 @@ public class MultiFileCascadeTest {
         ipfs = new IPFS("/ip4/127.0.0.1/tcp/5001");
 
         ipfsResourceSet = new ResourceSetImpl();
+        IPFSResourceFactoryImpl factory_ipfs = new IPFSResourceFactoryImpl(ipfs);
         ipfsResourceSet.getResourceFactoryRegistry().getProtocolToFactoryMap()
-                .put("ipfs", new IPFSResourceFactoryImpl(ipfs));
+                .put("ipfs", factory_ipfs);
+        ipfsResourceSet.getResourceFactoryRegistry().getProtocolToFactoryMap()
+                .put("ipns", factory_ipfs);
         ipfsResourceSet.getURIConverter().getURIHandlers()
                 .add(0, new IPFSURIHandlerImpl(ipfs));
 
