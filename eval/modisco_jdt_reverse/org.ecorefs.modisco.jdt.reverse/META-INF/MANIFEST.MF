@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Ecorefs MoDisco JDT Reverse Core
+Bundle-SymbolicName: org.ecorefs.modisco.jdt.reverse;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Automatic-Module-Name: org.ecorefs.modisco.jdt.reverse
+Bundle-RequiredExecutionEnvironment: JavaSE-21
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.emf.common,
+ org.eclipse.emf.ecore,
+ org.eclipse.emf.ecore.xmi,
+ org.eclipse.jdt.core,
+ org.eclipse.jdt.launching,
+ org.eclipse.pde.core,
+ org.eclipse.modisco.infra.discovery.core,
+ org.eclipse.modisco.java,
+ org.eclipse.modisco.java.discoverer
+Export-Package: org.ecorefs.modisco.jdt.reverse

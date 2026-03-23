@@ -53,3 +53,10 @@ eval/.ipfs/
 
 target/*.txt
 core-plugin/*.txt
+.m2-repo
+.tools
+.tools/*
+
+# Generated MoDisco helper workspace
+eval/modisco_jdt_reverse/org.ecorefs.modisco.jdt.reverse/target
+eval/modisco_jdt_reverse/org.ecorefs.modisco.jdt.reverse.tests/target
