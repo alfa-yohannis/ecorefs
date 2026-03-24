@@ -1,0 +1,28 @@
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.eclipse.bpmn2.modeler</groupId>
+		<artifactId>org.eclipse.bpmn2.modeler.parent</artifactId>
+		<version>1.5.4-SNAPSHOT</version>
+		<relativePath>../parent/pom.xml</relativePath>
+	</parent>
+
+	<groupId>org.eclipse.bpmn2.modeler.plugins</groupId>
+	<artifactId>org.eclipse.bpmn2.modeler.plugins.parent</artifactId>
+	<name>BPMN2 Modeler: Plugins Parent</name>
+	<version>1.5.4-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>org.eclipse.bpmn2.modeler.core</module>
+		<module>org.eclipse.bpmn2.modeler.ui</module>
+		<module>org.eclipse.bpmn2.modeler.runtime.jboss.jbpm</module>
+		<module>org.eclipse.bpmn2.modeler.help</module>
+	</modules>
+
+</project>
+	

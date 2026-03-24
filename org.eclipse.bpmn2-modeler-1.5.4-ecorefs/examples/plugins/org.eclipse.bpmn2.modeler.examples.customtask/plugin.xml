@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+	<extension point="org.eclipse.emf.ecore.generated_package">
+		<package
+			uri="http://org.eclipse.bpmn2.modeler.examples.customtask"
+			class="org.eclipse.bpmn2.modeler.examples.customtask.MyModel.MyModelPackage"
+			genModel="model/MyModel.genmodel" />
+	</extension>
+
+   <extension point="org.eclipse.emf.ecore.extension_parser">
+      <!-- @generated MyModel -->
+      <parser
+            type="bpmn"
+            class="org.eclipse.bpmn2.modeler.examples.customtask.MyModel.util.MyModelResourceFactoryImpl"/>
+   </extension>
+
+	<extension point="org.eclipse.bpmn2.modeler.runtime">
+		<runtime name="Sample Runtime - with EMF model"
+			id="org.eclipse.bpmn2.modeler.examples.customtask.runtime"
+			class="org.eclipse.bpmn2.modeler.examples.customtask.MyRuntimeExtension"
+			description="BPMN2 Modeler Sample Runtime using EMF model extensions">
+		</runtime>
+
+		<model
+			resourceFactory="org.eclipse.bpmn2.modeler.examples.customtask.MyModel.util.MyModelResourceFactoryImpl"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.customtask.runtime"
+			uri="http://org.eclipse.bpmn2.modeler.examples.customtask">
+		</model>
+
+		<customTask
+			category="My Tools"
+			description="This is a Custom Task that has been extended with runtime-specific configuration parameters. These parameters are defined in the &quot;My Task&quot; Property Tab"
+			featureContainer="org.eclipse.bpmn2.modeler.examples.customtask.MyTaskFeatureContainer"
+			icon="MyTask.png"
+			id="org.eclipse.bpmn2.modeler.examples.customtask.customTask1"
+			name="My Task"
+			propertyTabs="org.eclipse.bpmn2.modeler.examples.customtask.mytask.tab"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.customtask.runtime"
+			type="Task">
+			<property name="type" value="MyTask" />
+			<property name="taskConfig" label="Task Configuration" type="TaskConfig"/>
+		</customTask>
+
+		<customTask
+			category="My Tools"
+			description="This is a Custom Boundary Event that has been extended with a simple boolean flag."
+			featureContainer="org.eclipse.bpmn2.modeler.examples.customtask.MyBoundaryEventFeatureContainer"
+			icon="MyBoundaryEvent.png"
+			id="org.eclipse.bpmn2.modeler.examples.customtask.boundaryEvent1"
+			name="My Boundary Event"
+			propertyTabs="org.eclipse.bpmn2.modeler.examples.customtask.myBoundaryEvent.tab"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.customtask.runtime"
+			type="BoundaryEvent">
+			<property name="type" value="MyBoundaryEvent"/>
+			<property name="isEnabled" value="true" type="EBoolean"/>
+		</customTask>
+
+		<customTask
+			category="My Tools"
+			description="This is a Custom Event Definition that has been extended with a simple string field."
+			featureContainer="org.eclipse.bpmn2.modeler.examples.customtask.MyEventDefinitionFeatureContainer"
+			icon="MyEventDefinition.png"
+			id="org.eclipse.bpmn2.modeler.examples.customtask.eventDefinition1"
+			name="My Event Definition"
+			propertyTabs="org.eclipse.bpmn2.modeler.examples.customtask.myEventDefinition.tab"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.customtask.runtime"
+			type="MyEventDefinition">
+			<property name="type" value="MyEventDefinition"/>
+		</customTask>
+
+		<customTask
+			category="Time-BPMN"
+			description="Temporal Dependency"
+			featureContainer="org.eclipse.bpmn2.modeler.examples.customtask.CustomTemporalDependencyFeatureContainer"
+			icon="TemporalDepedency.png"
+			id="org.eclipse.bpmn2.modeler.examples.customtask.temporalDependency"
+			name="Temporal Dependency"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.customtask.runtime"
+			type="TemporalDependency">
+			<property name="lagTime" type="EString" value="3hr"/>
+		</customTask>
+
+		<!-- This CustomTask defines a Start Event containing a MessageEventDefinition -->
+		<customTask
+			category="My Tools"
+			description="Message Start Event"
+			featureContainer="org.eclipse.bpmn2.modeler.examples.customtask.MessageStartEventFeatureContainer"
+			id="org.eclipse.bpmn2.modeler.examples.customtask.messageStartEvent"
+			name="Message Event"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.customtask.runtime"
+			type="StartEvent">
+		</customTask>
+		
+		<propertyTab
+			id="org.eclipse.bpmn2.modeler.examples.customtask.description.tab"
+			replaceTab="org.eclipse.bpmn2.modeler.description.tab"
+			class="org.eclipse.bpmn2.modeler.examples.customtask.MyDescriptionPropertySection"
+			label="General">
+		</propertyTab>
+
+		<propertyTab
+			id="org.eclipse.bpmn2.modeler.examples.customtask.mytask.tab"
+			class="org.eclipse.bpmn2.modeler.examples.customtask.MyTaskPropertySection"
+			label="My Task"
+			type="org.eclipse.bpmn2.Task"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.customtask.runtime">
+		</propertyTab>
+
+		<propertyTab
+			id="org.eclipse.bpmn2.modeler.examples.customtask.myBoundaryEvent.tab"
+			class="org.eclipse.bpmn2.modeler.examples.customtask.MyBoundaryEventPropertySection"
+			type="org.eclipse.bpmn2.Event"
+			label="My Boundary Event"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.customtask.runtime">
+		</propertyTab>
+
+		<propertyTab
+			id="org.eclipse.bpmn2.modeler.examples.customtask.myEventDefinition.tab"
+			class="default"
+			features="value"
+			label="My Event Definition"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.customtask.runtime">
+		</propertyTab>
+
+		<propertyTab
+			id="org.eclipse.bpmn2.modeler.examples.customtask.temporalDependency.tab"
+			class="default"
+			features="name lagTime"
+			label="Temporal Dependency"
+			type="org.eclipse.bpmn2.modeler.examples.customtask.MyModel.TemporalDependency"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.customtask.runtime">
+		</propertyTab>
+
+		<propertyExtension
+			id="org.eclipse.bpmn2.modeler.examples.propertyExtension.MyEventDefinition"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.customtask.runtime"
+			type="org.eclipse.bpmn2.modeler.examples.customtask.MyModel.MyEventDefinition"
+			class="org.eclipse.bpmn2.modeler.examples.customtask.MyEventDefinitionPropertiesAdapter">
+		</propertyExtension>
+		
+		<modelEnablement
+				runtimeId="org.eclipse.bpmn2.modeler.examples.customtask.runtime"
+				id="customtask.profile.1"
+				profile="Full"
+				description="All BPMN2 elements and attributes"
+				ref="org.eclipse.bpmn2.modeler.runtime.none:Full">
+			<enable object="TaskConfig"/>
+			<enable object="TemporalDependency"/>
+			<enable object="Parameter"/>
+			<enable object="MetaData"/>
+			<enable object="MyEventDefinition"/>
+		</modelEnablement>
+
+	</extension>
+
+</plugin>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+	<extension
+		point="org.eclipse.bpmn2.modeler.runtime">
+		
+		<runtime name="Sample Runtime - with dynamic model" versions="1.0"
+			id="org.eclipse.bpmn2.modeler.examples.dynamic"
+			class="org.eclipse.bpmn2.modeler.examples.dynamic.SampleRuntimeExtension"
+			description="BPMN2 Modeler Sample Runtime using dynamic model extensions">
+		</runtime>
+
+		<model runtimeId="org.eclipse.bpmn2.modeler.examples.dynamic"
+			uri="http://org.eclipse.bpmn2.modeler.examples.dynamic">
+		</model>
+
+		<propertyTab
+			id="org.eclipse.bpmn2.modeler.examples.dynamic.association.tab"
+			replaceTab="org.eclipse.bpmn2.modeler.assocation.tab"
+			class="default"
+			features="affectsTaskExecution"
+			type="org.eclipse.bpmn2.Association"
+			label="Risk/Mitigation Association">
+		</propertyTab>
+		
+		<propertyTab
+			id="org.eclipse.bpmn2.modeler.examples.dynamic.risk.tab"
+			replaceTab="org.eclipse.bpmn2.modeler.textAnnotation.tab"
+			class="org.eclipse.bpmn2.modeler.examples.dynamic.SampleRiskTaskPropertySection"
+			type="org.eclipse.bpmn2.TextAnnotation"
+			label="Risk Task">
+		</propertyTab>
+		
+		<propertyTab
+			id="org.eclipse.bpmn2.modeler.examples.dynamic.mitigation.tab"
+			replaceTab="org.eclipse.bpmn2.modeler.textAnnotation.tab"
+			class="org.eclipse.bpmn2.modeler.examples.dynamic.SampleMitigationTaskPropertySection"
+			type="org.eclipse.bpmn2.TextAnnotation"
+			label="Mitigation Task">
+		</propertyTab>
+		
+		<propertyTab
+			id="org.eclipse.bpmn2.modeler.examples.dynamic.tab"
+			class="default"
+			features="priority"
+			type="org.eclipse.bpmn2.SequenceFlow"
+			label="Risk Mitigation">
+		</propertyTab>
+
+		<customTask
+			description="This task represents a risk that can occur in the connected Elements."
+			featureContainer="org.eclipse.bpmn2.modeler.examples.dynamic.SampleCustomTaskFeatureContainer"
+			id="org.eclipse.bpmn2.modeler.examples.dynamic.risk"
+			name="Risk Task"
+			category="Risk &amp; Mitigation"
+			icon="risk.png"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.dynamic"
+			type="TextAnnotation">
+			<property name="name" value="Risk Task" type="EString"/>
+			<property name="text" value="Risk Task" type="EString"/>
+			<property name="evaluate" value="true" type="EBoolean" description="Include this activity in Risk Calculations"/>
+			<property name="cost" value="0" type="EInt" description="Potential cost of this Risk"/>
+		</customTask>
+
+		<customTask
+			description="This task attempts to minimize the impact of risk."
+			featureContainer="org.eclipse.bpmn2.modeler.examples.dynamic.SampleCustomTaskFeatureContainer"
+			id="org.eclipse.bpmn2.modeler.examples.dynamic.mitigation"
+			name="Mitigation Task"
+			category="Risk &amp; Mitigation"
+			icon="mitigation.png"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.dynamic"
+			type="TextAnnotation">
+			<property name="name" value="Mitigation Task" type="EString"/>
+			<property name="text" value="Mitigation Task" type="EString"/>
+			<property name="evaluate" value="true" type="EBoolean" description="Include this activity in Risk Calculations"/>
+			<property name="benefit" value="0" type="EInt" description="Potential benefit provided by this Mitigation activity"/>
+		</customTask>
+
+		<customTask
+			description="Associates a Risk or Mitigation with a Task."
+			featureContainer="org.eclipse.bpmn2.modeler.examples.dynamic.SampleCustomSequenceFlowFeatureContainer"
+			id="org.eclipse.bpmn2.modeler.examples.dynamic.flow"
+			name="Mitigation Flow"
+			category="Risk &amp; Mitigation"
+			icon="flow.png"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.dynamic"
+			type="SequenceFlow">
+			<property name="name" value="Mitigate" type="EString"/>
+			<property name="priority" value="1" type="EInt"/>
+		</customTask>
+
+		<modelExtension
+			id="org.eclipse.bpmn2.modeler.examples.dynamic.modelExtension.Association"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.dynamic"
+			name="Association Extensions"
+			type="Association">
+			<property name="affectsTaskExecution" value="false" type="EBoolean"/>
+		</modelExtension>
+		
+		<modelExtension
+			id="org.eclipse.bpmn2.modeler.examples.dynamic.modelExtension.ManualTask"
+			runtimeId="org.eclipse.bpmn2.modeler.examples.dynamic"
+			name="Manual Task Extensions"
+			type="ManualTask">
+			<property name="timeToComplete" value="1d" type="EString"/>
+		</modelExtension>
+		
+		<style object="TextAnnotation" foreground="7F7F00" background="FFFF80" textColor="7F7F00" font="arial,10,-,-"/>
+		
+	</extension>
+   <extension
+         point="org.eclipse.bpmn2.modeler.ui">
+      <toolProvider
+            class="org.eclipse.bpmn2.modeler.examples.dynamic.SampleToolProvider"
+            id="org.eclipse.bpmn2.modeler.examples.dynamic.toolProvider1"
+            runtimeId="org.eclipse.bpmn2.modeler.examples.dynamic">
+      </toolProvider>
+   </extension>
+
+</plugin>

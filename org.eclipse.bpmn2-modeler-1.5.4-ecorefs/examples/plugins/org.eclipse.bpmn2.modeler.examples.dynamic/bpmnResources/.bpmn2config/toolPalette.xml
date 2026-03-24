@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<runtime id="org.eclipse.bpmn2.modeler.runtime.none">
+
+		<toolPalette
+			id="org.bpmn2.modeler.toolpalette.my.full"
+			runtimeId="org.eclipse.bpmn2.modeler.runtime.none"
+			profile="Full">
+
+			<category id="org.bpmn2.modeler.toolpalette.default.categories"/>
+			<category id="org.bpmn2.modeler.toolpalette.process.patterns" fromPalette="org.bpmn2.modeler.toolpalette.full">
+				<tool name="Parallel Join" id="org.bpmn2.modeler.tool.parallel.join">
+					<object type="Task[$name='Task A']" id="parallel.join.taskA" optional="true"/>
+					<object type="Task[$name='Task B',y=100]" id="parallel.join.taskB" optional="true"/>
+					<object type="Task[$name='Task C',x=200,y=50]" id="parallel.join.taskC" optional="true"/>
+					<object type="ParallelGateway[x=100,y=50,$gatewayDirection=Converging]" id="parallel.join.gateway"/>
+					<object type="SequenceFlow[source='parallel.join.taskA',target='parallel.join.gateway']"/>
+					<object type="SequenceFlow[source='parallel.join.taskB',target='parallel.join.gateway']"/>
+					<object type="SequenceFlow[source='parallel.join.gateway',target='parallel.join.taskC']"/>
+				</tool>
+			</category>
+			
+		</toolPalette>
+		
+</runtime>

@@ -1,0 +1,462 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<prerequisites>
+		<maven>3.0</maven>
+	</prerequisites>
+
+	<groupId>org.eclipse.bpmn2.modeler</groupId>
+	<artifactId>org.eclipse.bpmn2.modeler.parent</artifactId>
+	<version>1.5.4-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>BPMN2 Modeler Parent</name>
+	<description>Parent POM for the Eclipse BPMN2 Modeler Project</description>
+
+	<licenses>
+		<license>
+			<name>Eclipse Public License v1.0</name>
+			<comments>
+       All rights reserved.
+
+       This program and the accompanying materials are made
+       available under the terms of the Eclipse Public License v1.0
+       which accompanies this distribution, and is available at
+       http://www.eclipse.org/legal/epl-v10.htm
+      </comments>
+		</license>
+	</licenses>
+
+	<properties>
+		<!-- 1.3.0 2.7.2 -->
+		<tycho-version>2.7.5</tycho-version>
+		<tycho-extras-version>${tycho-version}</tycho-extras-version>
+		<BUILD_ALIAS>RC1</BUILD_ALIAS>
+		<BUILD_NUMBER>1</BUILD_NUMBER>
+		<eclipse-site>https://download.eclipse.org/releases/2022-03</eclipse-site>
+		<platform-version>[4.8,5.2)</platform-version>
+		<platform-version-name>2022-12</platform-version-name>
+		<eclipse.orbit.url>https://download.eclipse.org/tools/orbit/downloads/drops/S20221109014815/repository</eclipse.orbit.url>
+	</properties>
+
+	<profiles>
+
+		<profile>
+			<id>platform-2021-06</id>
+			<activation>
+				<property>
+					<name>platform-version-name</name>
+					<value>2021-06</value>
+				</property>
+			</activation>
+			<properties>
+				<eclipse-site>https://download.eclipse.org/releases/2020-09</eclipse-site>
+				<platform-version>[4.8,5.2)</platform-version>
+				<platform-version-name>2021-06</platform-version-name>
+				<!-- 
+				<eclipse.orbit.url>https://download.eclipse.org/tools/orbit/downloads/drops/R20200831200620/repository</eclipse.orbit.url>
+				 -->
+				<eclipse.orbit.url>https://download.eclipse.org/tools/orbit/S-builds/S20210406213021/repository</eclipse.orbit.url>				
+			</properties>
+			
+		</profile>
+		
+		<profile>
+			<id>platform-2022-06</id>
+			<activation>
+				<property>
+					<name>platform-version-name</name>
+					<value>2022-06</value>
+				</property>
+			</activation>
+			<properties>
+				<eclipse-site>https://download.eclipse.org/releases/2022-06</eclipse-site>
+				<platform-version>[4.8,5.2)</platform-version>
+				<platform-version-name>2022-06</platform-version-name>
+				<!-- I20220401155710  S20220517184036 -->
+				<eclipse.orbit.url>https://download.eclipse.org/tools/orbit/downloads/drops/S20220517184036/repository</eclipse.orbit.url>
+			</properties>
+			
+		</profile>		
+
+		<profile>
+			<id>platform-2022-12</id>
+			<activation>
+				<property>
+					<name>platform-version-name</name>
+					<value>2022-12</value>
+				</property>
+			</activation>
+			<properties>
+				<eclipse-site>https://download.eclipse.org/releases/2022-12</eclipse-site>
+				<platform-version>[4.8,5.2)</platform-version>
+				<platform-version-name>2022-12</platform-version-name>
+				<eclipse.orbit.url>https://download.eclipse.org/tools/orbit/downloads/drops/S20221109014815/repository</eclipse.orbit.url>				
+			</properties>
+			
+		</profile>	
+						
+		<profile>
+			<id>sign</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.eclipse.cbi.maven.plugins</groupId>
+						<artifactId>eclipse-jarsigner-plugin</artifactId>
+						<version>1.3.2</version>
+						<executions>
+							<execution>
+								<id>sign</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<repositories>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>central</id>
+			<name>Central Repository</name>
+			<url>https://repo.maven.apache.org/maven2</url>
+		</repository>
+	
+		<repository>
+			<id>eclipse-platform</id>
+			<layout>p2</layout>
+			<url>${eclipse-site}</url>
+		</repository>
+
+		<repository>
+			<id>eclipse-bpmn2</id>
+			<url>https://download.eclipse.org/modeling/mdt/bpmn2/updates/2020-09/1.5.1/</url>
+			<layout>p2</layout>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+
+
+		<!-- deactivated as no longer supported
+		<repository>
+			<id>eclipse-bpel</id>
+			<url>https://download.eclipse.org/bpel/updates/2020-09/1.1.3</url>
+			<layout>p2</layout>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+		 -->
+
+		<repository>
+			<id>eclipse-graphiti</id>
+			<!-- <url>https://download.eclipse.org/graphiti/updates/milestones/S-0.19.0M3-202205200756</url>  -->
+			<url>https://download.eclipse.org/graphiti/updates/milestones/</url>
+			<layout>p2</layout>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+
+		<repository>
+			<id>eclipse-emf</id>
+			<url>https://download.eclipse.org/modeling/emf/updates/releases/</url>
+			<layout>p2</layout>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+
+		<repository>
+			<id>eclipse-gef</id>
+			<url>https://download.eclipse.org/tools/gef/updates/releases/</url>
+			<layout>p2</layout>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+
+		<!-- vvv Remove when Web Tools has a fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=501445 -->
+		<repository>
+			<id>eclipse-wst</id>
+			<url>https://download.eclipse.org/webtools/downloads/drops/R3.13.0/I-latest/repository</url>
+			<layout>p2</layout>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+		<repository>
+			<id>eclipse-orbit</id>
+			<url>${eclipse.orbit.url}</url>
+			<layout>p2</layout>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+		<!-- ^^^ Remove when Web Tools has a fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=501445 -->
+
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>repo.eclipse.org.cbi-releases</id>
+			<url>https://repo.eclipse.org/content/repositories/cbi-releases/</url>
+		</pluginRepository>
+		
+		<pluginRepository>
+			<id>maven-central</id>
+			<url>https://repo1.maven.org/maven2/</url>
+		</pluginRepository>
+		
+		<pluginRepository>
+			<id>eclipse-nexus-central</id>
+			<url>https://maven.eclipse.org/nexus/content/groups/central/</url>
+		</pluginRepository>
+		
+		<pluginRepository>
+			<id>eclipse-nexus-public</id>
+			<url>https://maven.eclipse.org/nexus/content/groups/public/</url>
+		</pluginRepository>
+
+		<pluginRepository>
+			<id>m2e-cbi</id>
+			<url>https://download.eclipse.org/technology/m2e/maven/</url>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-packaging-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+                	<format>'${BUILD_ALIAS}-v'yyyyMMdd-HHmm'-B${BUILD_NUMBER}'</format>
+                    <archiveSite>true</archiveSite>
+				</configuration>
+			</plugin>
+			<plugin>
+			    <groupId>org.eclipse.tycho</groupId>
+			    <artifactId>tycho-surefire-plugin</artifactId>
+			    <version>${tycho-version}</version>
+				<configuration>
+					<useUIThread>false</useUIThread>
+				</configuration>
+			</plugin>			
+			<plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-source-feature-plugin</artifactId>
+				<version>${tycho-extras-version}</version>
+				<executions>
+					<execution>
+						<id>source-feature</id>
+						<phase>package</phase>
+						<goals>
+							<goal>source-feature</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<excludes>
+						<plugin id="org.eclipse.bpmn2.modeler.core.source" />
+						<plugin id="org.eclipse.bpmn2.modeler.ui.source" />
+						<plugin id="org.eclipse.bpmn2.modeler.runtime.jboss.jbpm.source" />
+					</excludes>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-p2-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<executions>
+					<execution>
+                 <id>attached-p2-metadata</id>
+						<phase>package</phase>
+						<goals>
+							<goal>p2-metadata</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<excludes>
+						<plugin id="org.eclipse.bpmn2.modeler.core.source" />
+						<plugin id="org.eclipse.bpmn2.modeler.ui.source" />
+						<plugin id="org.eclipse.bpmn2.modeler.runtime.jboss.jbpm.source" />
+					</excludes>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<extensions>true</extensions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<resolver>p2</resolver>
+					<includePackedArtifacts>true</includePackedArtifacts>
+					<environments>
+						<environment>
+							<os>macosx</os>
+							<ws>cocoa</ws>
+							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86_64</arch>
+						</environment>
+					</environments>
+					
+					<!-- vvv Remove when Web Tools has a fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=501445 -->
+					<!-- removed from ralph.soika@imixs.com at 27.05.2020 
+					<dependency-resolution>
+						<extraRequirements>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>javax.wsdl</id>
+								<versionRange>[1.5.0,1.6.0)</versionRange>
+							</requirement>
+						</extraRequirements>
+					</dependency-resolution>
+					-->
+					<!-- ^^^ Remove when Web Tools has a fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=501445 -->
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>plugin-source</id>
+						<goals>
+							<goal>plugin-source</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>maven-osgi-compiler-plugin</artifactId>
+					<version>${tycho-version}</version>
+					<configuration>
+						<encoding>UTF-8</encoding>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>2.4.1</version>
+					<configuration>
+						<encoding>ISO-8859-1</encoding>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>1.3</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>findbugs-maven-plugin</artifactId>
+					<version>2.3.2-SNAPSHOT</version>
+					<configuration>
+						<findbugsXmlOutput>true</findbugsXmlOutput>
+						<failOnError>false</failOnError>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>check</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-pmd-plugin</artifactId>
+					<version>2.5</version>
+					<configuration>
+						<sourceEncoding>utf-8</sourceEncoding>
+						<minimumTokens>100</minimumTokens>
+						<targetJdk>1.5</targetJdk>
+						<format>xml</format>
+						<failOnViolation>false</failOnViolation>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>cpd-check</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-source-plugin</artifactId>
+					<version>${tycho-version}</version>
+					<configuration>
+						<strictSrcIncludes>false</strictSrcIncludes>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>
+

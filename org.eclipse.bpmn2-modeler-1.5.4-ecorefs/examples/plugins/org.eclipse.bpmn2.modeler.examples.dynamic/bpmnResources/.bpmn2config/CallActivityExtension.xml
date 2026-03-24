@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<runtime id="org.eclipse.bpmn2.modeler.runtime.none">
+	<modelExtension
+		id="org.foo.callactivity.extension"
+		uri="http://org.foo/extensions"
+		name="My CallActivity Extension"
+		type="CallActivity">
+		<property name="proxy" type="EString" label="Called Activity"/>
+	</modelExtension>
+
+	<propertyTab
+		id="org.foo.callActivity.tab"
+		replaceTab="org.eclipse.bpmn2.modeler.callActivity.tab"
+		class="default"
+		features="proxy isForCompensation loopCharacteristics properties resources"
+		type="org.eclipse.bpmn2.CallActivity"
+		label="Proxy">
+	</propertyTab>
+</runtime>

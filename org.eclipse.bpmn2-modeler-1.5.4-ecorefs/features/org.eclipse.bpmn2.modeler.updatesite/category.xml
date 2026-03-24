@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description url="http://eclipse.org/bpmn2-modeler">
+      Eclipse BPMN2 Modeler.
+   </description>
+   <feature url="features/org.eclipse.bpmn2.modeler_0.0.0.jar" id="org.eclipse.bpmn2.modeler" version="0.0.0">
+      <category name="Eclipse BPMN2 Modeler"/>
+   </feature>
+   <feature url="features/org.eclipse.bpmn2.modeler.runtime.jboss_0.0.0.jar" id="org.eclipse.bpmn2.modeler.runtime.jboss" version="0.0.0">
+      <category name="Eclipse BPMN2 Modeler"/>
+   </feature>
+   <feature url="features/org.eclipse.bpmn2.modeler.examples_0.0.0.jar" id="org.eclipse.bpmn2.modeler.examples" version="0.0.0">
+      <category name="Eclipse BPMN2 Modeler"/>
+   </feature>
+   <feature url="features/org.eclipse.bpmn2.modeler.source_0.0.0.jar" id="org.eclipse.bpmn2.modeler.source" version="0.0.0">
+      <category name="Eclipse BPMN2 Modeler Sources"/>
+   </feature>
+   <feature url="features/org.eclipse.bpmn2.modeler.runtime.jboss.source_0.0.0.jar" id="org.eclipse.bpmn2.modeler.runtime.jboss.source" version="0.0.0">
+      <category name="Eclipse BPMN2 Modeler Sources"/>
+   </feature>
+   <feature url="features/org.eclipse.bpmn2.modeler.examples.source_0.0.0.jar" id="org.eclipse.bpmn2.modeler.examples.source" version="0.0.0">
+      <category name="Eclipse BPMN2 Modeler Sources"/>
+   </feature>
+   <category-def name="Eclipse BPMN2 Modeler" label="Eclipse BPMN2 Modeler">
+      <description>
+         Eclipse BPMN2 Modeler
+      </description>
+   </category-def>
+   <category-def name="Eclipse BPMN2 Modeler Sources" label="Eclipse BPMN2 Modeler Sources">
+      <description>
+         Eclipse BPMN2 Modeler Sources
+      </description>
+   </category-def>
+</site>

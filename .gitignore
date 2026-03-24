@@ -51,6 +51,14 @@ eval/.ipfs/
 .DS_Store
 *~
 
+# Recursive Java / Eclipse / Tycho build outputs
+**/target/
+**/bin/
+**/.metadata/
+**/target/work/
+**/target/work.stale.*/
+org.eclipse.bpmn2-modeler-1.5.4-ecorefs/tests/ipfs-ui/build/
+
 target/*.txt
 core-plugin/*.txt
 .m2-repo

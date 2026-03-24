@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.bpmn2.modeler.runtime.jboss"
+      label="BPMN2 Modeler - jBPM Runtime Extension Feature"
+      version="1.5.4.qualifier"
+      provider-name="%providerName">
+
+   <description url="http://jbpm.jboss.org/">
+      Extension plug-in that customizes BPMN2 Modeler behavior for the jBPM Target Runtime.
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="license.html">
+      %license
+   </license>
+
+   <requires>
+      <import plugin="org.eclipse.bpmn2.modeler.core"/>
+      <import plugin="org.eclipse.bpmn2.modeler.ui"/>
+   </requires>
+
+   <plugin
+         id="org.eclipse.bpmn2.modeler.runtime.jboss.jbpm"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>

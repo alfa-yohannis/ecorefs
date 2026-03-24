@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+	<extension point="org.eclipse.bpmn2.modeler.runtime">
+		<!-- is this necessary for this example? -->
+		<runtime
+			id="org.eclipse.bpmn2.modeler.examples.datatypes"
+			name="Sample Runtime - Data Types"
+			description="Data Types Example"
+			class="org.eclipse.bpmn2.modeler.examples.datatypes.DataTypeRuntimeExtension">
+		</runtime>
+		
+		<modelExtension
+			id="org.eclipse.bpmn2.modeler.examples.datatypes.modelExtension.activity"
+			name="Activity Extension"
+			type="Activity">
+			<property name="fgcolor" type="EColor" label="Foreground Color" />
+			<property name="bgcolor" type="EColor" label="Background Color" />
+		</modelExtension>
+
+		<modelExtension
+			id="org.eclipse.bpmn2.modeler.examples.datatypes.modelExtension.event"
+			name="Event Extension"
+			type="Event">
+			<property name="fgcolor" type="EColor" label="Foreground Color" />
+			<property name="bgcolor" type="EColor" label="Background Color" />
+		</modelExtension>
+
+		<propertyTab
+			id="org.eclipse.bpmn2.modeler.examples.datatypes.activity.tab"
+			afterTab="org.eclipse.bpmn2.modeler.description.tab"
+			class="default"
+			features="fgcolor bgcolor"
+			type="org.eclipse.bpmn2.Activity org.eclipse.bpmn2.Event"
+			label="Colors">
+		</propertyTab>
+
+		<dataType name="EColor" class="org.eclipse.bpmn2.modeler.examples.datatypes.EColorConversionDelegate"/>
+   </extension>
+
+</plugin>

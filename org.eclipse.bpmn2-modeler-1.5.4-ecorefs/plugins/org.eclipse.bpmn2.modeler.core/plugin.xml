@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="org.eclipse.bpmn2.modeler.runtime" name="%extension-point.name" schema="schema/org.eclipse.bpmn2.modeler.runtime.exsd"/>
+   
+	<!-- EMF Extensions -->
+   
+	<extension
+		point="org.eclipse.emf.ecore.factory_override">
+		<factory
+			class="org.eclipse.bpmn2.modeler.core.model.Bpmn2ModelerFactory"
+			uri="http://www.omg.org/spec/BPMN/20100524/MODEL-XMI">
+		</factory>
+	</extension>
+
+   <extension
+         point="org.eclipse.emf.validation.constraintProviders">
+      <category
+            name="%category.name"
+            id="org.eclipse.bpmn2.modeler.core.validation.category"/>
+      <category
+            name="Core Validation Overrides"
+            id="org.eclipse.bpmn2.modeler.core.validation.category.override"/>
+      <constraintProvider cache="true">
+         <package namespaceUri="http://www.omg.org/spec/BPMN/20100524/MODEL-XMI"/>
+         <constraints categories="org.eclipse.bpmn2.modeler.core.validation.category">
+
+			<!-- Live validation constraints -->
+			<constraint
+					class="org.eclipse.bpmn2.modeler.core.validation.BPMN2ValidationConstraints"
+					id="org.eclipse.bpmn2.modeler.core.live.validation.error"
+					lang="Java"
+					mode="Live"
+					name="%constraint.name.live"
+					statusCode="3" isEnabledByDefault="true">
+				<description>%constraint.description.live</description>
+				<message>%constraint.message.live</message>
+				<target class="BaseElement" />
+			</constraint>
+
+			<!-- Batch validation constraints -->
+			<constraint
+					class="org.eclipse.bpmn2.modeler.core.validation.BPMN2ValidationConstraints"
+					id="org.eclipse.bpmn2.modeler.core.validation.error"
+					isEnabledByDefault="true"
+					lang="Java"
+					mode="Batch"
+					name="%constraint.name.batch"
+					statusCode="0">
+				<description>%constraint.description.batch</description>
+		        <message>%constraint.message.batch</message>
+				<target class="BaseElement"/>
+			</constraint>
+		 
+         </constraints>
+      </constraintProvider>
+   </extension>
+
+   <extension
+         point="org.eclipse.emf.validation.constraintBindings">
+      <clientContext
+            default="false"
+            id="org.eclipse.bpmn2.modeler.core.validation.context">
+         <enablement>
+            <or>
+	         	<test
+	                property="org.eclipse.bpmn2.modeler.property.targetRuntimeId"
+	                value="org.eclipse.bpmn2.modeler.runtime.none"/>
+	         	<test
+	                property="org.eclipse.bpmn2.modeler.property.doCoreValidation"
+	                value="true"/>
+            </or>
+         </enablement>
+      </clientContext>
+      <binding
+            context="org.eclipse.bpmn2.modeler.core.validation.context"
+            category="org.eclipse.bpmn2.modeler.core.validation.category"/>
+   </extension>
+
+   <extension
+         point="org.eclipse.emf.validation.constraintBindings">
+      <clientContext
+            default="false"
+            id="org.eclipse.bpmn2.modeler.core.validation.context.override">
+         <enablement>
+            <not>
+	         	<test
+	                property="org.eclipse.bpmn2.modeler.property.targetRuntimeId"
+	                value="org.eclipse.bpmn2.modeler.runtime.none"/>
+            </not>
+         </enablement>
+      </clientContext>
+      <binding
+            context="org.eclipse.bpmn2.modeler.core.validation.context.override"
+            category="org.eclipse.bpmn2.modeler.core.validation.category.override"/>
+   </extension>
+	
+	<extension point="org.eclipse.emf.validation.validationListeners">
+		<listener class="org.eclipse.bpmn2.modeler.core.validation.LiveValidationListener">
+			<clientContext id="org.eclipse.bpmn2.modeler.core.validation.context"/>
+		</listener>
+	</extension>
+
+  <extension
+        id="org.eclipse.bpmn2.modeler.core.projectValidator"
+        name="%BPMN2Validator.name"
+        point="org.eclipse.wst.validation.validatorV2">
+     <validator
+           class="org.eclipse.bpmn2.modeler.core.validation.BPMN2ProjectValidator"
+           markerId="org.eclipse.bpmn2.modeler.core.problemMarker">
+		<projectNature
+			id="org.eclipse.bpmn2.modeler.core.bpmn2Nature">
+		</projectNature>
+        <include>
+           <rules>
+              <contentType
+                    exactMatch="true"
+                    id="org.eclipse.bpmn2.content-type.xml">
+              </contentType>
+              <file
+                    caseSensitive="true"
+                    name="bpmn2.xml"
+                    type="file">
+              </file>
+           </rules>
+        </include>
+        <exclude>
+           <rules>
+              <file
+                    caseSensitive="true"
+                    name="bpmn2.xml.diagram"
+                    type="file">
+              </file>
+           </rules>
+        </exclude>
+     </validator>
+  </extension>
+  
+  <extension
+        id="org.eclipse.bpmn2.modeler.core.problemMarker"
+        name="%BPMN2ProblemMarker.name"
+        point="org.eclipse.core.resources.markers">
+     <persistent
+           value="true">
+     </persistent>
+     <super
+           type="org.eclipse.emf.validation.problem">
+     </super>
+  </extension>
+  
+  <extension
+        id="org.eclipse.bpmn2.modeler.core.bpmn2Builder"
+        name="%BPMN2Builder.name"
+        point="org.eclipse.core.resources.builders">
+     <builder
+           hasNature="true">
+        <run
+              class="org.eclipse.bpmn2.modeler.core.builder.BPMN2Builder">
+        </run>
+     </builder>
+  </extension>
+  <extension
+        id="org.eclipse.bpmn2.modeler.core.bpmn2Nature"
+        name="%BPMN2Nature.name"
+        point="org.eclipse.core.resources.natures">
+     <runtime>
+        <run
+              class="org.eclipse.bpmn2.modeler.core.builder.BPMN2Nature">
+        </run>
+     </runtime>
+     <builder
+           id="org.eclipse.bpmn2.modeler.core.bpmn2Builder">
+     </builder>
+  </extension>
+  <extension
+        id="xmlProblem"
+        name="%XMLProblem.name"
+        point="org.eclipse.core.resources.markers">
+     <super
+           type="org.eclipse.core.resources.problemmarker">
+     </super>
+     <persistent
+           value="true">
+     </persistent>
+  </extension>
+  <extension
+        point="org.eclipse.core.expressions.propertyTesters">
+     <propertyTester
+           class="org.eclipse.bpmn2.modeler.core.validation.ResourcePropertyTester"
+           id="org.eclipse.bpmn2.modeler.core.targetRuntimePropertyTester"
+           namespace="org.eclipse.bpmn2.modeler.property"
+           properties="targetRuntimeId,toolPaletteProfile,doCoreValidation"
+           type="org.eclipse.emf.ecore.EObject">
+     </propertyTester>
+  </extension>
+  <extension
+        point="org.eclipse.emf.ecore.conversion_delegate">
+     <factory
+           class="org.eclipse.bpmn2.modeler.core.EDataTypeConversionFactory"
+           uri="http://org.eclipse.bpmn2.modeler.EDataTypeConversionFactory">
+     </factory>
+  </extension>
+</plugin>
