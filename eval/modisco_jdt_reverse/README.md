@@ -14,6 +14,8 @@ This project imports Eclipse Java projects from a checkout such as `eval/dataset
 - `org.ecorefs.modisco.jdt.reverse`: reusable exporter + partitioner services
 - `org.ecorefs.modisco.jdt.reverse.tests`: smoke test plus an opt-in integration test for a real checkout
 - `run-jdt-discovery.sh`: convenience wrapper for the real JDT checkout
+- `fetch-component-snapshot-from-ipfs.sh`: helper for rebuilding a local filesystem snapshot from the published IPFS component roots
+- `MANUAL-CHECKS.md`: manual runbook for the current tests, benchmarks, IPFS checks, and EMF Compare evaluations
 
 ## Requirements
 
@@ -61,7 +63,7 @@ The regular smoke test always runs. The external repository export only runs whe
 
 ## Partition a merged model by compilation unit
 
-This command takes the merged model and writes an EMF-native partitioned directory. The partitioner now also generates a root `version-manifest.json` plus plugin/module `component-manifest.json` files beside the partitioned XMIs:
+This command takes the merged model and writes an EMF-native partitioned directory. The partitioner now also generates plugin/module `component-manifest.json` files plus supporting inventories beside the partitioned XMIs:
 
 ```bash
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64
@@ -171,7 +173,6 @@ export MAVEN_OPTS="${MAVEN_OPTS:-} -Djdk.xml.maxGeneralEntitySizeLimit=0 -Djdk.x
 The directory `eval/datasets/modisco-java-models-by-repo/all-repos-merged-by-compilation-unit` contains:
 
 - `all-repos-merged.root.xmi`: small root model with shared package structure plus references to partitioned resources
-- `version-manifest.json`: project-level version manifest next to the root model
 - `project-head.json`: mutable local record of the current published IPNS head
 - `project-version-manifest.json`: published version manifest with resolved CIDs
 - `component-summary.csv`: component inventory with resource counts
@@ -190,5 +191,17 @@ For distributed publication, the intended layering is:
 
 - compilation units remain the immutable internal resources
 - plugin/module manifests become the independently versioned component units
-- `version-manifest.json` becomes the single mutable project head target, for example behind one `IPNS` name
+- `project-version-manifest.json` becomes the single mutable project head target, for example behind one `IPNS` name
 - `project-head.json` is the local sidecar that records the mutable IPNS head and its current target
+
+## Manual validation
+
+For the full manual runbook, including:
+
+- Kubo/IPFS consistency checks
+- merged and partitioned loader tests
+- whole-model traversal benchmark
+- component-scoped EMF Compare against IPFS-fetched snapshots
+- report locations and expected outcomes
+
+see [MANUAL-CHECKS.md](./MANUAL-CHECKS.md).

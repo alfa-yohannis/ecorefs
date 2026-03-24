@@ -19,7 +19,6 @@ public class ModiscoComponentManifestExternalModelTest {
     final Path rootModelPath = Path.of(fragmentedRootProperty).toAbsolutePath().normalize();
     final ManifestGenerationResult result = new ModiscoComponentManifestGenerator().generateForPartitionedModel(rootModelPath);
 
-    Assert.assertTrue(Files.exists(result.versionManifestPath()));
     Assert.assertTrue(Files.exists(rootModelPath.getParent().resolve("component-summary.csv")));
     Assert.assertTrue(Files.exists(rootModelPath.getParent().resolve("component-dependencies.csv")));
     Assert.assertTrue(result.componentCount() >= 1);

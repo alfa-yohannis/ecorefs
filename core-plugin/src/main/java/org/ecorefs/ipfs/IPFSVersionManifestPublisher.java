@@ -29,7 +29,6 @@ import java.util.stream.Stream;
 
 public final class IPFSVersionManifestPublisher {
 
-    private static final String SOURCE_VERSION_MANIFEST_FILENAME = "version-manifest.json";
     private static final String PUBLISHED_VERSION_MANIFEST_FILENAME = "project-version-manifest.json";
     private static final String PROJECT_HEAD_FILENAME = "project-head.json";
 
@@ -58,17 +57,10 @@ public final class IPFSVersionManifestPublisher {
 
         Path componentSummaryCsv = requireFile(normalizedPartitionRoot.resolve("component-summary.csv"), "component-summary.csv");
         Path componentDependenciesCsv = requireFile(normalizedPartitionRoot.resolve("component-dependencies.csv"), "component-dependencies.csv");
-        Path sourceVersionManifest = requireFile(normalizedPartitionRoot.resolve(SOURCE_VERSION_MANIFEST_FILENAME), SOURCE_VERSION_MANIFEST_FILENAME);
         Path rootModelFile = requireFile(normalizedPartitionRoot.resolve("all-repos-merged.root.xmi"), "all-repos-merged.root.xmi");
 
-        String modelName = extractJsonString(sourceVersionManifest, "modelName");
-        String rootModelRelativePath = extractJsonString(sourceVersionManifest, "rootModel");
-        if (modelName == null || modelName.isEmpty()) {
-            modelName = normalizedPartitionRoot.getFileName().toString();
-        }
-        if (rootModelRelativePath == null || rootModelRelativePath.isEmpty()) {
-            rootModelRelativePath = "all-repos-merged.root.xmi";
-        }
+        String modelName = deriveModelName(rootModelFile);
+        String rootModelRelativePath = normalizedPartitionRoot.relativize(rootModelFile).toString().replace('\\', '/');
 
         Files.createDirectories(normalizedOutputDirectory);
 
@@ -359,11 +351,15 @@ public final class IPFSVersionManifestPublisher {
         return columns;
     }
 
-    private static String extractJsonString(Path file, String fieldName) throws IOException {
-        String content = Files.readString(file, StandardCharsets.UTF_8);
-        Pattern pattern = Pattern.compile("\"" + Pattern.quote(fieldName) + "\"\\s*:\\s*\"([^\"]*)\"");
-        Matcher matcher = pattern.matcher(content);
-        return matcher.find() ? matcher.group(1) : null;
+    private static String deriveModelName(Path rootModelFile) {
+        String filename = rootModelFile.getFileName().toString();
+        if (filename.endsWith(".root.xmi")) {
+            return filename.substring(0, filename.length() - ".root.xmi".length());
+        }
+        if (filename.endsWith(".xmi")) {
+            return filename.substring(0, filename.length() - ".xmi".length());
+        }
+        return filename;
     }
 
     private static void ensureKeyExists(IPFS ipfs, String keyName) throws IOException {

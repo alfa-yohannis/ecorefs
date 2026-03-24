@@ -29,7 +29,8 @@ public class ModiscoCompilationUnitPartitionerExternalModelTest {
     Assert.assertTrue(Files.exists(result.rootModelPath()));
     Assert.assertTrue(Files.exists(outputDirectory.resolve("ROOT_MODEL.txt")));
     Assert.assertTrue(Files.exists(outputDirectory.resolve("resources-manifest.csv")));
-    Assert.assertTrue(Files.exists(outputDirectory.resolve("version-manifest.json")));
+    Assert.assertTrue(Files.exists(outputDirectory.resolve("component-summary.csv")));
+    Assert.assertTrue(Files.exists(outputDirectory.resolve("component-dependencies.csv")));
     Assert.assertTrue(result.compilationUnitResources() >= 1);
   }
 }

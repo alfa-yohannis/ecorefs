@@ -27,7 +27,6 @@ import org.eclipse.modisco.java.Model;
 
 public final class ModiscoComponentManifestGenerator {
 
-  private static final String VERSION_MANIFEST_FILENAME = "version-manifest.json";
   private static final String COMPONENT_SUMMARY_FILENAME = "component-summary.csv";
   private static final String COMPONENT_DEPENDENCIES_FILENAME = "component-dependencies.csv";
   private static final String README_FILENAME = "component-manifests.md";
@@ -110,19 +109,17 @@ public final class ModiscoComponentManifestGenerator {
     sharedResources.sort(Comparator.comparing(SharedResourceInfo::relativePath));
 
     writeComponentManifests(partitionRoot, sortedComponents);
-    writeVersionManifest(partitionRoot, normalizedRootModelPath, model, sortedComponents, sharedResources);
+    Files.deleteIfExists(partitionRoot.resolve("version-manifest.json"));
     writeComponentSummaryCsv(partitionRoot, sortedComponents);
     final int dependencyEdges = writeComponentDependenciesCsv(partitionRoot, sortedComponents);
     writeReadme(partitionRoot, model, sortedComponents.size(), sharedResources.size(), dependencyEdges);
 
     final ManifestGenerationResult result = new ManifestGenerationResult(
-        partitionRoot.resolve(VERSION_MANIFEST_FILENAME),
         sortedComponents.size(),
         sharedResources.size(),
         dependencyEdges,
         descriptors.size());
-    log("done: versionManifest=" + result.versionManifestPath()
-        + ", components=" + result.componentCount()
+    log("done: components=" + result.componentCount()
         + ", sharedResources=" + result.sharedResourceCount()
         + ", dependencyEdges=" + result.dependencyEdgeCount()
         + ", totalResources=" + result.totalResourceCount());
@@ -186,18 +183,6 @@ public final class ModiscoComponentManifestGenerator {
       Files.createDirectories(manifestPath.getParent());
       Files.write(manifestPath, componentManifestLines(component), StandardCharsets.UTF_8);
     }
-  }
-
-  private static void writeVersionManifest(
-      final Path partitionRoot,
-      final Path rootModelPath,
-      final Model model,
-      final List<ComponentInfo> components,
-      final List<SharedResourceInfo> sharedResources) throws IOException {
-    Files.write(
-        partitionRoot.resolve(VERSION_MANIFEST_FILENAME),
-        versionManifestLines(partitionRoot, rootModelPath, model, components, sharedResources),
-        StandardCharsets.UTF_8);
   }
 
   private static void writeComponentSummaryCsv(
@@ -265,18 +250,17 @@ public final class ModiscoComponentManifestGenerator {
         "This directory lifts the compilation-unit partition into plugin/module-level version units.",
         "",
         "- Model name: `" + model.getName() + "`",
-        "- Version head manifest: `" + VERSION_MANIFEST_FILENAME + "`",
         "- Component count: `" + componentCount + "`",
         "- Shared resource count: `" + sharedResourceCount + "`",
         "- Dependency edges: `" + dependencyEdges + "`",
         "",
         "Intended publication layout:",
         "",
-        "- root manifest next to the root XMI",
+        "- root XMI plus shared resources in the partition root",
         "- component manifests next to the component XMI files",
         "- immutable resource fragments by CID",
         "- one component manifest per plugin/module",
-        "- one version manifest as the mutable project head target"
+        "- one published `project-version-manifest.json` as the mutable project head target"
     );
     Files.write(partitionRoot.resolve(README_FILENAME), lines, StandardCharsets.UTF_8);
   }
@@ -303,29 +287,6 @@ public final class ModiscoComponentManifestGenerator {
     return lines;
   }
 
-  private static List<String> versionManifestLines(
-      final Path partitionRoot,
-      final Path rootModelPath,
-      final Model model,
-      final List<ComponentInfo> components,
-      final List<SharedResourceInfo> sharedResources) {
-    final List<String> lines = new ArrayList<>();
-    lines.add("{");
-    lines.add("  \"schemaVersion\": 1,");
-    lines.add("  \"manifestKind\": \"modisco-project-version-manifest\",");
-    lines.add("  \"modelName\": \"" + json(model.getName()) + "\",");
-    lines.add("  \"rootModel\": \"" + json(partitionRoot.relativize(rootModelPath).toString().replace('\\', '/')) + "\",");
-    lines.add("  \"componentStrategy\": \"plugin-module over compilation-unit resources\",");
-    lines.add("  \"sharedResources\": [");
-    appendSharedResources(lines, sharedResources);
-    lines.add("  ],");
-    lines.add("  \"components\": [");
-    appendComponents(lines, components);
-    lines.add("  ]");
-    lines.add("}");
-    return lines;
-  }
-
   private static void appendStringArray(final List<String> lines, final List<String> values, final int indent) {
     for (int index = 0; index < values.size(); index++) {
       final String suffix = index + 1 == values.size() ? "" : ",";
@@ -345,29 +306,6 @@ public final class ModiscoComponentManifestGenerator {
       final String suffix = index + 1 == entries.size() ? "" : ",";
       lines.add(spaces(indent) + "{ \"" + idField + "\": \"" + json(entry.getKey())
           + "\", \"crossReferenceCount\": " + entry.getValue() + " }" + suffix);
-    }
-  }
-
-  private static void appendSharedResources(final List<String> lines, final List<SharedResourceInfo> sharedResources) {
-    for (int index = 0; index < sharedResources.size(); index++) {
-      final SharedResourceInfo shared = sharedResources.get(index);
-      final String suffix = index + 1 == sharedResources.size() ? "" : ",";
-      lines.add("    { \"kind\": \"" + json(shared.kind()) + "\", \"path\": \"" + json(shared.relativePath()) + "\" }" + suffix);
-    }
-  }
-
-  private static void appendComponents(final List<String> lines, final List<ComponentInfo> components) {
-    for (int index = 0; index < components.size(); index++) {
-      final ComponentInfo component = components.get(index);
-      final String suffix = index + 1 == components.size() ? "" : ",";
-      lines.add("    {");
-      lines.add("      \"componentId\": \"" + json(component.componentId()) + "\",");
-      lines.add("      \"repo\": \"" + json(component.repoName()) + "\",");
-      lines.add("      \"module\": \"" + json(component.moduleName()) + "\",");
-      lines.add("      \"manifest\": \"" + json(componentManifestRelativePath(component)) + "\",");
-      lines.add("      \"resourceCount\": " + component.resourcePaths().size() + ",");
-      lines.add("      \"dependencyCount\": " + component.outgoingComponentReferences().size());
-      lines.add("    }" + suffix);
     }
   }
 
@@ -591,7 +529,6 @@ public final class ModiscoComponentManifestGenerator {
   }
 
   public record ManifestGenerationResult(
-      Path versionManifestPath,
       int componentCount,
       int sharedResourceCount,
       int dependencyEdgeCount,

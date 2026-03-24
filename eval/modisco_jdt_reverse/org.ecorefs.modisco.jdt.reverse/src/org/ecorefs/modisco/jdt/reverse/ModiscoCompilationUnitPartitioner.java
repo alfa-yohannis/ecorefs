@@ -179,9 +179,9 @@ public final class ModiscoCompilationUnitPartitioner {
         "- Resource entries: `" + manifestEntries + "`",
         "- Plugin/module components: `" + componentCount + "`",
         "- Layout: one authoritative root/package resource plus one EMF resource per compilation unit",
-        "- Publication manifests: `version-manifest.json` at the root plus one `component-manifest.json` per plugin/module directory",
+        "- One `component-manifest.json` is emitted per plugin/module directory",
         "",
-        "See `resources-manifest.csv` for the emitted resource list and `version-manifest.json` for the project-level manifest."
+        "See `resources-manifest.csv` for the emitted resource list and `project-version-manifest.json` after publication for the published project manifest."
     );
   }
 
