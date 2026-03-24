@@ -1,7 +1,6 @@
 package org.ecorefs.ipfs;
 
 import io.ipfs.api.IPFS;
-import io.ipfs.multihash.Multihash;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.impl.URIHandlerImpl;
 
@@ -9,6 +8,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class IPFSURIHandlerImpl extends URIHandlerImpl {
@@ -39,7 +42,7 @@ public class IPFSURIHandlerImpl extends URIHandlerImpl {
             }
 
             try {
-                String resolved = ipfs.name.resolve(Multihash.fromBase58(ipnsKey));
+                String resolved = resolveIpnsPath(ipnsKey);
                 // Resolution returns "/ipfs/<CID>" — extract just the CID
                 cid = resolved.replace("/ipfs/", "");
             } catch (Exception e) {
@@ -56,8 +59,52 @@ public class IPFSURIHandlerImpl extends URIHandlerImpl {
             }
         }
 
-        byte[] content = ipfs.cat(Multihash.fromBase58(cid));
+        byte[] content = catContent(cid);
         return new ByteArrayInputStream(content);
+    }
+
+    private String resolveIpnsPath(String ipnsKey) throws IOException {
+        String endpoint = apiEndpoint("name/resolve", ipnsKey);
+        HttpURLConnection connection = (HttpURLConnection) new URL(endpoint).openConnection();
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
+        connection.connect();
+
+        try (InputStream input = connection.getInputStream()) {
+            String body = new String(input.readAllBytes(), StandardCharsets.UTF_8);
+            String marker = "\"Path\":\"";
+            int start = body.indexOf(marker);
+            if (start < 0) {
+                throw new IOException("Unexpected IPNS resolve response: " + body);
+            }
+            start += marker.length();
+            int end = body.indexOf('"', start);
+            if (end < 0) {
+                throw new IOException("Unexpected IPNS resolve response: " + body);
+            }
+            return body.substring(start, end);
+        } finally {
+            connection.disconnect();
+        }
+    }
+
+    private byte[] catContent(String cid) throws IOException {
+        String endpoint = apiEndpoint("cat", cid);
+        HttpURLConnection connection = (HttpURLConnection) new URL(endpoint).openConnection();
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
+        connection.connect();
+
+        try (InputStream input = connection.getInputStream()) {
+            return input.readAllBytes();
+        } finally {
+            connection.disconnect();
+        }
+    }
+
+    private String apiEndpoint(String command, String argument) {
+        return ipfs.protocol + "://" + ipfs.host + ":" + ipfs.port
+                + "/api/v0/" + command + "?arg=" + URLEncoder.encode(argument, StandardCharsets.UTF_8);
     }
 
     @Override

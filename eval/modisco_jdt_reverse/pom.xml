@@ -56,11 +56,18 @@
         <configuration>
           <useUIHarness>false</useUIHarness>
           <useUIThread>false</useUIThread>
-          <argLine>-Xmx3g</argLine>
+          <argLine>-Xmx3g -Djdk.xml.maxGeneralEntitySizeLimit=0 -Djdk.xml.totalEntitySizeLimit=0 -Djdk.xml.entityExpansionLimit=0</argLine>
           <systemProperties>
             <modisco.repo>${modisco.repo}</modisco.repo>
             <modisco.output>${modisco.output}</modisco.output>
             <modisco.project>${modisco.project}</modisco.project>
+            <modisco.merged>${modisco.merged}</modisco.merged>
+            <modisco.merged.snapshot>${modisco.merged.snapshot}</modisco.merged.snapshot>
+            <modisco.fragmented.root>${modisco.fragmented.root}</modisco.fragmented.root>
+            <modisco.fragmented.snapshot.root>${modisco.fragmented.snapshot.root}</modisco.fragmented.snapshot.root>
+            <modisco.component.id>${modisco.component.id}</modisco.component.id>
+            <modisco.component.report.dir>${modisco.component.report.dir}</modisco.component.report.dir>
+            <modisco.partition.output>${modisco.partition.output}</modisco.partition.output>
           </systemProperties>
         </configuration>
       </plugin>
