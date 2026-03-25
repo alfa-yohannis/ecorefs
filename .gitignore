@@ -46,6 +46,8 @@ eval/.ipfs/
 .classpath
 .settings/
 .vscode/
+!core-plugin/.project
+!core-plugin/.classpath
 
 # OS / Temporary
 .DS_Store

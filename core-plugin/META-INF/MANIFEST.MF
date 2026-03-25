@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: EcoreFS IPFS Core
+Bundle-SymbolicName: org.ecorefs.ipfs.core;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: EcoreFS
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.emf.common,
+ org.eclipse.emf.ecore,
+ org.eclipse.emf.ecore.xmi
+Export-Package: org.ecorefs.ipfs

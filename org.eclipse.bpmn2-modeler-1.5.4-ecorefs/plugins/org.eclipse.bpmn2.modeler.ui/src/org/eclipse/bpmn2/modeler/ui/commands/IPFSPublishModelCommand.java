@@ -53,19 +53,25 @@ public class IPFSPublishModelCommand extends AbstractHandler {
 
 			PublicationResult result = IPFSModelTransfer.publish(modelSource.modelFile, preferences.getIpfsApiUrl(),
 					preferences.getIpfsPublishMode(), preferences.getIpfsDefaultIpnsKey());
+			// EcoreFS begin: success results go to a resizable copy-friendly dialog so long references are not truncated
 			if (result.hasIpnsPublication()) {
-				MessageDialog.openInformation(HandlerUtil.getActiveShell(event), Messages.IPFS_Publish_Success_Title,
+				new IPFSPublicationResultDialog(HandlerUtil.getActiveShell(event), Messages.IPFS_Publish_Success_Title,
+						Messages.IPFS_Publish_Result_Details_Message,
 						NLS.bind(Messages.IPFS_Publish_Success_Message_With_IPNS,
 								new Object[] { result.getCid(), result.getIpfsUri(), result.getIpfsPath(),
 										result.getGatewayUrl(), result.getIpnsName(), result.getIpnsUri(),
-										result.getIpnsPath(), result.getIpnsGatewayUrl() }));
+										result.getIpnsPath(), result.getIpnsGatewayUrl() }))
+						.open();
 			}
 			else {
-				MessageDialog.openInformation(HandlerUtil.getActiveShell(event), Messages.IPFS_Publish_Success_Title,
+				new IPFSPublicationResultDialog(HandlerUtil.getActiveShell(event), Messages.IPFS_Publish_Success_Title,
+						Messages.IPFS_Publish_Result_Details_Message,
 						NLS.bind(Messages.IPFS_Publish_Success_Message,
 								new Object[] { result.getCid(), result.getIpfsUri(), result.getIpfsPath(),
-										result.getGatewayUrl() }));
+										result.getGatewayUrl() }))
+						.open();
 			}
+			// EcoreFS end: success results go to a resizable copy-friendly dialog so long references are not truncated
 			return null;
 		} catch (Exception e) {
 			Activator.logError(e);

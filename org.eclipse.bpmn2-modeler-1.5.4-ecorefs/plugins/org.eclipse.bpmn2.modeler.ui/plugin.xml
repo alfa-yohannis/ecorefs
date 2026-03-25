@@ -1264,6 +1264,16 @@
            categoryId="org.eclipse.bpmn2.modeler.command.category"
            name="%command.name.3">
      </command>
+     <command
+           id="org.eclipse.bpmn2.modeler.command.openProjectFromIpfs"
+           categoryId="org.eclipse.bpmn2.modeler.command.category"
+           name="%command.name.4">
+     </command>
+     <command
+           id="org.eclipse.bpmn2.modeler.command.publishProjectToIpfs"
+           categoryId="org.eclipse.bpmn2.modeler.command.category"
+           name="%command.name.5">
+     </command>
      <!-- EcoreFS end: explicit IPFS UI commands -->
   </extension>
 
@@ -1290,6 +1300,14 @@
 	     <handler
 	        class="org.eclipse.bpmn2.modeler.ui.commands.IPFSPublishModelCommand"
 	        commandId="org.eclipse.bpmn2.modeler.command.publishModelToIpfs">
+	     </handler>
+	     <handler
+	        class="org.eclipse.bpmn2.modeler.ui.commands.IPFSOpenProjectCommand"
+	        commandId="org.eclipse.bpmn2.modeler.command.openProjectFromIpfs">
+	     </handler>
+	     <handler
+	        class="org.eclipse.bpmn2.modeler.ui.commands.IPFSPublishProjectCommand"
+	        commandId="org.eclipse.bpmn2.modeler.command.publishProjectToIpfs">
 	     </handler>
 	     <!-- EcoreFS end: handlers for the IPFS UI commands -->
 	</extension> 
@@ -1358,6 +1376,16 @@
 	             </equals>
 	          </with>
 	       </visibleWhen>
+	    </command>
+	    <command
+	       commandId="org.eclipse.bpmn2.modeler.command.openProjectFromIpfs"
+	       id= "openProjectFromIpfs"
+	       label= "%command.label.4">
+	    </command>
+	    <command
+	       commandId="org.eclipse.bpmn2.modeler.command.publishProjectToIpfs"
+	       id= "publishProjectToIpfs"
+	       label= "%command.label.5">
 	    </command>
 	</menuContribution>
 	<!-- EcoreFS end: top-level BPMN2 IPFS menu -->

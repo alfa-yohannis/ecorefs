@@ -6,14 +6,16 @@ This checkout keeps the normal BPMN2 Modeler workflow unchanged:
 - the editor still works on local `.bpmn` files
 - Graphiti `.diagram` sidecars remain local
 
-The customized UI bundle version is:
+The UI bundle version remains:
 
-`1.5.4.ecorefs`
+`1.5.4.qualifier`
 
 IPFS is exposed through two explicit UI actions instead:
 
 - `BPMN2 IPFS > Open BPMN2 Model from IPFS...`
 - `BPMN2 IPFS > Publish Current BPMN2 Model to IPFS...`
+- `BPMN2 IPFS > Open BPMN2 Project from IPFS...`
+- `BPMN2 IPFS > Publish BPMN2 Project to IPFS...`
 
 ## What The Actions Do
 
@@ -21,8 +23,9 @@ IPFS is exposed through two explicit UI actions instead:
 
 - accepts a `CID`, `/ipfs/...` path, `ipfs://...` URI, or `IPNS` reference
 - fetches the BPMN XML through Kubo
-- writes it to a temporary local `.bpmn` file
-- opens that temp file in the existing BPMN2 editor flow
+- writes it into the selected workspace folder, the active model folder, or the active project when one is available
+- falls back to a temporary local `.bpmn` file only when there is no usable active workspace location
+- opens the persisted file in the existing BPMN2 editor flow
 
 `Publish Current BPMN2 Model to IPFS...`
 
@@ -31,7 +34,23 @@ IPFS is exposed through two explicit UI actions instead:
 <!-- EcoreFS begin: per-project IPFS/IPNS publishing behavior documentation -->
 - when the project publish mode is `CID`, shows the resulting `CID`, `ipfs://...` URI, `/ipfs/...` path, and local gateway URL
 - when the project publish mode is `IPNS`, publishes the new `CID` and then updates the configured IPNS key name to point to it
+- the publish success popup is resizable and keeps the full references in a multi-line text area so they can be selected or copied
 <!-- EcoreFS end: per-project IPFS/IPNS publishing behavior documentation -->
+
+`Publish BPMN2 Project to IPFS...`
+
+- saves dirty editors before collecting files
+- scans the active project or selected folder recursively for `.bpmn` and `.bpmn2` files
+- publishes each BPMN file by CID
+- generates a small JSON manifest that records the root model and each relative path to CID mapping
+- publishes that manifest as the project entry point, optionally through IPNS
+
+`Open BPMN2 Project from IPFS...`
+
+- accepts a BPMN project manifest reference
+- downloads the manifest JSON
+- restores all listed `.bpmn` files into a new workspace folder under the active project or selected folder
+- opens the manifest root model after the import completes
 
 ## Kubo Configuration
 
@@ -72,8 +91,9 @@ The open action accepts:
 ## Caveats
 
 - This integration publishes and reloads the BPMN model file, not the local Graphiti `.diagram` file.
-- Models opened from IPFS are edited through a temporary local `.bpmn` file.
-- Closing the editor cleans up that temporary model file through the existing temp-file logic.
+- When a workspace folder or project is active, models opened from IPFS become normal persisted workspace files.
+- The temp-file fallback is still used when there is no active workspace location to persist into.
+- Project imports always restore into a real workspace folder; they do not use temp files.
 - IPNS publishing expects a Kubo key name that already exists in the local node.
 
 ## Build
@@ -109,4 +129,6 @@ These self-tests cover:
 - reference normalization for `CID`, `ipfs://`, `/ipfs/...`, and `IPNS`
 - plugin command and handler registration
 - bundle dependency/version metadata
+- workspace-persist behavior for the IPFS open action
+- project-manifest command wiring and documentation
 - a real BPMN file round-trip through Kubo when `--integration` is enabled

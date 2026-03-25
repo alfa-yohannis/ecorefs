@@ -79,13 +79,21 @@ public final class IPFSModelTransfer {
 	}
 
 	public static File downloadToTempModel(String reference, String apiUrl) throws IOException {
-		String normalizedReference = normalizeReference(reference);
-		byte[] bytes = read(normalizedReference, normalizeApiBase(apiUrl));
+		byte[] bytes = downloadBytes(reference, apiUrl);
 		File tempFile = File.createTempFile(deriveTempPrefix(reference), ".bpmn"); //$NON-NLS-1$
 		try (OutputStream output = new FileOutputStream(tempFile)) {
 			output.write(bytes);
 		}
 		return tempFile;
+	}
+
+	public static byte[] downloadBytes(String reference) throws IOException {
+		return downloadBytes(reference, null);
+	}
+
+	public static byte[] downloadBytes(String reference, String apiUrl) throws IOException {
+		String normalizedReference = normalizeReference(reference);
+		return read(normalizedReference, normalizeApiBase(apiUrl));
 	}
 
 	public static boolean isSupportedReference(String reference) {

@@ -27,12 +27,27 @@ public class Messages extends NLS {
 	public static String IPFS_Open_Invalid_Empty;
 	public static String IPFS_Open_Invalid_Format;
 	public static String IPFS_Open_Error_Title;
+	public static String IPFS_Project_Open_Title;
+	public static String IPFS_Project_Open_Message;
+	public static String IPFS_Project_Open_Error_Title;
+	public static String IPFS_Project_Open_No_Target;
 	public static String IPFS_Publish_Success_Title;
 	public static String IPFS_Publish_Success_Message;
 	public static String IPFS_Publish_Success_Message_With_IPNS;
+	public static String IPFS_Publish_Result_Details_Message;
+	public static String IPFS_Publish_Result_Details_Label;
+	public static String IPFS_Publish_Result_Copy_Button;
 	public static String IPFS_Publish_Error_Title;
 	public static String IPFS_Publish_No_Model;
 	public static String IPFS_Publish_Missing_IPNS_Key;
+	public static String IPFS_Project_Publish_Success_Title;
+	public static String IPFS_Project_Publish_Result_Message;
+	public static String IPFS_Project_Publish_Error_Title;
+	public static String IPFS_Project_Publish_No_Target;
+	public static String IPFS_Project_Publish_No_Models;
+	public static String IPFS_Project_Publish_Details_Header;
+	public static String IPFS_Project_Publish_Manifest_Details;
+	public static String IPFS_Project_Publish_Manifest_Details_With_IPNS;
 	// EcoreFS end: message keys for the IPFS UI actions
 	static {
 		// initialize resource bundle

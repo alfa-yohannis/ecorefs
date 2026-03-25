@@ -2,14 +2,11 @@ package org.eclipse.bpmn2.modeler.ui.commands;
 
 import java.io.File;
 
-import org.eclipse.bpmn2.modeler.core.preferences.Bpmn2Preferences;
 import org.eclipse.bpmn2.modeler.ui.Activator;
-import org.eclipse.bpmn2.modeler.ui.editor.BPMN2Editor;
 import org.eclipse.bpmn2.modeler.ui.util.IPFSModelTransfer;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -28,8 +25,8 @@ public class IPFSOpenModelCommand extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		Bpmn2Preferences preferences = resolvePreferences();
-		String initialReference = preferences.getIpfsDefaultLoadReference();
+		String apiUrl = IPFSWorkspaceResourceSupport.resolvePreferences().getIpfsApiUrl();
+		String initialReference = IPFSWorkspaceResourceSupport.resolvePreferences().getIpfsDefaultLoadReference();
 		InputDialog dialog = new InputDialog(HandlerUtil.getActiveShell(event), Messages.IPFS_Open_Title,
 				Messages.IPFS_Open_Message, initialReference, new IInputValidator() {
 					@Override
@@ -59,8 +56,18 @@ public class IPFSOpenModelCommand extends AbstractHandler {
 		}
 
 		try {
-			File tempFile = IPFSModelTransfer.downloadToTempModel(dialog.getValue(), preferences.getIpfsApiUrl());
+			// EcoreFS begin: persist downloaded models into the active workspace folder when one is available
+			org.eclipse.core.resources.IContainer targetContainer = IPFSWorkspaceResourceSupport.resolveTargetContainer(event);
+			if (targetContainer != null) {
+				org.eclipse.core.resources.IFile targetFile = IPFSWorkspaceResourceSupport.downloadToWorkspaceFile(
+						dialog.getValue(), apiUrl, targetContainer);
+				IDE.openEditor(page, targetFile);
+				return null;
+			}
+
+			File tempFile = IPFSModelTransfer.downloadToTempModel(dialog.getValue(), apiUrl);
 			IDE.openEditorOnFileStore(page, EFS.getStore(tempFile.toURI()));
+			// EcoreFS end: persist downloaded models into the active workspace folder when one is available
 			return null;
 		} catch (Exception e) {
 			Activator.logError(e);
@@ -68,20 +75,5 @@ public class IPFSOpenModelCommand extends AbstractHandler {
 			throw new ExecutionException("Could not open BPMN2 model from IPFS.", e); //$NON-NLS-1$
 		}
 	}
-
-	// EcoreFS begin: resolve project-scoped BPMN2 preferences so IPFS defaults can vary per project
-	private Bpmn2Preferences resolvePreferences() {
-		BPMN2Editor editor = BPMN2Editor.getActiveEditor();
-		if (editor != null && editor.getProject() != null) {
-			return Bpmn2Preferences.getInstance(editor.getProject());
-		}
-
-		IProject project = Bpmn2Preferences.getActiveProject();
-		if (project != null) {
-			return Bpmn2Preferences.getInstance(project);
-		}
-		return Bpmn2Preferences.getInstance();
-	}
-	// EcoreFS end: resolve project-scoped BPMN2 preferences so IPFS defaults can vary per project
 }
 // EcoreFS end: command that downloads a BPMN model from IPFS/IPNS and opens it locally

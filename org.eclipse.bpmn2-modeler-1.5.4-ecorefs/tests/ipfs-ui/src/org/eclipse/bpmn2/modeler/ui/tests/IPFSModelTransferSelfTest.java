@@ -29,9 +29,12 @@ public final class IPFSModelTransferSelfTest {
 		testNormalizeReferenceSupportsCidAndIpnsForms();
 		testNormalizeReferenceRejectsInvalidInput();
 		testPluginXmlRegistersIpfsCommands(repoRoot);
-		testManifestIncludesFilesystemDependencyAndVersionSuffix(repoRoot);
+		testManifestIncludesFilesystemDependencyAndQualifierVersion(repoRoot);
 		testProjectPropertiesExposeIpfsSettings(repoRoot);
+		testOpenCommandPersistsIntoWorkspaceWhenPossible(repoRoot);
+		testProjectManifestCommandsArePresent(repoRoot);
 		testDocumentationMentionsIpfsActions(repoRoot);
+		testPublishResultDialogIsPresent(repoRoot);
 
 		if (integration) {
 			testKuboRoundTrip(repoRoot);
@@ -62,23 +65,31 @@ public final class IPFSModelTransferSelfTest {
 		String pluginXml = read(repoRoot.resolve("plugins/org.eclipse.bpmn2.modeler.ui/plugin.xml")); //$NON-NLS-1$
 		assertContains(pluginXml, "org.eclipse.bpmn2.modeler.command.openFromIpfs", "plugin.xml should declare the open command"); //$NON-NLS-1$ //$NON-NLS-2$
 		assertContains(pluginXml, "org.eclipse.bpmn2.modeler.command.publishModelToIpfs", "plugin.xml should declare the publish command"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertContains(pluginXml, "org.eclipse.bpmn2.modeler.command.openProjectFromIpfs", "plugin.xml should declare the project open command"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertContains(pluginXml, "org.eclipse.bpmn2.modeler.command.publishProjectToIpfs", "plugin.xml should declare the project publish command"); //$NON-NLS-1$ //$NON-NLS-2$
 		assertContains(pluginXml, "org.eclipse.bpmn2.modeler.ui.commands.IPFSOpenModelCommand", "plugin.xml should register the open handler"); //$NON-NLS-1$ //$NON-NLS-2$
 		assertContains(pluginXml, "org.eclipse.bpmn2.modeler.ui.commands.IPFSPublishModelCommand", "plugin.xml should register the publish handler"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertContains(pluginXml, "org.eclipse.bpmn2.modeler.ui.commands.IPFSOpenProjectCommand", "plugin.xml should register the project open handler"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertContains(pluginXml, "org.eclipse.bpmn2.modeler.ui.commands.IPFSPublishProjectCommand", "plugin.xml should register the project publish handler"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	private static void testManifestIncludesFilesystemDependencyAndVersionSuffix(Path repoRoot) throws Exception {
+	private static void testManifestIncludesFilesystemDependencyAndQualifierVersion(Path repoRoot) throws Exception {
 		String manifest = read(repoRoot.resolve("plugins/org.eclipse.bpmn2.modeler.ui/META-INF/MANIFEST.MF")); //$NON-NLS-1$
 		assertContains(manifest, "Require-Bundle: org.eclipse.ui.ide,", "manifest should still require the UI IDE bundle"); //$NON-NLS-1$ //$NON-NLS-2$
 		assertContains(manifest, " org.eclipse.core.filesystem,", "manifest should require org.eclipse.core.filesystem"); //$NON-NLS-1$ //$NON-NLS-2$
-		assertContains(manifest, "Bundle-Version: 1.5.4.ecorefs", "manifest should advertise the EcoreFS version suffix"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertContains(manifest, "Bundle-Version: 1.5.4.qualifier", "manifest should keep the qualifier version for Eclipse launches"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private static void testDocumentationMentionsIpfsActions(Path repoRoot) throws Exception {
 		String doc = read(repoRoot.resolve("IPFS-UI.md")); //$NON-NLS-1$
 		assertContains(doc, "Open BPMN2 Model from IPFS", "documentation should mention the open action"); //$NON-NLS-1$ //$NON-NLS-2$
 		assertContains(doc, "Publish Current BPMN2 Model to IPFS", "documentation should mention the publish action"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertContains(doc, "Open BPMN2 Project from IPFS", "documentation should mention the project open action"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertContains(doc, "Publish BPMN2 Project to IPFS", "documentation should mention the project publish action"); //$NON-NLS-1$ //$NON-NLS-2$
 		assertContains(doc, "Project Properties > BPMN2", "documentation should mention the per-project settings location"); //$NON-NLS-1$ //$NON-NLS-2$
-		assertContains(doc, "1.5.4.ecorefs", "documentation should mention the EcoreFS bundle version"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertContains(doc, "1.5.4.qualifier", "documentation should mention the qualifier bundle version"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertContains(doc, "selected workspace folder", "documentation should mention workspace persistence"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertContains(doc, "JSON manifest", "documentation should mention the project manifest"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private static void testProjectPropertiesExposeIpfsSettings(Path repoRoot) throws Exception {
@@ -93,6 +104,47 @@ public final class IPFSModelTransferSelfTest {
 				"plugins/org.eclipse.bpmn2.modeler.core/src/org/eclipse/bpmn2/modeler/core/preferences/Bpmn2Preferences.java")); //$NON-NLS-1$
 		assertContains(preferences, "PREF_IPFS_API_URL", "preferences should define the Kubo API URL key"); //$NON-NLS-1$ //$NON-NLS-2$
 		assertContains(preferences, "PREF_IPFS_PUBLISH_MODE_IPNS", "preferences should define the IPNS publish mode"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	private static void testOpenCommandPersistsIntoWorkspaceWhenPossible(Path repoRoot) throws Exception {
+		String command = read(repoRoot.resolve(
+				"plugins/org.eclipse.bpmn2.modeler.ui/src/org/eclipse/bpmn2/modeler/ui/commands/IPFSOpenModelCommand.java")); //$NON-NLS-1$
+		assertContains(command, "resolveTargetContainer", "open command should resolve an active workspace container"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertContains(command, "downloadToWorkspaceFile", "open command should persist downloaded files into the workspace"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertContains(command, "IDE.openEditor(page, targetFile)", "open command should open persisted workspace files"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	private static void testProjectManifestCommandsArePresent(Path repoRoot) throws Exception {
+		String openProject = read(repoRoot.resolve(
+				"plugins/org.eclipse.bpmn2.modeler.ui/src/org/eclipse/bpmn2/modeler/ui/commands/IPFSOpenProjectCommand.java")); //$NON-NLS-1$
+		assertContains(openProject, "IPFSProjectManifest", "project open should consume the BPMN project manifest"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertContains(openProject, "createUniqueFolder", "project open should restore into a workspace folder"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		String publishProject = read(repoRoot.resolve(
+				"plugins/org.eclipse.bpmn2.modeler.ui/src/org/eclipse/bpmn2/modeler/ui/commands/IPFSPublishProjectCommand.java")); //$NON-NLS-1$
+		assertContains(publishProject, "collectBpmnFiles", "project publish should collect BPMN files recursively"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertContains(publishProject, "IPFSProjectManifest", "project publish should emit the BPMN project manifest"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		String manifest = read(repoRoot.resolve(
+				"plugins/org.eclipse.bpmn2.modeler.ui/src/org/eclipse/bpmn2/modeler/ui/util/IPFSProjectManifest.java")); //$NON-NLS-1$
+		assertContains(manifest, "bpmn-project-manifest", "manifest helper should define the manifest kind"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	private static void testPublishResultDialogIsPresent(Path repoRoot) throws Exception {
+		String dialog = read(repoRoot.resolve(
+				"plugins/org.eclipse.bpmn2.modeler.ui/src/org/eclipse/bpmn2/modeler/ui/commands/IPFSPublicationResultDialog.java")); //$NON-NLS-1$
+		assertContains(dialog, "Messages.IPFS_Publish_Result_Copy_Button",
+				"publication dialog should expose a copy action"); //$NON-NLS-1$
+		assertContains(dialog, "SWT.MULTI", "publication dialog should use a multiline text area"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		String command = read(repoRoot.resolve(
+				"plugins/org.eclipse.bpmn2.modeler.ui/src/org/eclipse/bpmn2/modeler/ui/commands/IPFSPublishModelCommand.java")); //$NON-NLS-1$
+		assertContains(command, "IPFSPublicationResultDialog", "publish command should use the custom result dialog"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		String messages = read(repoRoot.resolve(
+				"plugins/org.eclipse.bpmn2.modeler.ui/src/org/eclipse/bpmn2/modeler/ui/commands/messages.properties")); //$NON-NLS-1$
+		assertContains(messages, "IPFS_Publish_Result_Copy_Button=Copy All",
+				"messages should define the copy button label"); //$NON-NLS-1$
 	}
 
 	private static void testKuboRoundTrip(Path repoRoot) throws Exception {
