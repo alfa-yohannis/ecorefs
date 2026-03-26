@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL"
+    id="Definitions_Payment"
+    targetNamespace="http://ecorefs.org/case-study/payment-process">
+
+  <bpmn2:process id="PaymentProcess" name="Payment Process" isExecutable="false">
+
+    <bpmn2:startEvent id="StartEvent_Payment" name="Payment Requested">
+      <bpmn2:outgoing>Flow_P1</bpmn2:outgoing>
+    </bpmn2:startEvent>
+
+    <bpmn2:task id="Task_ValidateCard" name="Validate Card Details">
+      <bpmn2:incoming>Flow_P1</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_P2</bpmn2:outgoing>
+    </bpmn2:task>
+
+    <bpmn2:task id="Task_ChargeCard" name="Charge Card">
+      <bpmn2:incoming>Flow_P2</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_P3</bpmn2:outgoing>
+    </bpmn2:task>
+
+    <bpmn2:task id="Task_IssueReceipt" name="Issue Receipt">
+      <bpmn2:incoming>Flow_P3</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_P4</bpmn2:outgoing>
+    </bpmn2:task>
+
+    <bpmn2:endEvent id="EndEvent_PaymentComplete" name="Payment Complete">
+      <bpmn2:incoming>Flow_P4</bpmn2:incoming>
+    </bpmn2:endEvent>
+
+    <bpmn2:sequenceFlow id="Flow_P1" sourceRef="StartEvent_Payment" targetRef="Task_ValidateCard"/>
+    <bpmn2:sequenceFlow id="Flow_P2" sourceRef="Task_ValidateCard"  targetRef="Task_ChargeCard"/>
+    <bpmn2:sequenceFlow id="Flow_P3" sourceRef="Task_ChargeCard"    targetRef="Task_IssueReceipt"/>
+    <bpmn2:sequenceFlow id="Flow_P4" sourceRef="Task_IssueReceipt"  targetRef="EndEvent_PaymentComplete"/>
+
+  </bpmn2:process>
+
+</bpmn2:definitions>

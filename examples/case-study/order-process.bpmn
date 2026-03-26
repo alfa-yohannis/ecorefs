@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL"
+    id="Definitions_Order"
+    targetNamespace="http://ecorefs.org/case-study/order-process">
+
+  <!--
+    Cross-resource EReference: Process.supports (Process -> Process)
+    Points to PaymentProcess in payment-process.bpmn via its IPFS CID.
+    EMF resolves this as a proxy — the ResourceSet downloads the
+    referenced resource from IPFS and navigates to the fragment.
+
+    When payment-process.bpmn is modified and re-saved to IPFS,
+    it receives a NEW CID. This href still points to the OLD CID,
+    meaning OrderProcess is version-pinned to the exact PaymentProcess
+    it was validated against.
+  -->
+  <bpmn2:process id="OrderFulfillmentProcess" name="Order Fulfillment Process" isExecutable="false">
+
+    <bpmn2:supports href="ipfs://QmPaymentCID_v1#//PaymentProcess"/>
+
+    <bpmn2:startEvent id="StartEvent_Order" name="Order Placed">
+      <bpmn2:outgoing>Flow_O1</bpmn2:outgoing>
+    </bpmn2:startEvent>
+
+    <bpmn2:task id="Task_CheckInventory" name="Check Inventory">
+      <bpmn2:incoming>Flow_O1</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_O2</bpmn2:outgoing>
+    </bpmn2:task>
+
+    <bpmn2:exclusiveGateway id="Gateway_InStock" name="Item In Stock?">
+      <bpmn2:incoming>Flow_O2</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_InStock</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_OutOfStock</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+
+    <bpmn2:task id="Task_ReserveItem" name="Reserve Item">
+      <bpmn2:incoming>Flow_InStock</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_O3</bpmn2:outgoing>
+    </bpmn2:task>
+
+    <bpmn2:task id="Task_BackOrder" name="Create Back Order">
+      <bpmn2:incoming>Flow_OutOfStock</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_O4</bpmn2:outgoing>
+    </bpmn2:task>
+
+    <bpmn2:task id="Task_PackageShip" name="Package and Ship">
+      <bpmn2:incoming>Flow_O3</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_O5</bpmn2:outgoing>
+    </bpmn2:task>
+
+    <bpmn2:endEvent id="EndEvent_Shipped" name="Order Shipped">
+      <bpmn2:incoming>Flow_O5</bpmn2:incoming>
+    </bpmn2:endEvent>
+
+    <bpmn2:endEvent id="EndEvent_BackOrdered" name="Back Order Placed">
+      <bpmn2:incoming>Flow_O4</bpmn2:incoming>
+    </bpmn2:endEvent>
+
+    <bpmn2:sequenceFlow id="Flow_O1"         sourceRef="StartEvent_Order"  targetRef="Task_CheckInventory"/>
+    <bpmn2:sequenceFlow id="Flow_O2"         sourceRef="Task_CheckInventory" targetRef="Gateway_InStock"/>
+    <bpmn2:sequenceFlow id="Flow_InStock"    name="Yes" sourceRef="Gateway_InStock" targetRef="Task_ReserveItem"/>
+    <bpmn2:sequenceFlow id="Flow_OutOfStock" name="No"  sourceRef="Gateway_InStock" targetRef="Task_BackOrder"/>
+    <bpmn2:sequenceFlow id="Flow_O3"         sourceRef="Task_ReserveItem"  targetRef="Task_PackageShip"/>
+    <bpmn2:sequenceFlow id="Flow_O4"         sourceRef="Task_BackOrder"    targetRef="EndEvent_BackOrdered"/>
+    <bpmn2:sequenceFlow id="Flow_O5"         sourceRef="Task_PackageShip"  targetRef="EndEvent_Shipped"/>
+
+  </bpmn2:process>
+
+</bpmn2:definitions>

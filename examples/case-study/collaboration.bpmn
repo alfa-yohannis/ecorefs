@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL"
+    id="Definitions_Collaboration"
+    targetNamespace="http://ecorefs.org/case-study/collaboration">
+
+  <!--
+    Top-level Collaboration linking participants to their processes.
+
+    Participant.processRef is a non-containment EReference (Participant -> Process).
+    Each processRef points to a Process defined in a separate BPMN resource
+    on IPFS, forming the outermost layer of the dependency chain:
+
+        collaboration.bpmn  ──processRef──>  order-process.bpmn  ──supports──>  payment-process.bpmn
+            ipfs://QmC                           ipfs://QmB                         ipfs://QmA
+
+    CASCADE SCENARIO:
+    1. Payment team modifies payment-process.bpmn
+       -> re-saved to IPFS -> new CID: QmA'
+    2. cascadeSave detects order-process.bpmn references QmA
+       -> rewrites supports href to QmA' -> re-saved -> new CID: QmB'
+    3. cascadeSave detects collaboration.bpmn references QmB
+       -> rewrites processRef to QmB' -> re-saved -> new CID: QmC'
+
+    Three hops, fully automatic. Every intermediate resource gets a
+    new CID that reflects the updated dependency.
+  -->
+  <bpmn2:collaboration id="Collaboration_ECommerce" name="E-Commerce Collaboration">
+
+    <bpmn2:participant id="Participant_Seller" name="Seller"
+        processRef="ipfs://QmOrderCID_v1#//OrderFulfillmentProcess"/>
+
+    <bpmn2:participant id="Participant_PaymentProvider" name="Payment Provider"
+        processRef="ipfs://QmPaymentCID_v1#//PaymentProcess"/>
+
+  </bpmn2:collaboration>
+
+</bpmn2:definitions>
