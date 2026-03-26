@@ -69,6 +69,8 @@ public class IPFSPublishProjectCommand extends AbstractHandler {
 
 			for (IFile modelFile : modelFiles) {
 				if (modelFile.getLocation() == null) {
+					Activator.logError(new IllegalStateException(
+							"Skipping model file with no filesystem location: " + modelFile.getFullPath())); //$NON-NLS-1$
 					continue;
 				}
 				String relativePath = IPFSWorkspaceResourceSupport.toRelativePath(container, modelFile);

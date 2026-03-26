@@ -63,6 +63,12 @@ public class Bpmn2ModelerResourceSetImpl extends ResourceSetImpl implements IRes
 		super();
         getLoadOptions().put(XMLResource.OPTION_DISABLE_NOTIFY, true);
         getLoadOptions().put(XMLResource.OPTION_DEFER_IDREF_RESOLUTION, true);
+        // EcoreFS begin: register IPFS/IPNS URI handler at position 0 so that
+        // cross-references like href="ipfs://QmXxx#//fragment" resolve
+        // via the local Kubo daemon instead of falling through to
+        // java.net.URL which does not understand these schemes.
+        getURIConverter().getURIHandlers().add(0, new IPFSUriHandler());
+        // EcoreFS end
 	}
 
 	/**

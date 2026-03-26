@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: XsltFromEcore
+Bundle-SymbolicName: org.eclipse.bpmn2.tools.xsltFromEcore
+Bundle-Version: 1.5.2.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.eclipse.emf,
+ org.eclipse.emf.ecore,
+ org.eclipse.emf.ecore.xmi,
+ org.eclipse.bpmn2,
+ org.junit
+Automatic-Module-Name: org.eclipse.bpmn2.tools.xsltFromEcore

@@ -70,3 +70,4 @@ core-plugin/*.txt
 # Generated MoDisco helper workspace
 eval/modisco_jdt_reverse/org.ecorefs.modisco.jdt.reverse/target
 eval/modisco_jdt_reverse/org.ecorefs.modisco.jdt.reverse.tests/target
+.claude

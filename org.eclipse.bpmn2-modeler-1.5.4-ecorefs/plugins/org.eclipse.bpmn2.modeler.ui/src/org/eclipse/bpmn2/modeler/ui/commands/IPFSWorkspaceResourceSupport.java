@@ -123,6 +123,12 @@ final class IPFSWorkspaceResourceSupport {
 
 	static IFile writeWorkspaceFile(IContainer container, String relativePath, byte[] contents) throws Exception {
 		IPath path = new Path(relativePath);
+		for (String segment : path.segments()) {
+			if ("..".equals(segment) || ".".equals(segment)) { //$NON-NLS-1$ //$NON-NLS-2$
+				throw new IllegalArgumentException(
+						"Manifest path contains illegal segment '" + segment + "': " + relativePath); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
 		if (path.segmentCount() > 1) {
 			ensureFolder(container, path.removeLastSegments(1));
 		}

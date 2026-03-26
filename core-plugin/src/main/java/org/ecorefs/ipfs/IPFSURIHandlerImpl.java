@@ -24,14 +24,21 @@ public class IPFSURIHandlerImpl extends URIHandlerImpl {
     @Override
     public boolean canHandle(URI uri) {
         String scheme = uri.scheme();
-        return "ipfs".equals(scheme) || "ipns".equals(scheme);
+        return "ipfs".equals(scheme) || "ipns".equals(scheme)
+                || "http".equals(scheme) || "https".equals(scheme);
     }
 
     @Override
     public InputStream createInputStream(URI uri, Map<?, ?> options) throws IOException {
+        String scheme = uri.scheme();
+
+        if ("http".equals(scheme) || "https".equals(scheme)) {
+            return fetchHttp(uri.toString());
+        }
+
         String cid;
 
-        if ("ipns".equals(uri.scheme())) {
+        if ("ipns".equals(scheme)) {
             // IPNS: resolve the mutable name to its current CID first
             String ipnsKey = uri.authority();
             if (ipnsKey == null) ipnsKey = uri.opaquePart();
@@ -61,6 +68,34 @@ public class IPFSURIHandlerImpl extends URIHandlerImpl {
 
         byte[] content = catContent(cid);
         return new ByteArrayInputStream(content);
+    }
+
+    private InputStream fetchHttp(String url) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+        connection.setRequestMethod("GET");
+        connection.setConnectTimeout(30_000);
+        connection.setReadTimeout(60_000);
+        connection.setRequestProperty("Accept", "application/xml, text/xml, */*");
+        connection.connect();
+
+        int status = connection.getResponseCode();
+        if (status < 200 || status >= 300) {
+            connection.disconnect();
+            throw new IOException("HTTP " + status + " fetching resource: " + url);
+        }
+
+        // Wrap so that disconnect() is called when the stream is closed
+        InputStream raw = connection.getInputStream();
+        return new java.io.FilterInputStream(raw) {
+            @Override
+            public void close() throws IOException {
+                try {
+                    super.close();
+                } finally {
+                    connection.disconnect();
+                }
+            }
+        };
     }
 
     private String resolveIpnsPath(String ipnsKey) throws IOException {
@@ -109,6 +144,11 @@ public class IPFSURIHandlerImpl extends URIHandlerImpl {
 
     @Override
     public OutputStream createOutputStream(URI uri, Map<?, ?> options) throws IOException {
+        String scheme = uri.scheme();
+        if ("http".equals(scheme) || "https".equals(scheme)) {
+            throw new UnsupportedOperationException(
+                    "HTTP/HTTPS URIs are read-only in this handler. Use IPFSResourceImpl.save() to persist models.");
+        }
         throw new UnsupportedOperationException(
                 "IPFS is content-addressed. Output streams are handled natively via IPFSResourceImpl.save(), "
                         + "generating a new CID, rather than piping to an existing URI.");

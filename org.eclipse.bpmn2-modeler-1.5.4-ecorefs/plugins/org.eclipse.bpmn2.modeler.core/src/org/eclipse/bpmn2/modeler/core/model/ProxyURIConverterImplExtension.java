@@ -23,10 +23,17 @@ import org.eclipse.emf.ecore.resource.impl.ExtensibleURIConverterImpl;
 public final class ProxyURIConverterImplExtension extends ExtensibleURIConverterImpl {
 	private static final String DIR_NAME = "cache/"; //$NON-NLS-1$
 	private URI baseUri;
-	
+	// EcoreFS begin: direct IPFS/IPNS stream resolution
+	private final IPFSUriHandler ipfsHandler = new IPFSUriHandler();
+	// EcoreFS end
+
 	public ProxyURIConverterImplExtension(URI baseUri) {
 		super();
 		this.baseUri = baseUri;
+		// EcoreFS begin: register IPFS/IPNS handler so that ipfs:// cross-references
+		// are resolved via the Kubo daemon instead of falling through to java.net.URL
+		getURIHandlers().add(0, ipfsHandler);
+		// EcoreFS end
 	}
 	
 	/**
@@ -69,6 +76,12 @@ public final class ProxyURIConverterImplExtension extends ExtensibleURIConverter
 	}
 
 	private InputStream getInputStreamForUri(URI uri) throws IOException {
+		// EcoreFS begin: resolve ipfs:// and ipns:// directly to avoid
+		// falling through to java.net.URL which does not know these schemes
+		if (ipfsHandler.canHandle(uri)) {
+			return ipfsHandler.createInputStream(uri, null);
+		}
+		// EcoreFS end
 		if (uri.toString().startsWith("http://")) { //$NON-NLS-1$
 			return checkForLocalCopy(uri);
 		}

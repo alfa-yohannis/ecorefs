@@ -1,12 +1,12 @@
-/******************************************************************************* 
- * Copyright (c) 2011, 2012 Red Hat, Inc. 
- *  All rights reserved. 
- * This program is made available under the terms of the 
- * Eclipse Public License v1.0 which accompanies this distribution, 
- * and is available at http://www.eclipse.org/legal/epl-v10.html 
- * 
- * Contributors: 
- * Red Hat, Inc. - initial API and implementation 
+/*******************************************************************************
+ * Copyright (c) 2011, 2012 Red Hat, Inc.
+ *  All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Red Hat, Inc. - initial API and implementation
  *
  * @author Ivar Meikas
  ******************************************************************************/
@@ -44,7 +44,7 @@ public class Activator extends AbstractUIPlugin {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
@@ -54,7 +54,7 @@ public class Activator extends AbstractUIPlugin {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
@@ -64,7 +64,7 @@ public class Activator extends AbstractUIPlugin {
 
 	/**
 	 * Returns the shared instance
-	 * 
+	 *
 	 * @return the shared instance
 	 */
 	public static Activator getDefault() {
@@ -75,11 +75,11 @@ public class Activator extends AbstractUIPlugin {
 		if (plugin!=null)
 			Platform.getLog(plugin.getBundle()).log(status);
 	}
-	
+
 	public static void logError(Exception e) {
 		logStatus(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
 	}
-	
+
 	/**
 	 * Initializes the table of images used in this plugin.
 	 */
@@ -91,10 +91,10 @@ public class Activator extends AbstractUIPlugin {
 		// A little reflection magic ... so that we don't
 		// have to add the createImageDescriptor every time
 		// we add it to the IConstants ..
-		Field fields[] = IConstants.class.getFields();	
+		Field fields[] = IConstants.class.getFields();
 		for(int i=0; i < fields.length; i++) {
 			Field f = fields[i];
-			if (f.getType() != String.class) { 
+			if (f.getType() != String.class) {
 				continue;
 			}
 			String name = f.getName();
@@ -105,7 +105,7 @@ public class Activator extends AbstractUIPlugin {
 				} catch (Exception e) {
 					logError(e);
 				}
-			}			
+			}
 		}
 		return registry;
 	}

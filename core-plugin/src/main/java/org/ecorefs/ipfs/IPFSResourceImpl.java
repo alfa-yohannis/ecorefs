@@ -91,7 +91,7 @@ public class IPFSResourceImpl extends XMIResourceImpl {
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
         connection.setConnectTimeout(30_000);
-        connection.setReadTimeout(0);
+        connection.setReadTimeout(120_000);
         connection.connect();
 
         try (InputStream input = connection.getInputStream()) {

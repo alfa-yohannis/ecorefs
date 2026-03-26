@@ -81,6 +81,10 @@ public class IPFSOpenProjectCommand extends AbstractHandler {
 			if (rootFile == null) {
 				rootFile = importFolder.getFile(new Path(manifest.getRootModel()));
 			}
+			if (!rootFile.exists()) {
+				throw new ExecutionException("Root model file was not found after import: " //$NON-NLS-1$
+						+ manifest.getRootModel());
+			}
 			IDE.openEditor(page, rootFile);
 			return null;
 		} catch (Exception e) {

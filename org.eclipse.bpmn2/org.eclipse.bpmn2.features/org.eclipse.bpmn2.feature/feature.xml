@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.bpmn2.feature"
+      label="BPMN2 Metamodel"
+      version="1.5.2.qualifier"
+      provider-name="Eclipse.org"
+      license-feature="org.eclipse.license"
+      license-feature-version="0.0.0">
+
+   <description url="https://www.eclipse.org/modeling/mdt/?project=bpmn2">
+      BPMN2 is a component of the Model Development Tools (MDT) subproject that provides a metamodel implementation
+      based on the Business Process Model and Notation (BPMN) 2.0 OMG specification.
+   </description>
+
+   <copyright>
+      Copyright (c) 2011, 2020 Red Hat, Inc.
+All rights reserved. 
+This program and the accompanying materials are made available under the terms of the Eclipse Public License 2.0
+which accompanies this distribution, and is available at
+https://www.eclipse.org/legal/epl-2.0/
+SPDX-License-Identifier: EPL-2.0
+Contributors: 
+Red Hat, Inc. - initial API and implementation
+   </copyright>
+
+   <!-- The %licenseURL and %license properties are delivered by the license-feature, org.eclipse.license -->
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <plugin
+         id="org.eclipse.bpmn2"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.bpmn2.edit"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.bpmn2.editor"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
