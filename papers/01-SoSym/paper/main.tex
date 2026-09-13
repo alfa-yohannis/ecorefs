@@ -204,11 +204,11 @@ Figure~\ref{fig:architecture} shows the three extension points of the plugin as 
 
 Listing~\ref{lst:setup} shows the configuration of a resource set. The factory is registered for the \texttt{ipfs} and \texttt{ipns} schemes. The URI handler is added at the front of the handler list, so the handler receives IPFS URIs before the default handlers.
 
-\begin{figure*}[tbp]
+\begin{figure}[tbp]
 \centering
-\includegraphics[width=0.76\textwidth]{figures/architecture.pdf}
+\includegraphics[width=\columnwidth]{figures/architecture.pdf}
 \caption{Unified Modeling Language (UML) class diagram of the ecorefs core plugin. Each class marked ecorefs extends one class of the EMF persistence API. The IPFS node runs Kubo and offers the HTTP API for saving and loading.}\label{fig:architecture}
-\end{figure*}
+\end{figure}
 
 \begin{lstlisting}[language=Java,float=tbp,caption={Configuration of a resource set for IPFS, adapted from the test code},label={lst:setup}]
 IPFS ipfs = new IPFS("/ip4/127.0.0.1/tcp/5001");
