@@ -210,7 +210,7 @@ Listing~\ref{lst:setup} shows the configuration of a resource set. The factory i
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=\columnwidth]{figures/architecture.pdf}
+\includegraphics[width=.7\columnwidth]{figures/architecture.pdf}
 \caption{Unified Modeling Language (UML) class diagram of the ecorefs core plugin. Each class marked ecorefs extends one class of the EMF persistence API. The IPFS node runs Kubo and offers the HTTP API for saving and loading.}\label{fig:architecture}
 \end{figure}
 
@@ -237,7 +237,7 @@ In IPNS mode, the third step differs. The resource derives a key name from the r
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=\columnwidth]{figures/save.pdf}
+\includegraphics[width=.7\columnwidth]{figures/save.pdf}
 \caption{UML sequence diagram of saving a resource to IPFS. The reference mode of the resource selects the alternative. In CID mode, the new CID becomes the resource URI. In IPNS mode, the resource URI stays an IPNS name.}\label{fig:save}
 \end{figure}
 
@@ -247,7 +247,7 @@ In IPNS mode, the third step differs. The resource derives a key name from the r
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=\columnwidth]{figures/load.pdf}
+\includegraphics[width=.8\columnwidth]{figures/load.pdf}
 \caption{UML sequence diagram of loading a resource from IPFS. The URI converter of the resource set selects \texttt{IPFSURIHandlerImpl} for \texttt{ipfs://} and \texttt{ipns://} URIs. An IPNS name costs one extra lookup.}\label{fig:load}
 \end{figure}
 
@@ -265,7 +265,7 @@ Figure~\ref{fig:lifecycle} summarizes the resulting lifecycle as a UML state mac
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=\columnwidth]{figures/lifecycle.pdf}
+\includegraphics[width=.9\columnwidth]{figures/lifecycle.pdf}
 \caption{UML state machine of the URI of an \texttt{IPFSResourceImpl}. Each state shows the URI and the effect of a later save after a change. In CID mode, the URI follows the content. In IPNS mode, the URI stays the same, and the IPNS name points to the new CID. Earlier CIDs stay readable while an IPFS node stores the content.}\label{fig:lifecycle}
 \end{figure}
 
@@ -306,45 +306,55 @@ Manifest or registry & A document maps logical names to CIDs & Flexible & The ma
 In CID mode, a change to one resource requires new saves of every resource with a reference to the changed resource. \texttt{IPFSModelPersister.cascadeSave} automates the saves (Algorithm~\ref{alg:cascade}).
 
 \begin{algorithm}
-\caption{Cascade save in CID mode ($S$ holds the resources saved so far)}\label{alg:cascade}
+\caption{Cascade save in CID mode}\label{alg:cascade}
 \begin{algorithmic}[1]
-\Procedure{CascadeSave}{$r, S$}
-\If{$r \in S$}
+\Procedure{CascadeSave}{$r$}
+\State $X \gets$ all cross-references in the resource set
+\State $A \gets \{r\}$ and every resource that reaches $r$ through $X$
+\State $O \gets$ empty list
+\ForAll{$a \in A$}
+\State \Call{Append}{$a, A, X, O$}
+\EndFor
+\ForAll{$q \in O$}
+\State save $q$ to IPFS
+\EndFor
+\EndProcedure
+\Statex
+\Procedure{Append}{$q, A, X, O$}
+\If{$q \in O$ or $q$ lies on the current path}
 \State \Return
 \EndIf
-\State save $r$ to IPFS
-\State $S \gets S \cup \{r\}$
-\State $X \gets$ all cross-references in the resource set
-\State $P \gets$ resources with a reference in $X$ into $r$
-\ForAll{$p \in P \setminus S$}
-\State \Call{CascadeSave}{$p, S$}
+\ForAll{$t \in A$ with a reference from $q$ in $X$}
+\State \Call{Append}{$t, A, X, O$}
 \EndFor
+\State append $q$ to $O$
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
-The procedure first saves the changed resource, and the save updates the URI of the resource to the new CID. The EMF cross referencer then collects all cross-references in the resource set. After that, each resource with a reference into the saved resource is saved in the same way. During serialization, EMF writes the current URI of the target into each reference. The rewritten references therefore point to the new CID without any text replacement. The procedure resembles a Git commit, where a changed file leads to new tree objects up to the root~\cite{chacon2014progit}. Furthermore, the set of saved resources stops the recursion for cyclic references. Figure~\ref{fig:cascade} shows the expected result for the BPMN case study of Section~\ref{sec:evaluation-rq2}. A change to \texttt{payment-process.bpmn} gives a new CID to all three resources, and every reference points to the new CID of the target.
+The procedure starts with the cross-references of the resource set, collected by the EMF cross referencer. From the cross-references, the procedure builds a dependency graph of the resources and collects every resource that reaches the changed resource. After that, the procedure orders the collected resources, so a resource comes after every collected resource that the resource references. The saves then follow that order. During serialization, EMF writes the current URI of the target into each reference. The rewritten references therefore point to the new CID without any text replacement. The procedure resembles a Git commit, where a changed file leads to new tree objects up to the root~\cite{chacon2014progit}.
 
-\begin{figure*}[tbp]
+The order matters as soon as two reference paths reach the changed resource. In the case study of Section~\ref{sec:evaluation-rq2}, \texttt{collaboration.bpmn} refers to the order process and to the payment process, while the order process also refers to the payment process. A save of the collaboration before the order process would leave the collaboration with the old CID of the order process. The dependency order saves the payment process first, the order process second and the collaboration last. An earlier version of the cascade saved a resource as soon as a reference to a saved resource appeared, and the order of the saves came from a hash set, so the outcome depended on the iteration order. Figure~\ref{fig:cascade} shows the expected result for the BPMN case study of Section~\ref{sec:evaluation-rq2}. A change to \texttt{payment-process.bpmn} gives a new CID to all three resources, and every reference points to the new CID of the target.
+
+\begin{figure}[tbp]
 \centering
-\begin{minipage}[t]{0.47\textwidth}
+\begin{minipage}[t]{0.234\textwidth}
 \centering
-\includegraphics[width=\linewidth]{figures/cascade-before.pdf}\\[3pt]
 {\footnotesize (a) Before the change}
-\end{minipage}\hfill
-\begin{minipage}[t]{0.47\textwidth}
-\centering
-\includegraphics[width=\linewidth]{figures/cascade-after.pdf}\\[3pt]
-{\footnotesize (b) After the cascade save}
+\includegraphics[width=\linewidth]{figures/cascade-before.pdf}\\[3pt]
 \end{minipage}
+\hfill
+\begin{minipage}[t]{0.234\textwidth}
+\centering
+{\footnotesize (b) After the cascade save}
+\includegraphics[width=\linewidth]{figures/cascade-after.pdf}\\[3pt]
+\end{minipage}\\[10pt]
 \caption{UML object diagram of the three BPMN resources of the case study. (a) Each resource refers to the CIDs of the resources below. (b) A change to \texttt{payment-process.bpmn} and a complete cascade save give every resource a new CID, marked with a prime. The CIDs are placeholders.}\label{fig:cascade}
-\end{figure*}
+\end{figure}
 
 In IPNS mode, \texttt{cascadeSave} saves only the changed resource. References by IPNS name resolve to the newly published CID, so the referencing resources need no new save.
 
-Cycles need care. Resource A may refer to resource B while B refers to A. In such a cycle, one direction always refers to an outdated CID. A new save of A would change the CID of A again, so the cycle cannot settle. \texttt{IPFSModelPublishTool} therefore checks a partitioned model for cycles before a publication in CID mode. The tool stops with an error when the resource graph contains a cycle.
-
-\todo{Check resources with two reference paths to the changed resource. In the case study, collaboration.bpmn refers to both processes, and the saved-set check may skip a needed second save of the collaboration. A save in reverse topological order would avoid the problem.}
+Cycles need care. Resource A may refer to resource B while B refers to A. In such a cycle, one direction always refers to an outdated CID, because no order of saves satisfies both directions. A new save of A would change the CID of A again, so the cycle cannot settle. \texttt{IPFSModelPublishTool} therefore checks a partitioned model for cycles before a publication in CID mode. The tool stops with an error when the resource graph contains a cycle.
 
 \subsection{Publishing partitioned models}\label{sec:rq2-partitioned}
 
@@ -551,7 +561,7 @@ Future work includes a corrected XMI load benchmark, larger models and remote IP
 
 \bmhead{Acknowledgements}
 
-\todo{Optional.}
+The author looks for funding for an evaluation in a production IPFS environment. Such an evaluation needs storage, bandwidth and the operation of several nodes over a long period, so the cost goes beyond the means of the current project.
 
 \section*{Statements and Declarations}
 

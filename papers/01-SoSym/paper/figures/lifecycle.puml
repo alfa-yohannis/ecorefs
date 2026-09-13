@@ -14,8 +14,8 @@ state "Published by IPNS name" as Published
 Published : URI = ipns://<key id>
 Published : save() / new CID, same URI
 
-[*] -right-> Unsaved : create
-Unsaved --> Stored : save()\n[CID mode]
-Unsaved --> Published : save()\n[IPNS mode]
-Stored -[hidden]down-> Published
+[*] -down-> Unsaved : create
+Unsaved -right-> Stored : save()\n[CID mode]
+Unsaved -up-> Published : save()\n[IPNS mode]
+Published -[hidden]down-> Stored
 @enduml
