@@ -35,11 +35,11 @@ A reference that names a version would remove the ambiguity in all three setting
 
 ## 4. State of the art and the gap
 
-Three lines of work touch the problem without closing it.
+Three lines of work touch the problem without closing the problem.
 
 Scalable persistence keeps identifiers stable inside a store, because the store owns the identity of an element. Versioning systems such as EMFStore record operations between versions, and comparison tools such as EMF Compare compute differences between two states. Both lines answer "what changed", while neither gives an immutable address that a third party can quote.
 
-Content-addressed storage outside MDE gives exactly such an address, and package managers already use the idea for dependencies. A lock file records an exact dependency tree, Go modules record checksums, and reproducible builds check that a binary matches its source. None of these applies content addressing to the resources and the references of a modeling framework.
+Content-addressed storage outside MDE gives exactly such an address, and package managers already use the idea for dependencies. A lock file records an exact dependency tree, Go modules record checksums, and reproducible builds check that a binary matches the source code. None of these applies content addressing to the resources and the references of a modeling framework.
 
 The gap is therefore concrete. No reviewed approach stores EMF models under content-addressed identifiers, and no approach describes how cross-resource references behave when every save produces a new identifier.
 
