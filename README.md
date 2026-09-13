@@ -156,7 +156,7 @@ Open work for the SoSyM manuscript in `papers/01-SoSym/paper/main.tex` and for t
 - [ ] Archive the MoDisco dataset (1.04 GiB) and the published CIDs under a DOI for the data availability statement.
 - [ ] Refactor the IPFS Java code to the project rules: object-oriented structure, no nested functions, intelligible names, an effective comment on every class and method, and `// EcoreFS begin` and `// EcoreFS end` markers around additions to existing files. This item is not in the manuscript.
 - [x] Write the declarations: funding (self-funded), competing interests, ethics approval, consent for publication, author contribution and the Springer statement on the use of large language models (in the Research method section).
-- [ ] Fill in the affiliation, which still reads `Department` and `City`.
+- [x] Fill in the affiliation: Department of Informatics, Pradita University, Kabupaten Tangerang, Banten, Indonesia.
 - [ ] Remove every `\todo` note from `main.tex` before submission.
 
 ## Architecture
