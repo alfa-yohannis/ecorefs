@@ -156,7 +156,7 @@ The first five items come from a review of the current draft. The draft reads as
 - [x] Run the BPMN cascade case study with a live Kubo node and record the real CIDs before and after the cascade save. `BpmnCaseStudyCascadeTest` loads the three BPMN files with the Eclipse BPMN 2.0 metamodel, publishes them, changes the payment process and checks every rewritten reference. The figure in the paper carries the CIDs of that run.
 - [x] Record the measurement environment: Intel Core i7-1165G7, 16 GB memory, Ubuntu 24.04.3 with Linux 6.8.0, OpenJDK 21.0.9, Kubo 0.40.1 in Docker 29.8.0, EMF 2.23.0, java-ipfs-http-client 1.4.3, JUnit 5.10.0, Maven 3.8.7.
 - [x] Extend the benchmark to larger models with 30 runs per size and a statistical test. The run covers 100 to 500,000 elements, and `eval/analyse_benchmark.py` writes the summary with a Wilcoxon signed-rank test. A shared network file system as a further baseline stays open and is named as such in the paper.
-- [ ] Test proxy resolution across `ipfs://` references, because the current tests resolve fragments only after an explicit load.
+- [x] Test proxy resolution across `ipfs://` references. `ProxyResolutionTest` loads a referring resource in a fresh resource set, checks that the reference starts as a proxy and checks the object after the resolution.
 - [x] Assert the rewritten reference in the cascade test and measure chains longer than two resources. The chain of four resources took 120 ms for four saves.
 - [ ] Build the modeler with Tycho. The BPMN2 update site in the build file is no longer available, and `releases/2022-06` carries the same bundles.
 - [ ] Report the output of `BpmnIpfsExample` and of the modeler self-tests against a running Kubo node.
