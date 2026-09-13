@@ -44,6 +44,15 @@
     </dependency>
 
     <!-- Testing -->
+    <!-- BPMN 2.0 metamodel of Eclipse, installed from the Eclipse 2022-06 plug-in,
+         used by the case study test that cascades three BPMN resources -->
+    <dependency>
+      <groupId>org.eclipse.bpmn2</groupId>
+      <artifactId>org.eclipse.bpmn2</artifactId>
+      <version>1.5.1</version>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>

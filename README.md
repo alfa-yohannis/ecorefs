@@ -153,7 +153,7 @@ The first five items come from a review of the current draft. The draft reads as
 
 - [x] Repeat the XMI load benchmark with a fresh `ResourceSet`. Every load now runs in a fresh resource set, the copy of the model sits outside the measured region, and each iteration stamps the copy, so every iteration stores new content.
 - [x] Check `cascadeSave` when two reference paths reach the changed resource. `ResourceDependencyGraph` now orders the affected resources by their dependencies, and `CascadeReferenceIntegrityTest` checks a chain, a diamond and a chain of four resources.
-- [ ] Run the BPMN cascade case study with a live Kubo node and record the real CIDs before and after the cascade save.
+- [x] Run the BPMN cascade case study with a live Kubo node and record the real CIDs before and after the cascade save. `BpmnCaseStudyCascadeTest` loads the three BPMN files with the Eclipse BPMN 2.0 metamodel, publishes them, changes the payment process and checks every rewritten reference. The figure in the paper carries the CIDs of that run.
 - [x] Record the measurement environment: Intel Core i7-1165G7, 16 GB memory, Ubuntu 24.04.3 with Linux 6.8.0, OpenJDK 21.0.9, Kubo 0.40.1 in Docker 29.8.0, EMF 2.23.0, java-ipfs-http-client 1.4.3, JUnit 5.10.0, Maven 3.8.7.
 - [x] Extend the benchmark to larger models with 30 runs per size and a statistical test. The run covers 100 to 500,000 elements, and `eval/analyse_benchmark.py` writes the summary with a Wilcoxon signed-rank test. A shared network file system as a further baseline stays open and is named as such in the paper.
 - [ ] Test proxy resolution across `ipfs://` references, because the current tests resolve fragments only after an explicit load.

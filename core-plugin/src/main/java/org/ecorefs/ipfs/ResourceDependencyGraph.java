@@ -1,15 +1,14 @@
 package org.ecorefs.ipfs;
 
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,9 +43,14 @@ public final class ResourceDependencyGraph {
     }
 
     /**
-     * Builds the graph from the cross-references of a resource set. References
-     * inside one resource are ignored, because such references never change the
-     * content identifier of another resource.
+     * Builds the graph from the references between the resources of a resource
+     * set. References inside one resource are ignored, because such references
+     * never change the content identifier of another resource.
+     *
+     * The traversal walks the resources directly instead of calling the cross
+     * referencer of EMF, because the cross referencer reads every feature of
+     * every object. Some generated metamodels leave a derived feature without an
+     * implementation, and a read of such a feature then fails.
      *
      * @param resourceSet the resource set with the loaded resources
      * @return the dependency graph of the resource set
@@ -54,24 +58,75 @@ public final class ResourceDependencyGraph {
     public static ResourceDependencyGraph of(ResourceSet resourceSet) {
         Map<Resource, Set<Resource>> dependencies = new HashMap<>();
         Map<Resource, Set<Resource>> dependents = new HashMap<>();
-        Map<EObject, Collection<EStructuralFeature.Setting>> crossReferences =
-                EcoreUtil.CrossReferencer.find(resourceSet.getResources());
-
-        for (Map.Entry<EObject, Collection<EStructuralFeature.Setting>> entry : crossReferences.entrySet()) {
-            Resource referencedResource = entry.getKey().eResource();
-            if (referencedResource == null) {
-                continue;
-            }
-            for (EStructuralFeature.Setting setting : entry.getValue()) {
-                Resource referencingResource = setting.getEObject().eResource();
-                if (referencingResource == null || referencingResource == referencedResource) {
-                    continue;
-                }
-                addEdge(dependencies, referencingResource, referencedResource);
-                addEdge(dependents, referencedResource, referencingResource);
-            }
+        for (Resource resource : new ArrayList<>(resourceSet.getResources())) {
+            collectReferencesOfResource(resource, dependencies, dependents);
         }
         return new ResourceDependencyGraph(dependencies, dependents);
+    }
+
+    /**
+     * Adds every reference of one resource into another resource to the graph.
+     *
+     * @param resource     the resource that holds the referencing objects
+     * @param dependencies outgoing edges under construction
+     * @param dependents   incoming edges under construction
+     */
+    private static void collectReferencesOfResource(Resource resource, Map<Resource, Set<Resource>> dependencies,
+            Map<Resource, Set<Resource>> dependents) {
+        Iterator<EObject> contents = resource.getAllContents();
+        while (contents.hasNext()) {
+            collectReferencesOfObject(resource, contents.next(), dependencies, dependents);
+        }
+    }
+
+    /**
+     * Adds every reference of one object into another resource to the graph.
+     * Containment references and derived features are skipped, because a
+     * containment reference stays inside one resource and a derived feature
+     * carries no stored reference.
+     *
+     * @param resource     the resource that holds the object
+     * @param object       the object with the references
+     * @param dependencies outgoing edges under construction
+     * @param dependents   incoming edges under construction
+     */
+    private static void collectReferencesOfObject(Resource resource, EObject object,
+            Map<Resource, Set<Resource>> dependencies, Map<Resource, Set<Resource>> dependents) {
+        for (EReference reference : object.eClass().getEAllReferences()) {
+            if (reference.isContainment() || reference.isContainer() || reference.isDerived()
+                    || reference.isVolatile()) {
+                continue;
+            }
+            Object value = object.eGet(reference, true);
+            if (value instanceof List) {
+                for (Object target : (List<?>) value) {
+                    addResourceEdge(resource, target, dependencies, dependents);
+                }
+            } else {
+                addResourceEdge(resource, value, dependencies, dependents);
+            }
+        }
+    }
+
+    /**
+     * Adds one edge when the target of a reference lives in another resource.
+     *
+     * @param resource     the resource that holds the referencing object
+     * @param target       the referenced value
+     * @param dependencies outgoing edges under construction
+     * @param dependents   incoming edges under construction
+     */
+    private static void addResourceEdge(Resource resource, Object target,
+            Map<Resource, Set<Resource>> dependencies, Map<Resource, Set<Resource>> dependents) {
+        if (!(target instanceof EObject)) {
+            return;
+        }
+        Resource referencedResource = ((EObject) target).eResource();
+        if (referencedResource == null || referencedResource == resource) {
+            return;
+        }
+        addEdge(dependencies, resource, referencedResource);
+        addEdge(dependents, referencedResource, resource);
     }
 
     /**

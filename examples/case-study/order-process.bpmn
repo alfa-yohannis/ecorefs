@@ -18,7 +18,9 @@
   -->
   <bpmn2:process id="OrderFulfillmentProcess" name="Order Fulfillment Process" isExecutable="false">
 
-    <bpmn2:supports href="ipfs://QmPaymentCID_v1#//PaymentProcess"/>
+    <!-- The reference to the payment process is written on the first save.
+         BpmnCaseStudyCascadeTest wires Process.supports to the process of
+         payment-process.bpmn, and the save writes the current CID. -->
 
     <bpmn2:startEvent id="StartEvent_Order" name="Order Placed">
       <bpmn2:outgoing>Flow_O1</bpmn2:outgoing>

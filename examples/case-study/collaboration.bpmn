@@ -26,13 +26,13 @@
     Three hops, fully automatic. Every intermediate resource gets a
     new CID that reflects the updated dependency.
   -->
+  <!-- Participant.processRef is wired by BpmnCaseStudyCascadeTest, and the save
+       writes the current CID of each referenced process. -->
   <bpmn2:collaboration id="Collaboration_ECommerce" name="E-Commerce Collaboration">
 
-    <bpmn2:participant id="Participant_Seller" name="Seller"
-        processRef="ipfs://QmOrderCID_v1#//OrderFulfillmentProcess"/>
+    <bpmn2:participant id="Participant_Seller" name="Seller"/>
 
-    <bpmn2:participant id="Participant_PaymentProvider" name="Payment Provider"
-        processRef="ipfs://QmPaymentCID_v1#//PaymentProcess"/>
+    <bpmn2:participant id="Participant_PaymentProvider" name="Payment Provider"/>
 
   </bpmn2:collaboration>
 

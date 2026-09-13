@@ -1,6 +1,6 @@
 @startuml cascade-before
 ' UML object diagram: the three BPMN resources of the case study before the change.
-' The CIDs are placeholders, not real content identifiers.
+' The CIDs come from a run of BpmnCaseStudyCascadeTest and are shortened.
 ' Laid out top to bottom and about one text column wide.
 !include style.iuml
 skinparam defaultFontSize 11
@@ -8,15 +8,15 @@ skinparam nodesep 12
 skinparam ranksep 26
 
 object "collaboration.bpmn" as C {
-  URI = ipfs://QmC
-  refs = QmB, QmA
+  URI = ipfs://QmdbtU...JUbh
+  refs = QmR7od..., QmfGiC...
 }
 object "order-process.bpmn" as O {
-  URI = ipfs://QmB
-  refs = QmA
+  URI = ipfs://QmR7od...tYZZ
+  refs = QmfGiC...
 }
 object "payment-process.bpmn" as P {
-  URI = ipfs://QmA
+  URI = ipfs://QmfGiC...Ren5
 }
 
 C --> O : processRef
