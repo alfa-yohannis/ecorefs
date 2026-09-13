@@ -14,7 +14,9 @@
 %% The template asks for a single .tex file, so avoid \input.
 %%
 %% Writing rules for the manuscript: plain words, no overclaiming, short
-%% sentences, no pronouns, and no em or en dashes in the prose.
+%% sentences, no pronouns, and no em or en dashes in the prose. Give the long
+%% form of every abbreviation at first use, for example "Business Process Model
+%% and Notation (BPMN)"; the abstract defines its own abbreviations.
 %% Sources: the ecorefs README and evaluation notes, the two BPMN2 repositories,
 %% and ../literature-review.md (every reference checked online).
 
@@ -79,7 +81,7 @@ Content addressing has two consequences for models. First, a reference to a CID 
 
 Research on model persistence has mainly addressed scalability~\cite{kolovos2013roadmap}. Database-backed solutions load parts of a large model on demand~\cite{pagan2015repository,daniel2017neoemf}. Model versioning systems track changes between versions of a model~\cite{koegel2010emfstore,altmanninger2009survey}. None of the reviewed approaches stores EMF models on content-addressed storage (Section~\ref{sec:related}).
 
-The paper studies content-addressed persistence for EMF with three research questions:
+The paper studies content-addressed persistence for EMF with three research questions (RQ1 to RQ3):
 
 %% Research questions adapted from the ecorefs README.md ("Research questions").
 %% The README's "Publication plan" targets RQ2 at MODELS and RQ1/RQ3 at the
@@ -94,7 +96,7 @@ The paper makes four contributions:
 \begin{itemize}
 \item An EMF resource implementation for IPFS. The implementation saves models as XMI files on a local IPFS node and loads models by CID or IPNS name (Section~\ref{sec:rq1}).
 \item A description of four strategies for cross-resource references on IPFS and a cascade save for references by CID (Section~\ref{sec:rq2}).
-\item IPFS support in the Eclipse BPMN2 Modeler and in the generated BPMN2 tree editor (Section~\ref{sec:tool}).
+\item IPFS support in the Eclipse BPMN2 Modeler for Business Process Model and Notation (BPMN) diagrams and in the generated BPMN2 tree editor (Section~\ref{sec:tool}).
 \item An evaluation with generated models and with large MoDisco models of Java code (Section~\ref{sec:evaluation}).
 \end{itemize}
 
@@ -104,13 +106,13 @@ Section~\ref{sec:background} introduces EMF persistence and IPFS. Section~\ref{s
 
 \subsection{Model persistence in EMF}\label{sec:background-emf}
 
-EMF defines metamodels with Ecore. Ecore is aligned with the Essential MOF subset of the Meta Object Facility~\cite{steinberg2008emf,omg2016mof}. A \texttt{Resource} holds the root objects of a model, and a URI identifies the resource. A \texttt{ResourceSet} groups resources and resolves references between the resources. A resource factory registry maps a URI scheme or a file extension to a resource factory. A \texttt{URIConverter} opens input and output streams for a URI through a list of URI handlers~\cite{steinberg2008emf}.
+EMF defines metamodels with Ecore. Ecore is aligned with the core subset of the Meta Object Facility (MOF), called Essential MOF~\cite{steinberg2008emf,omg2016mof}. A \texttt{Resource} holds the root objects of a model, and a URI identifies the resource. A \texttt{ResourceSet} groups resources and resolves references between the resources. A resource factory registry maps a URI scheme or a file extension to a resource factory. A \texttt{URIConverter} opens input and output streams for a URI through a list of URI handlers~\cite{steinberg2008emf}.
 
-A reference to an object in another resource is serialized as a URI with a fragment, for example \verb|href="model.xmi#//Person"|. During loading, EMF creates a proxy object for such a reference. The proxy is resolved on first access, and the target resource is loaded when needed.
+XMI files use the Extensible Markup Language (XML). A reference to an object in another resource is serialized as a URI with a fragment, for example \verb|href="model.xmi#//Person"|. During loading, EMF creates a proxy object for such a reference. The proxy is resolved on first access, and the target resource is loaded when needed.
 
 \subsection{Content-addressed storage with IPFS}\label{sec:background-ipfs}
 
-Content addressing identifies data by a hash of the data. Merkle introduced hash trees for authentication~\cite{merkle1988signature}. Venti used a hash of the block contents as the identifier of a block in archival storage~\cite{quinlan2002venti}. Git stores every object under the SHA-1 checksum of the object content~\cite{chacon2014progit}.
+Content addressing identifies data by a hash of the data. Merkle introduced hash trees for authentication~\cite{merkle1988signature}. Venti used a hash of the block contents as the identifier of a block in archival storage~\cite{quinlan2002venti}. Git stores every object under the Secure Hash Algorithm 1 (SHA-1) checksum of the object content~\cite{chacon2014progit}.
 
 IPFS combines content addressing with a peer-to-peer network~\cite{benet2014ipfs}. Content is stored in blocks, and links between blocks form a Merkle directed acyclic graph (DAG)~\cite{benet2014ipfs}. Nodes locate content through a distributed hash table (DHT) based on Kademlia~\cite{maymounkov2002kademlia,psaras2020ipfs}. Studies describe the design and performance of IPFS~\cite{trautwein2022ipfs} and the size of the public network~\cite{henningsen2020mapping}. A survey compares IPFS with other peer-to-peer data networks~\cite{daniel2022ipfsfriends}.
 
@@ -126,23 +128,15 @@ The ecorefs core plugin adds IPFS persistence to EMF. The plugin is a Java libra
 
 \subsection{Architecture}\label{sec:rq1-architecture}
 
-Table~\ref{tab:classes} lists the main classes of the plugin. Listing~\ref{lst:setup} shows the configuration of a resource set. The factory is registered for the \texttt{ipfs} and \texttt{ipns} schemes. The URI handler is added at the front of the handler list, so the handler receives IPFS URIs before the default handlers.
+Figure~\ref{fig:architecture} shows the main classes of the plugin as a Unified Modeling Language (UML) class diagram. \texttt{IPFSResourceImpl} extends the XMI resource of EMF, and \texttt{IPFSResourceFactoryImpl} creates the IPFS resources. \texttt{IPFSURIHandlerImpl} extends the default URI handler of EMF. \texttt{IPFSModelPersister} provides the cascade save (Section~\ref{sec:rq2-cascade}), and \texttt{ReferenceMode} selects references by CID or by IPNS name.
 
-\begin{table*}[t]
-\caption{Main classes of the ecorefs core plugin}\label{tab:classes}
-\footnotesize
-\begin{tabular}{@{}p{0.26\textwidth}p{0.68\textwidth}@{}}
-\toprule
-Class & Role \\
-\midrule
-\texttt{IPFSResourceImpl} & Subclass of \texttt{XMIResourceImpl}. Saves the resource to IPFS and replaces the resource URI with the new CID or IPNS name. \\
-\texttt{IPFSResourceFactoryImpl} & Creates \texttt{IPFSResourceImpl} instances. \\
-\texttt{IPFSURIHandlerImpl} & Reads \texttt{ipfs://}, \texttt{ipns://}, \texttt{http://} and \texttt{https://} URIs. \\
-\texttt{IPFSModelPersister} & Provides the cascade save (Section~\ref{sec:rq2-cascade}). \\
-\texttt{ReferenceMode} & Selects references by CID or by IPNS name through a save option. \\
-\botrule
-\end{tabular}
-\end{table*}
+Listing~\ref{lst:setup} shows the configuration of a resource set. The factory is registered for the \texttt{ipfs} and \texttt{ipns} schemes. The URI handler is added at the front of the handler list, so the handler receives IPFS URIs before the default handlers.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/architecture.pdf}
+\caption{Unified Modeling Language (UML) class diagram of the ecorefs core plugin. Classes marked ecorefs extend classes and interfaces of the EMF persistence API. The Kubo node offers the HTTP API for saving and loading.}\label{fig:architecture}
+\end{figure*}
 
 \begin{lstlisting}[language=Java,caption={Configuration of a resource set for IPFS, adapted from the test code},label={lst:setup}]
 IPFS ipfs = new IPFS("/ip4/127.0.0.1/tcp/5001");
@@ -160,9 +154,15 @@ resourceSet.getURIConverter().getURIHandlers()
 
 \subsection{Saving a model}\label{sec:rq1-save}
 
-Saving an \texttt{IPFSResourceImpl} takes three steps. First, the resource writes the XMI serialization to a temporary file. The temporary file avoids keeping a large serialized model in memory. Second, the file is added to the local Kubo node, and Kubo returns the CID. Third, the resource URI is replaced with \texttt{ipfs://} followed by the CID.
+Figure~\ref{fig:save-load} shows the save and load interactions as a UML sequence diagram. Saving an \texttt{IPFSResourceImpl} takes three steps. First, the resource writes the XMI serialization to a temporary file. The temporary file avoids keeping a large serialized model in memory. Second, the file is added to the local Kubo node, and Kubo returns the CID. Third, the resource URI is replaced with \texttt{ipfs://} followed by the CID.
 
 In IPNS mode, the third step differs. The resource derives a key name from the resource URI. An Ed25519 key is created when no key with the name exists. The new CID is then published under the key, and the resource URI becomes \texttt{ipns://} followed by the key identifier. The key name is kept after the first save, so later saves publish under the same name.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/save-load.pdf}
+\caption{UML sequence diagram of saving a resource to IPFS and loading the resource again. During loading, the URI converter of the resource set selects \texttt{IPFSURIHandlerImpl} for \texttt{ipfs://} and \texttt{ipns://} URIs.}\label{fig:save-load}
+\end{figure*}
 
 \subsection{Loading a model}\label{sec:rq1-load}
 
@@ -178,11 +178,25 @@ The implementation shows four points where content addressing departs from the a
 \item File resources and IPFS resources can use one resource set configuration, because the IPFS handler accepts only IPFS and HTTP URIs. The BPMN example program loads local \texttt{.bpmn} files and IPFS resources with the same configuration.
 \end{enumerate}
 
+Figure~\ref{fig:lifecycle} summarizes the resulting lifecycle as a UML state machine. In CID mode, the URI of a resource follows the content. In IPNS mode, the URI stays stable, and the IPNS name follows the content.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\columnwidth]{figures/lifecycle.pdf}
+\caption{UML state machine of the URI of an \texttt{IPFSResourceImpl}. Each state shows the URI and the effect of a later save after a change. In CID mode, the URI follows the content. In IPNS mode, the URI stays the same, and the IPNS name points to the new CID. Earlier CIDs stay readable while an IPFS node stores the content.}\label{fig:lifecycle}
+\end{figure}
+
 \section{Cross-resource references}\label{sec:rq2}
 
 \subsection{Version pinning by content addressing}\label{sec:rq2-pinning}
 
-A reference to a resource on IPFS contains the CID of the target resource, for example \verb|href="ipfs://QmB...#//Person"|. The CID fixes the content of the target. When the target model changes, the changed model receives a new CID. The existing reference still resolves to the old version, as long as an IPFS node keeps the old content.
+A reference to a resource on IPFS contains the CID of the target resource, for example \verb|href="ipfs://QmB...#//Person"|. The CID fixes the content of the target. When the target model changes, the changed model receives a new CID. The existing reference still resolves to the old version, as long as an IPFS node keeps the old content. Figure~\ref{fig:pinning} contrasts the two kinds of references.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics{figures/version-pinning.pdf}
+\caption{References under location-based and content-addressed persistence. (a) A file path resolves to the current content at the path. (b) A CID reference resolves to the version with the given CID.}\label{fig:pinning}
+\end{figure}
 
 For models developed independently, the behavior pins a dependency in the same way as a lock file~\cite{npmpackagelock,gomodules}. A model keeps working with the version used during validation. The adoption of a newer version becomes an explicit step.
 
@@ -227,7 +241,13 @@ In CID mode, a change to one resource requires new saves of every resource with 
 \end{algorithmic}
 \end{algorithm}
 
-The procedure first saves the changed resource, and the save updates the URI of the resource to the new CID. The EMF cross referencer then collects all cross-references in the resource set. Each resource with a reference into the saved resource is saved in the same way. During serialization, EMF writes the current URI of the target into each reference. The rewritten references therefore point to the new CID without any text replacement. The procedure resembles a Git commit, where a changed file leads to new tree objects up to the root~\cite{chacon2014progit}. The set of saved resources stops the recursion for cyclic references.
+The procedure first saves the changed resource, and the save updates the URI of the resource to the new CID. The EMF cross referencer then collects all cross-references in the resource set. Each resource with a reference into the saved resource is saved in the same way. During serialization, EMF writes the current URI of the target into each reference. The rewritten references therefore point to the new CID without any text replacement. The procedure resembles a Git commit, where a changed file leads to new tree objects up to the root~\cite{chacon2014progit}. The set of saved resources stops the recursion for cyclic references. Figure~\ref{fig:cascade} shows the expected result for the BPMN case study of Section~\ref{sec:evaluation-rq2}.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/cascade-example.pdf}
+\caption{UML object diagram of the BPMN case study before and after a change to \texttt{payment-process.bpmn} and a complete cascade save. Every resource receives a new CID, and every reference points to the new CID of the target. The CIDs are placeholders.}\label{fig:cascade}
+\end{figure*}
 
 In IPNS mode, \texttt{cascadeSave} saves only the changed resource. References by IPNS name resolve to the newly published CID, so the referencing resources need no new save.
 
@@ -245,13 +265,19 @@ Large models are often split into many resources. The MoDisco case study (Sectio
 \item One IPNS name points to the current project version manifest. A local file records the IPNS name and the CID of the current manifest.
 \end{enumerate}
 
-The layers combine three strategies from Table~\ref{tab:strategies}: directories, a manifest and IPNS indirection. A new publication after a change to one component gives the changed component a new root CID. The other components keep the same root CIDs, because the content of the other components is unchanged. The new project version manifest is then published under the same IPNS name.
+Figure~\ref{fig:layers} shows the layers. The layers combine three strategies from Table~\ref{tab:strategies}: directories, a manifest and IPNS indirection.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics{figures/publication-layers.pdf}
+\caption{Publication layers of a partitioned model. One mutable IPNS name points to an immutable project version manifest. The manifest lists the CIDs of the root model, the shared resources and the component directories.}\label{fig:layers}
+\end{figure} A new publication after a change to one component gives the changed component a new root CID. The other components keep the same root CIDs, because the content of the other components is unchanged. The new project version manifest is then published under the same IPNS name.
 
 \section{Tool support}\label{sec:tool}
 
 \subsection{Eclipse BPMN2 Modeler}\label{sec:tool-modeler}
 
-The Eclipse BPMN2 Modeler is a graphical tool for creating and editing Business Process Model and Notation (BPMN) diagrams~\cite{bpmn2modeler,omg2010bpmn}. The modeler builds the diagram editors with Graphiti~\cite{graphiti}. IPFS support was added to version 1.5.4 of the modeler, and the modified plug-ins target Java~17. A menu named BPMN2 IPFS offers four commands (Table~\ref{tab:commands}).
+The Eclipse BPMN2 Modeler is a graphical tool for creating and editing BPMN diagrams~\cite{bpmn2modeler,omg2010bpmn}. The modeler builds the diagram editors with Graphiti~\cite{graphiti}. IPFS support was added to version 1.5.4 of the modeler, and the modified plug-ins target Java~17. A menu named BPMN2 IPFS offers four commands (Table~\ref{tab:commands}).
 
 \begin{table*}[t]
 \caption{IPFS commands in the Eclipse BPMN2 Modeler}\label{tab:commands}
@@ -268,7 +294,7 @@ Open BPMN2 Project from IPFS & Downloads a project manifest, restores the listed
 \end{tabular}
 \end{table*}
 
-The project manifest is a JavaScript Object Notation (JSON) file. Each project stores four settings on the BPMN2 property page. The settings are the Kubo API URL, a default load reference, the publish mode (CID or IPNS) and a default IPNS key name. The modeler core also registers an IPFS URI handler in the modeler resource set. References with \texttt{ipfs://} inside BPMN files then load through Kubo.
+The project manifest is a JavaScript Object Notation (JSON) file. Each project stores four settings on the BPMN2 property page. The settings are the Uniform Resource Locator (URL) of the Kubo API, a default load reference, the publish mode (CID or IPNS) and a default IPNS key name. The modeler core also registers an IPFS URI handler in the modeler resource set. References with \texttt{ipfs://} inside BPMN files then load through Kubo.
 
 The integration publishes the BPMN model file, and the Graphiti \texttt{.diagram} file stays local. IPNS publishing needs a key name that already exists in the local Kubo node. Without an active workspace folder, a model opened from IPFS is stored in a temporary file.
 
@@ -302,7 +328,13 @@ A BPMN case study prepares a longer chain of three resources. \texttt{payment-pr
 
 \subsection{RQ3: Performance}\label{sec:evaluation-rq3}
 
-The benchmark uses generated models with 100, 1,000 and 10,000 elements. The models conform to a small metamodel with one class, \texttt{Component}. Each component has an integer identifier and contains child components. In each iteration, the test copies the model into two new resources. One copy is saved as an XMI file, and the other copy is saved to IPFS. The IPFS copy is then loaded again through the new CID. Table~\ref{tab:rq3} shows the results.
+The benchmark uses generated models with 100, 1,000 and 10,000 elements. The models conform to a small metamodel with one class, \texttt{Component}. Each component has an integer identifier and contains child components. In each iteration, the test copies the model into two new resources. One copy is saved as an XMI file, and the other copy is saved to IPFS. The IPFS copy is then loaded again through the new CID. Table~\ref{tab:rq3} lists the results, and Figure~\ref{fig:rq3} shows the means with standard deviations.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics{figures/rq3-performance.pdf}
+\caption{Mean save and load times for generated models over ten measured runs. Error bars show one standard deviation. Table~\ref{tab:rq3} lists the values.}\label{fig:rq3}
+\end{figure}
 
 \begin{table*}[t]
 \caption{Save and load times for generated models over ten measured runs, given as mean / median / standard deviation in ms. XMI load times are not reported (Section~\ref{sec:evaluation-rq3}).}\label{tab:rq3}
@@ -365,7 +397,13 @@ Components & Resources & Size (MiB) & Time (ms) \\
 \end{tabular}
 \end{table}
 
-In the recheck on 24 March 2026, the comparison of eight components with 1,639 resources finished without differences in 186,696~ms. The component \texttt{org.eclipse.jdt.core} dominated the comparison time. The component has 1,066 resources with 191.62~MiB of XMI. In the earlier run of the same selection, the component took 152,315~ms of 168,992~ms (about 90\%). The time for the same component varied between runs, for example from 519~ms to 1,385~ms for the smallest component.
+In the recheck on 24 March 2026, the comparison of eight components with 1,639 resources finished without differences in 186,696~ms. The component \texttt{org.eclipse.jdt.core} dominated the comparison time. The component has 1,066 resources with 191.62~MiB of XMI. In the earlier run of the same selection, the component took 152,315~ms of 168,992~ms (about 90\%). The time for the same component varied between runs, for example from 519~ms to 1,385~ms for the smallest component. Figure~\ref{fig:compare} shows the time per component in the first run and in the recheck.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics{figures/compare-scaling.pdf}
+\caption{EMF Compare time per component against the XMI size of the component, on logarithmic axes. The first run took 168,992~ms in total, and the recheck took 186,696~ms for the same eight components.}\label{fig:compare}
+\end{figure}
 
 According to the notes of the case study, whole-model scans ran faster on the merged model. The partitioned model loaded faster at the start and suited checks of single components. \todo{Add the measured load and traversal times.}
 
@@ -381,7 +419,7 @@ For RQ3, a save through a local Kubo node added 9 to 10~ms per model for models 
 
 \subsection{Limitations}\label{sec:limitations}
 
-The approach loads each resource as a whole. Database-backed persistence can load parts of a model on demand~\cite{pagan2011morsa,daniel2017neoemf}, but the IPFS layer cannot. The approach also offers no query support comparable to OCL queries inside a database~\cite{omg2014ocl,daniel2016mogwai}. IPNS resolution needs an extra lookup and can take longer than direct CID access. In CID mode, a change to a leaf resource causes saves along the whole dependency chain. Cyclic references always leave one outdated CID. Published models stay available only while at least one node stores the content.
+The approach loads each resource as a whole. Database-backed persistence can load parts of a model on demand~\cite{pagan2011morsa,daniel2017neoemf}, but the IPFS layer cannot. The approach also offers no query support comparable to Object Constraint Language (OCL) queries inside a database~\cite{omg2014ocl,daniel2016mogwai}. IPNS resolution needs an extra lookup and can take longer than direct CID access. In CID mode, a change to a leaf resource causes saves along the whole dependency chain. Cyclic references always leave one outdated CID. Published models stay available only while at least one node stores the content.
 
 \subsection{Threats to validity}\label{sec:threats}
 
@@ -395,7 +433,7 @@ For construct validity, the wall-clock time of single save and load calls stands
 
 \subsection{Scalable model persistence}\label{sec:related-persistence}
 
-Kolovos et al. propose a research roadmap for scalability in MDE, covering large models, collaborative modeling, and scalable queries and transformations~\cite{kolovos2013roadmap}. Morsa stores large models in a NoSQL database and loads model parts on demand~\cite{pagan2011morsa}. The journal version adds incremental store to the Morsa repository~\cite{pagan2015repository}. Neo4EMF provides a scalable persistence layer for EMF~\cite{benelallam2014neo4emf}. NeoEMF offers several database back ends in one framework, because a single data store rarely suits all modeling activities~\cite{daniel2017neoemf}. Mogwaï translates OCL queries to Gremlin and runs the queries inside the database~\cite{daniel2016mogwai}. Scheidgen compares model representations such as XMI trees and relational data in CDO~\cite{scheidgen2013reference}. The CDO model repository stores and versions models in a central repository with relational, NoSQL or in-memory databases~\cite{cdo}. The approaches identify model elements inside a store. The identifiers stay stable while the content changes.
+Kolovos et al. propose a research roadmap for scalability in MDE, covering large models, collaborative modeling, and scalable queries and transformations~\cite{kolovos2013roadmap}. Morsa stores large models in a non-relational (NoSQL) database and loads model parts on demand~\cite{pagan2011morsa}. The journal version adds incremental store to the Morsa repository~\cite{pagan2015repository}. Neo4EMF provides a scalable persistence layer for EMF~\cite{benelallam2014neo4emf}. NeoEMF offers several database back ends in one framework, because a single data store rarely suits all modeling activities~\cite{daniel2017neoemf}. Mogwaï translates OCL queries to Gremlin and runs the queries inside the database~\cite{daniel2016mogwai}. Scheidgen compares model representations such as XMI trees and relational data in CDO~\cite{scheidgen2013reference}. The CDO model repository stores and versions models in a central repository with relational, NoSQL or in-memory databases~\cite{cdo}. The approaches identify model elements inside a store. The identifiers stay stable while the content changes.
 
 \subsection{Model repositories and versioning}\label{sec:related-versioning}
 
@@ -438,7 +476,7 @@ Future work includes a corrected XMI load benchmark, larger models and remote IP
 \todo{Write ``Not applicable'' if the item does not apply.}
 
 \bmhead{Data availability}
-The benchmark summaries are in the \texttt{eval/results} folder of the ecorefs repository. \todo{Archive the MoDisco dataset (1.04~GiB) and the published CIDs with a DOI.}
+The benchmark summaries are in the \texttt{eval/results} folder of the ecorefs repository. \todo{Archive the MoDisco dataset (1.04~GiB) and the published CIDs with a digital object identifier (DOI).}
 
 \bmhead{Code availability}
 The implementation is available at

@@ -1,0 +1,43 @@
+@startuml save-load
+' UML sequence diagram: saving a resource to IPFS and loading the resource back.
+!include style.iuml
+hide footbox
+skinparam defaultFontSize 11
+skinparam maxMessageSize 320
+skinparam ParticipantPadding 28
+
+participant "Client" as Client
+participant "IPFSResourceImpl" as Res
+participant "IPFSURIHandlerImpl" as Handler
+participant "Kubo node" as Kubo
+
+== Save ==
+Client -> Res : save(options)
+activate Res
+Res -> Kubo : add(XMI written to a temporary file)
+Kubo --> Res : CID
+alt CID mode (default)
+  Res -> Res : setURI(ipfs://CID)
+else IPNS mode
+  Res -> Kubo : key/gen if missing, name/publish(CID)
+  Kubo --> Res : key id
+  Res -> Res : setURI(ipns://key id)
+end
+deactivate Res
+
+== Load (through ResourceSet and URIConverter) ==
+Client -> Res : load(options)
+activate Res
+Res -> Handler : createInputStream(uri)
+activate Handler
+opt ipns:// URI
+  Handler -> Kubo : name/resolve(name)
+  Kubo --> Handler : CID
+end
+Handler -> Kubo : cat(CID)
+Kubo --> Handler : XMI bytes
+Handler --> Res : input stream
+deactivate Handler
+Res --> Client : parsed resource
+deactivate Res
+@enduml

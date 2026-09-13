@@ -1,0 +1,45 @@
+' Shared look for the UML figures of the manuscript.
+' Neutral ink on white, one light accent for ecorefs elements, no shadows.
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundCorner 6
+skinparam ArrowColor #52514e
+skinparam ArrowFontColor #0b0b0b
+skinparam ArrowThickness 1
+
+skinparam PackageBorderColor #898781
+skinparam PackageBackgroundColor #ffffff
+skinparam PackageFontStyle bold
+
+skinparam NoteBackgroundColor #f0efec
+skinparam NoteBorderColor #898781
+
+skinparam ClassAttributeIconSize 0
+skinparam ClassBackgroundColor #ffffff
+skinparam ClassBorderColor #52514e
+skinparam ClassBackgroundColor<<ecorefs>> #cde2fb
+skinparam ClassBorderColor<<ecorefs>> #1c5cab
+skinparam StereotypeCBackgroundColor #ffffff
+skinparam StereotypeIBackgroundColor #ffffff
+skinparam StereotypeEBackgroundColor #ffffff
+
+skinparam NodeBackgroundColor #f0efec
+skinparam NodeBorderColor #52514e
+
+skinparam ParticipantBackgroundColor #ffffff
+skinparam ParticipantBorderColor #52514e
+skinparam SequenceLifeLineBorderColor #898781
+skinparam SequenceGroupBorderColor #898781
+skinparam SequenceGroupBackgroundColor #f0efec
+skinparam SequenceDividerBackgroundColor #f0efec
+skinparam SequenceDividerBorderColor #898781
+skinparam SequenceBoxBorderColor #898781
+
+skinparam StateBackgroundColor #ffffff
+skinparam StateBorderColor #52514e
+skinparam StateStartColor #0b0b0b
+skinparam StateEndColor #0b0b0b
+
+skinparam ObjectBackgroundColor #ffffff
+skinparam ObjectBorderColor #52514e

@@ -1,0 +1,58 @@
+@startuml architecture
+' UML class diagram: how the ecorefs core plugin extends the EMF persistence API.
+' Stereotypes mark the origin of each class; the ecorefs classes also get a light fill.
+!include style.iuml
+allowmixing
+hide empty members
+skinparam defaultFontSize 11
+skinparam nodesep 22
+skinparam ranksep 34
+
+class ResourceSet <<EMF>>
+interface Resource <<EMF>>
+class XMIResourceImpl <<EMF>>
+class ResourceFactoryImpl <<EMF>>
+interface URIConverter <<EMF>>
+interface URIHandler <<EMF>>
+class URIHandlerImpl <<EMF>>
+class "EcoreUtil.CrossReferencer" as CrossReferencer <<EMF>>
+
+class IPFSResourceImpl <<ecorefs>> {
+  +save(options)
+}
+class IPFSResourceFactoryImpl <<ecorefs>> {
+  +createResource(uri)
+}
+class IPFSURIHandlerImpl <<ecorefs>> {
+  +canHandle(uri)
+  +createInputStream(uri, options)
+  +createOutputStream(uri, options)
+}
+class IPFSModelPersister <<ecorefs>> {
+  {static} +cascadeSave(resource, options)
+}
+enum ReferenceMode <<ecorefs>> {
+  CID
+  IPNS
+}
+
+node "Kubo node" as Kubo
+
+ResourceSet "1" o-- "*" Resource : resources
+ResourceSet --> ResourceFactoryImpl : factory per\nURI scheme
+ResourceSet --> URIConverter
+URIConverter o-- "*" URIHandler : handlers
+Resource <|.. XMIResourceImpl
+URIHandler <|.. URIHandlerImpl
+
+XMIResourceImpl <|-- IPFSResourceImpl
+ResourceFactoryImpl <|-- IPFSResourceFactoryImpl
+URIHandlerImpl <|-- IPFSURIHandlerImpl
+IPFSResourceFactoryImpl ..> IPFSResourceImpl : <<create>>
+IPFSResourceImpl ..> ReferenceMode
+IPFSModelPersister ..> CrossReferencer
+IPFSModelPersister ..> Resource : save
+
+IPFSResourceImpl --> Kubo : add,\nname/publish
+IPFSURIHandlerImpl --> Kubo : cat,\nname/resolve
+@enduml
