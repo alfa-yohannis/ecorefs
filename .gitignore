@@ -94,5 +94,8 @@ eval/modisco_jdt_reverse/org.ecorefs.modisco.jdt.reverse.tests/target
 *.xdv
 *.bcf
 *.run.xml
-papers/01-SoSym/main.pdf
+papers/01-SoSym/paper/main.pdf
+
+# Python virtual environment
+.venv/
 

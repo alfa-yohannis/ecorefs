@@ -1,0 +1,536 @@
+% References for the SoSyM manuscript "Towards Decentralized Model Persistence".
+% Every entry was checked online on 2026-09-13: DOIs against Crossref (and OpenAlex,
+% Semantic Scholar or the publisher page for abstracts), arXiv entries against DataCite,
+% and web resources by loading the URL. See ../literature-review.md for summaries.
+
+% ---------------------------------------------------------------------------
+% Model-driven engineering, EMF and OMG specifications
+% ---------------------------------------------------------------------------
+
+@article{schmidt2006mde,
+  author  = {Schmidt, Douglas C.},
+  title   = {Guest Editor's Introduction: Model-Driven Engineering},
+  journal = {Computer},
+  volume  = {39},
+  number  = {2},
+  pages   = {25--31},
+  year    = {2006},
+  doi     = {10.1109/MC.2006.58}
+}
+
+@book{steinberg2008emf,
+  author    = {Steinberg, Dave and Budinsky, Frank and Paternostro, Marcelo and Merks, Ed},
+  title     = {{EMF}: {Eclipse} Modeling Framework},
+  edition   = {2nd},
+  publisher = {Addison-Wesley Professional},
+  address   = {Upper Saddle River, NJ, USA},
+  year      = {2008},
+  url       = {https://www.informit.com/store/emf-eclipse-modeling-framework-9780321331885}
+}
+
+@misc{omg2016mof,
+  author = {{Object Management Group}},
+  title  = {Meta Object Facility ({MOF}) Specification, Version 2.5.1},
+  year   = {2016},
+  url    = {https://www.omg.org/spec/MOF/}
+}
+
+@misc{omg2015xmi,
+  author = {{Object Management Group}},
+  title  = {{XML} Metadata Interchange ({XMI}) Specification, Version 2.5.1},
+  year   = {2015},
+  url    = {https://www.omg.org/spec/XMI/}
+}
+
+@misc{omg2014ocl,
+  author = {{Object Management Group}},
+  title  = {Object Constraint Language ({OCL}), Version 2.4},
+  year   = {2014},
+  url    = {https://www.omg.org/spec/OCL/}
+}
+
+@misc{omg2010bpmn,
+  author = {{Object Management Group}},
+  title  = {Business Process Model and Notation ({BPMN}), Version 2.0},
+  year   = {2010},
+  url    = {https://www.omg.org/spec/BPMN/2.0/}
+}
+
+% ---------------------------------------------------------------------------
+% Scalable model persistence and querying
+% ---------------------------------------------------------------------------
+
+@inproceedings{kolovos2013roadmap,
+  author    = {Kolovos, Dimitrios S. and Rose, Louis M. and Matragkas, Nicholas and Paige, Richard F. and Guerra, Esther and S{\'a}nchez Cuadrado, Jes{\'u}s and De Lara, Juan and R{\'a}th, Istv{\'a}n and Varr{\'o}, D{\'a}niel and Tisi, Massimo and Cabot, Jordi},
+  title     = {A Research Roadmap Towards Achieving Scalability in Model Driven Engineering},
+  booktitle = {Proceedings of the Workshop on Scalability in Model Driven Engineering (BigMDE '13)},
+  pages     = {1--10},
+  publisher = {ACM},
+  address   = {New York, NY, USA},
+  year      = {2013},
+  doi       = {10.1145/2487766.2487768}
+}
+
+@inproceedings{pagan2011morsa,
+  author    = {Espinazo Pag{\'a}n, Javier and S{\'a}nchez Cuadrado, Jes{\'u}s and Garc{\'i}a Molina, Jes{\'u}s},
+  title     = {{Morsa}: A Scalable Approach for Persisting and Accessing Large Models},
+  booktitle = {Model Driven Engineering Languages and Systems (MODELS 2011)},
+  series    = {Lecture Notes in Computer Science},
+  pages     = {77--92},
+  publisher = {Springer},
+  address   = {Berlin, Heidelberg},
+  year      = {2011},
+  doi       = {10.1007/978-3-642-24485-8_7}
+}
+
+@article{pagan2015repository,
+  author  = {Espinazo Pag{\'a}n, Javier and S{\'a}nchez Cuadrado, Jes{\'u}s and Garc{\'i}a Molina, Jes{\'u}s},
+  title   = {A Repository for Scalable Model Management},
+  journal = {Software and Systems Modeling},
+  volume  = {14},
+  number  = {1},
+  pages   = {219--239},
+  year    = {2015},
+  doi     = {10.1007/s10270-013-0326-8}
+}
+
+@inproceedings{benelallam2014neo4emf,
+  author    = {Benelallam, Amine and G{\'o}mez, Abel and Suny{\'e}, Gerson and Tisi, Massimo and Launay, David},
+  title     = {{Neo4EMF}, A Scalable Persistence Layer for {EMF} Models},
+  booktitle = {Modelling Foundations and Applications (ECMFA 2014)},
+  series    = {Lecture Notes in Computer Science},
+  pages     = {230--241},
+  publisher = {Springer},
+  address   = {Cham},
+  year      = {2014},
+  doi       = {10.1007/978-3-319-09195-2_15}
+}
+
+@article{daniel2017neoemf,
+  author  = {Daniel, Gwendal and Suny{\'e}, Gerson and Benelallam, Amine and Tisi, Massimo and Vernageau, Yoann and G{\'o}mez, Abel and Cabot, Jordi},
+  title   = {{NeoEMF}: A Multi-Database Model Persistence Framework for Very Large Models},
+  journal = {Science of Computer Programming},
+  volume  = {149},
+  pages   = {9--14},
+  year    = {2017},
+  doi     = {10.1016/j.scico.2017.08.002}
+}
+
+@inproceedings{daniel2016mogwai,
+  author    = {Daniel, Gwendal and Suny{\'e}, Gerson and Cabot, Jordi},
+  title     = {{Mogwa\"{\i}}: A Framework to Handle Complex Queries on Large Models},
+  booktitle = {2016 IEEE Tenth International Conference on Research Challenges in Information Science (RCIS)},
+  pages     = {1--12},
+  publisher = {IEEE},
+  address   = {Piscataway, NJ, USA},
+  year      = {2016},
+  doi       = {10.1109/RCIS.2016.7549343}
+}
+
+@inproceedings{scheidgen2013reference,
+  author    = {Scheidgen, Markus},
+  title     = {Reference Representation Techniques for Large Models},
+  booktitle = {Proceedings of the Workshop on Scalability in Model Driven Engineering (BigMDE '13)},
+  pages     = {1--9},
+  publisher = {ACM},
+  address   = {New York, NY, USA},
+  year      = {2013},
+  doi       = {10.1145/2487766.2487769}
+}
+
+@inproceedings{barmpis2013hawk,
+  author    = {Barmpis, Konstantinos and Kolovos, Dimitris},
+  title     = {{Hawk}: Towards a Scalable Model Indexing Architecture},
+  booktitle = {Proceedings of the Workshop on Scalability in Model Driven Engineering (BigMDE '13)},
+  pages     = {1--9},
+  publisher = {ACM},
+  address   = {New York, NY, USA},
+  year      = {2013},
+  doi       = {10.1145/2487766.2487771}
+}
+
+@misc{cdo,
+  author       = {{Eclipse Foundation}},
+  title        = {{CDO} Model Repository},
+  howpublished = {Project website},
+  year         = {2026},
+  note         = {Accessed 13 September 2026},
+  url          = {https://eclipse.dev/cdo/}
+}
+
+% ---------------------------------------------------------------------------
+% Model repositories, versioning, comparison and collaboration
+% ---------------------------------------------------------------------------
+
+@inproceedings{france2007remodd,
+  author    = {France, Robert and Bieman, Jim and Cheng, Betty H. C.},
+  title     = {Repository for Model Driven Development ({ReMoDD})},
+  booktitle = {Models in Software Engineering},
+  series    = {Lecture Notes in Computer Science},
+  pages     = {311--317},
+  publisher = {Springer},
+  address   = {Berlin, Heidelberg},
+  year      = {2007},
+  doi       = {10.1007/978-3-540-69489-2_38}
+}
+
+@article{dirocco2015repositories,
+  author  = {Di Rocco, Juri and Di Ruscio, Davide and Iovino, Ludovico and Pierantonio, Alfonso},
+  title   = {Collaborative Repositories in Model-Driven Engineering},
+  journal = {IEEE Software},
+  volume  = {32},
+  number  = {3},
+  pages   = {28--34},
+  year    = {2015},
+  doi     = {10.1109/MS.2015.61}
+}
+
+@inproceedings{koegel2010emfstore,
+  author    = {Koegel, Maximilian and Helming, Jonas},
+  title     = {{EMFStore}: A Model Repository for {EMF} Models},
+  booktitle = {Proceedings of the 32nd ACM/IEEE International Conference on Software Engineering, Volume 2},
+  pages     = {307--308},
+  publisher = {ACM},
+  address   = {New York, NY, USA},
+  year      = {2010},
+  doi       = {10.1145/1810295.1810364}
+}
+
+@article{altmanninger2009survey,
+  author  = {Altmanninger, Kerstin and Seidl, Martina and Wimmer, Manuel},
+  title   = {A Survey on Model Versioning Approaches},
+  journal = {International Journal of Web Information Systems},
+  volume  = {5},
+  number  = {3},
+  pages   = {271--304},
+  year    = {2009},
+  doi     = {10.1108/17440080910983556}
+}
+
+@inproceedings{brosch2012versioning,
+  author    = {Brosch, Petra and Kappel, Gerti and Langer, Philip and Seidl, Martina and Wieland, Konrad and Wimmer, Manuel},
+  title     = {An Introduction to Model Versioning},
+  booktitle = {Formal Methods for Model-Driven Engineering (SFM 2012)},
+  series    = {Lecture Notes in Computer Science},
+  pages     = {336--398},
+  publisher = {Springer},
+  address   = {Berlin, Heidelberg},
+  year      = {2012},
+  doi       = {10.1007/978-3-642-30982-3_10}
+}
+
+@inproceedings{kolovos2006comparison,
+  author    = {Kolovos, Dimitrios S. and Paige, Richard F. and Polack, Fiona A. C.},
+  title     = {Model Comparison: A Foundation for Model Composition and Model Transformation Testing},
+  booktitle = {Proceedings of the 2006 International Workshop on Global Integrated Model Management},
+  pages     = {13--20},
+  publisher = {ACM},
+  address   = {New York, NY, USA},
+  year      = {2006},
+  doi       = {10.1145/1138304.1138308}
+}
+
+@misc{emfcompare,
+  author       = {{Eclipse Foundation}},
+  title        = {{EMF} {Compare}},
+  howpublished = {Project website},
+  year         = {2026},
+  note         = {Accessed 13 September 2026},
+  url          = {https://eclipse.dev/emfcompare/}
+}
+
+@article{franzago2018collaborative,
+  author  = {Franzago, Mirco and Di Ruscio, Davide and Malavolta, Ivano and Muccini, Henry},
+  title   = {Collaborative Model-Driven Software Engineering: A Classification Framework and a Research Map},
+  journal = {IEEE Transactions on Software Engineering},
+  volume  = {44},
+  number  = {12},
+  pages   = {1146--1175},
+  year    = {2018},
+  doi     = {10.1109/TSE.2017.2755039}
+}
+
+% ---------------------------------------------------------------------------
+% Content addressing, peer-to-peer storage and IPFS
+% ---------------------------------------------------------------------------
+
+@inproceedings{merkle1988signature,
+  author    = {Merkle, Ralph C.},
+  title     = {A Digital Signature Based on a Conventional Encryption Function},
+  booktitle = {Advances in Cryptology: CRYPTO '87},
+  series    = {Lecture Notes in Computer Science},
+  pages     = {369--378},
+  publisher = {Springer},
+  address   = {Berlin, Heidelberg},
+  year      = {1988},
+  doi       = {10.1007/3-540-48184-2_32}
+}
+
+@inproceedings{maymounkov2002kademlia,
+  author    = {Maymounkov, Petar and Mazi{\`e}res, David},
+  title     = {{Kademlia}: A Peer-to-Peer Information System Based on the {XOR} Metric},
+  booktitle = {Peer-to-Peer Systems (IPTPS 2002)},
+  series    = {Lecture Notes in Computer Science},
+  pages     = {53--65},
+  publisher = {Springer},
+  address   = {Berlin, Heidelberg},
+  year      = {2002},
+  doi       = {10.1007/3-540-45748-8_5}
+}
+
+@inproceedings{quinlan2002venti,
+  author    = {Quinlan, Sean and Dorward, Sean},
+  title     = {{Venti}: A New Approach to Archival Data Storage},
+  booktitle = {Conference on File and Storage Technologies (FAST '02)},
+  publisher = {USENIX Association},
+  address   = {Berkeley, CA, USA},
+  year      = {2002},
+  url       = {https://www.usenix.org/conference/fast-02/venti-new-approach-archival-data-storage}
+}
+
+@book{chacon2014progit,
+  author    = {Chacon, Scott and Straub, Ben},
+  title     = {Pro {Git}},
+  edition   = {2nd},
+  publisher = {Apress},
+  address   = {Berkeley, CA, USA},
+  year      = {2014},
+  doi       = {10.1007/978-1-4842-0076-6}
+}
+
+@misc{benet2014ipfs,
+  author       = {Benet, Juan},
+  title        = {{IPFS} - Content Addressed, Versioned, {P2P} File System},
+  howpublished = {arXiv preprint arXiv:1407.3561},
+  year         = {2014},
+  doi          = {10.48550/arXiv.1407.3561}
+}
+
+@inproceedings{psaras2020ipfs,
+  author    = {Psaras, Yiannis and Dias, David},
+  title     = {The {InterPlanetary} File System and the {Filecoin} Network},
+  booktitle = {2020 50th Annual IEEE/IFIP International Conference on Dependable Systems and Networks, Supplemental Volume (DSN-S)},
+  pages     = {80},
+  publisher = {IEEE},
+  address   = {Piscataway, NJ, USA},
+  year      = {2020},
+  doi       = {10.1109/DSN-S50200.2020.00043}
+}
+
+@inproceedings{trautwein2022ipfs,
+  author    = {Trautwein, Dennis and Raman, Aravindh and Tyson, Gareth and Castro, Ignacio and Scott, Will and Schubotz, Moritz and Gipp, Bela and Psaras, Yiannis},
+  title     = {Design and Evaluation of {IPFS}: A Storage Layer for the Decentralized Web},
+  booktitle = {Proceedings of the ACM SIGCOMM 2022 Conference},
+  pages     = {739--752},
+  publisher = {ACM},
+  address   = {New York, NY, USA},
+  year      = {2022},
+  doi       = {10.1145/3544216.3544232}
+}
+
+@misc{henningsen2020mapping,
+  author       = {Henningsen, Sebastian and Florian, Martin and Rust, Sebastian and Scheuermann, Bj{\"o}rn},
+  title        = {Mapping the {Interplanetary} {Filesystem}},
+  howpublished = {arXiv preprint arXiv:2002.07747},
+  year         = {2020},
+  doi          = {10.48550/arXiv.2002.07747}
+}
+
+@article{daniel2022ipfsfriends,
+  author  = {Daniel, Erik and Tschorsch, Florian},
+  title   = {{IPFS} and Friends: A Qualitative Comparison of Next Generation Peer-to-Peer Data Networks},
+  journal = {IEEE Communications Surveys \& Tutorials},
+  volume  = {24},
+  number  = {1},
+  pages   = {31--52},
+  year    = {2022},
+  doi     = {10.1109/COMST.2022.3143147}
+}
+
+@inproceedings{chen2017improved,
+  author    = {Chen, Yongle and Li, Hui and Li, Kejiao and Zhang, Jiyang},
+  title     = {An Improved {P2P} File System Scheme Based on {IPFS} and Blockchain},
+  booktitle = {2017 IEEE International Conference on Big Data (Big Data)},
+  pages     = {2652--2657},
+  publisher = {IEEE},
+  address   = {Piscataway, NJ, USA},
+  year      = {2017},
+  doi       = {10.1109/BigData.2017.8258226}
+}
+
+@article{nizamuddin2019document,
+  author  = {Nizamuddin, N. and Salah, K. and Ajmal Azad, M. and Arshad, J. and Rehman, M. H.},
+  title   = {Decentralized Document Version Control Using {Ethereum} Blockchain and {IPFS}},
+  journal = {Computers \& Electrical Engineering},
+  volume  = {76},
+  pages   = {183--197},
+  year    = {2019},
+  doi     = {10.1016/j.compeleceng.2019.03.014}
+}
+
+@inproceedings{kelly2016wayback,
+  author    = {Kelly, Mat and Alam, Sawood and Nelson, Michael L. and Weigle, Michele C.},
+  title     = {{InterPlanetary Wayback}: Peer-To-Peer Permanence of Web Archives},
+  booktitle = {Research and Advanced Technology for Digital Libraries (TPDL 2016)},
+  series    = {Lecture Notes in Computer Science},
+  pages     = {411--416},
+  publisher = {Springer},
+  address   = {Cham},
+  year      = {2016},
+  doi       = {10.1007/978-3-319-43997-6_35}
+}
+
+@inproceedings{dicosmo2017heritage,
+  author    = {Di Cosmo, Roberto and Zacchiroli, Stefano},
+  title     = {{Software Heritage}: Why and How to Preserve Software Source Code},
+  booktitle = {iPRES 2017: 14th International Conference on Digital Preservation},
+  pages     = {1--10},
+  year      = {2017},
+  url       = {https://hal.science/hal-01590958}
+}
+
+@misc{kubo,
+  key          = {Kubo},
+  title        = {{Kubo}: {IPFS} Implementation in {Go}},
+  howpublished = {GitHub repository},
+  year         = {2026},
+  note         = {Accessed 13 September 2026},
+  url          = {https://github.com/ipfs/kubo}
+}
+
+@misc{ipfsdocscid,
+  key          = {IPFS Docs},
+  title        = {Content Identifiers ({CIDs})},
+  howpublished = {IPFS Docs},
+  year         = {2026},
+  note         = {Accessed 13 September 2026},
+  url          = {https://docs.ipfs.tech/concepts/content-addressing/}
+}
+
+@misc{ipfsdocsipns,
+  key          = {IPFS Docs},
+  title        = {{IPNS} ({InterPlanetary} Name System)},
+  howpublished = {IPFS Docs},
+  year         = {2026},
+  note         = {Accessed 13 September 2026},
+  url          = {https://docs.ipfs.tech/concepts/ipns/}
+}
+
+@misc{javaipfsclient,
+  key          = {java-ipfs-http-client},
+  title        = {java-ipfs-http-client: A {Java} Implementation of the {HTTP} {IPFS} {API}},
+  howpublished = {GitHub repository},
+  year         = {2026},
+  note         = {Accessed 13 September 2026},
+  url          = {https://github.com/ipfs-shipyard/java-ipfs-http-client}
+}
+
+% ---------------------------------------------------------------------------
+% Dependency pinning and reproducibility
+% ---------------------------------------------------------------------------
+
+@inproceedings{dolstra2004nix,
+  author    = {Dolstra, Eelco and de Jonge, Merijn and Visser, Eelco},
+  title     = {{Nix}: A Safe and Policy-Free System for Software Deployment},
+  booktitle = {18th Large Installation System Administration Conference (LISA '04)},
+  pages     = {79--92},
+  publisher = {USENIX Association},
+  address   = {Berkeley, CA, USA},
+  year      = {2004},
+  url       = {https://www.usenix.org/legacy/publications/library/proceedings/lisa04/tech/dolstra.html}
+}
+
+@article{cox2019dependencies,
+  author  = {Cox, Russ},
+  title   = {Surviving Software Dependencies},
+  journal = {ACM Queue},
+  volume  = {17},
+  number  = {2},
+  pages   = {24--47},
+  year    = {2019},
+  doi     = {10.1145/3329781.3344149}
+}
+
+@article{decan2019ecosystems,
+  author  = {Decan, Alexandre and Mens, Tom and Grosjean, Philippe},
+  title   = {An Empirical Comparison of Dependency Network Evolution in Seven Software Packaging Ecosystems},
+  journal = {Empirical Software Engineering},
+  volume  = {24},
+  number  = {1},
+  pages   = {381--416},
+  year    = {2019},
+  doi     = {10.1007/s10664-017-9589-y}
+}
+
+@article{lamb2022reproducible,
+  author  = {Lamb, Chris and Zacchiroli, Stefano},
+  title   = {Reproducible Builds: Increasing the Integrity of Software Supply Chains},
+  journal = {IEEE Software},
+  volume  = {39},
+  number  = {2},
+  pages   = {62--70},
+  year    = {2022},
+  doi     = {10.1109/MS.2021.3073045}
+}
+
+@misc{gomodules,
+  key          = {Go},
+  title        = {Go Modules Reference},
+  howpublished = {The Go Programming Language documentation},
+  year         = {2026},
+  note         = {Accessed 13 September 2026},
+  url          = {https://go.dev/ref/mod}
+}
+
+@misc{npmpackagelock,
+  key          = {npm Docs},
+  title        = {package-lock.json},
+  howpublished = {npm Docs},
+  year         = {2026},
+  note         = {Accessed 13 September 2026},
+  url          = {https://docs.npmjs.com/cli/v10/configuring-npm/package-lock-json/}
+}
+
+% ---------------------------------------------------------------------------
+% Tools used in the evaluation
+% ---------------------------------------------------------------------------
+
+@inproceedings{bruneliere2010modisco,
+  author    = {Bruneliere, Hugo and Cabot, Jordi and Jouault, Fr{\'e}d{\'e}ric and Madiot, Fr{\'e}d{\'e}ric},
+  title     = {{MoDisco}: A Generic and Extensible Framework for Model Driven Reverse Engineering},
+  booktitle = {Proceedings of the IEEE/ACM International Conference on Automated Software Engineering (ASE '10)},
+  pages     = {173--174},
+  publisher = {ACM},
+  address   = {New York, NY, USA},
+  year      = {2010},
+  doi       = {10.1145/1858996.1859032}
+}
+
+@article{bruneliere2014modisco,
+  author  = {Bruneli{\`e}re, Hugo and Cabot, Jordi and Dup{\'e}, Gr{\'e}goire and Madiot, Fr{\'e}d{\'e}ric},
+  title   = {{MoDisco}: A Model Driven Reverse Engineering Framework},
+  journal = {Information and Software Technology},
+  volume  = {56},
+  number  = {8},
+  pages   = {1012--1032},
+  year    = {2014},
+  doi     = {10.1016/j.infsof.2014.04.007}
+}
+
+@misc{bpmn2modeler,
+  author       = {{Eclipse Foundation}},
+  title        = {Eclipse {BPMN2} Modeler Project},
+  howpublished = {Project page},
+  year         = {2026},
+  note         = {Accessed 13 September 2026},
+  url          = {https://projects.eclipse.org/projects/technology.bpmn2-modeler}
+}
+
+@misc{graphiti,
+  author       = {{Eclipse Foundation}},
+  title        = {{Graphiti}},
+  howpublished = {Project website},
+  year         = {2026},
+  note         = {Accessed 13 September 2026},
+  url          = {https://eclipse.dev/graphiti/}
+}
