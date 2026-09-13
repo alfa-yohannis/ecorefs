@@ -59,7 +59,6 @@ eval/.ipfs/
 **/.metadata/
 **/target/work/
 **/target/work.stale.*/
-org.eclipse.bpmn2-modeler-1.5.4-ecorefs/tests/ipfs-ui/build/
 
 target/*.txt
 core-plugin/*.txt
@@ -71,3 +70,10 @@ core-plugin/*.txt
 eval/modisco_jdt_reverse/org.ecorefs.modisco.jdt.reverse/target
 eval/modisco_jdt_reverse/org.ecorefs.modisco.jdt.reverse.tests/target
 .claude
+
+# Local Eclipse 2022-06 install
+/eclipse.2022.06/
+
+# Symlinks to the separate BPMN2 Modeler and BPMN 2.0 Metamodel repos
+/org.eclipse.bpmn2-modeler-1.5.4-ecorefs
+/org.eclipse.bpmn2-ecorefs
