@@ -1,5 +1,6 @@
 % Figure: mean save and load times for generated models (RQ3).
-% Data: eval/results/benchmark_summary.md, 30 measured runs per model size.
+% Data: eval/results/benchmark_summary.md, 30 measured runs per model size on an
+% otherwise idle machine.
 % Hue separates the two persistence paths (categorical slots 1 and 2 of the
 % validated default palette, checked with validate_palette.js against a white
 % page). Line style and marker separate save from load, so the figure stays
@@ -23,7 +24,7 @@
   xmode=log, ymode=log,
   log basis x=10, log basis y=10,
   xmin=60, xmax=900000,
-  ymin=0.7, ymax=3000,
+  ymin=0.4, ymax=2000,
   xtick={100,1000,10000,100000,500000},
   xticklabels={100,1K,10K,100K,500K},
   ytick={1,10,100,1000},
@@ -38,13 +39,13 @@
   legend cell align=left,
 ]
 \addplot[seriesone, line width=0.9pt, mark=*, mark size=2pt]
-  coordinates {(100,1.22) (1000,4.06) (10000,9.73) (100000,65.94) (500000,496.47)};
+  coordinates {(100,0.60) (1000,0.91) (10000,3.54) (100000,33.05) (500000,353.84)};
 \addplot[seriestwo, line width=0.9pt, mark=square*, mark size=2pt]
-  coordinates {(100,30.39) (1000,35.38) (10000,41.81) (100000,126.25) (500000,702.64)};
+  coordinates {(100,29.86) (1000,28.73) (10000,32.45) (100000,79.12) (500000,518.20)};
 \addplot[seriesone, densely dashed, line width=0.9pt, mark=triangle*, mark size=2.4pt]
-  coordinates {(100,4.30) (1000,8.73) (10000,25.24) (100000,154.66) (500000,888.52)};
+  coordinates {(100,1.88) (1000,2.41) (10000,8.46) (100000,77.07) (500000,602.99)};
 \addplot[seriestwo, densely dashed, line width=0.9pt, mark=diamond*, mark size=2.4pt]
-  coordinates {(100,6.39) (1000,13.43) (10000,33.40) (100000,204.52) (500000,1300.45)};
+  coordinates {(100,3.10) (1000,2.84) (10000,10.92) (100000,95.91) (500000,830.18)};
 \legend{XMI save, IPFS save, XMI load, IPFS load}
 \end{axis}
 \end{tikzpicture}

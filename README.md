@@ -143,16 +143,16 @@ RQ2 is considered the main new contribution and targets the MODELS conference. R
 
 Open work for the SoSyM manuscript in `papers/01-SoSym/paper/main.tex` and for the code, most significant first. Every item marked here also appears as a `\todo` note in the manuscript, except where noted.
 
-- [ ] Repeat the XMI load benchmark with a fresh `ResourceSet`. The current test keeps the saved resource in the resource set, so the load returns the resource from memory and the measurement says nothing about file reading. RQ3 has no XMI load baseline until this is fixed.
-- [ ] Check `cascadeSave` when two reference paths reach the changed resource. In the BPMN case study, `collaboration.bpmn` refers to both processes, so the set of saved resources may skip a needed second save of the collaboration. A save in reverse topological order would avoid the problem.
+- [x] Repeat the XMI load benchmark with a fresh `ResourceSet`. Every load now runs in a fresh resource set, the copy of the model sits outside the measured region, and each iteration stamps the copy, so every iteration stores new content.
+- [x] Check `cascadeSave` when two reference paths reach the changed resource. `ResourceDependencyGraph` now orders the affected resources by their dependencies, and `CascadeReferenceIntegrityTest` checks a chain, a diamond and a chain of four resources.
 - [ ] Run the BPMN cascade case study with a live Kubo node and record the real CIDs before and after the cascade save.
 - [x] Record the measurement environment: Intel Core i7-1165G7, 16 GB memory, Ubuntu 24.04.3 with Linux 6.8.0, OpenJDK 21.0.9, Kubo 0.40.1 in Docker 29.8.0, EMF 2.23.0, java-ipfs-http-client 1.4.3, JUnit 5.10.0, Maven 3.8.7.
-- [ ] Extend the benchmark to larger models with 30 runs per size, add a network file system baseline and a statistical test. The benchmark code already lists 100,000 and 500,000 elements.
+- [x] Extend the benchmark to larger models with 30 runs per size and a statistical test. The run covers 100 to 500,000 elements, and `eval/analyse_benchmark.py` writes the summary with a Wilcoxon signed-rank test. A shared network file system as a further baseline stays open and is named as such in the paper.
 - [ ] Test proxy resolution across `ipfs://` references, because the current tests resolve fragments only after an explicit load.
-- [ ] Assert the rewritten reference in the cascade test and measure chains longer than two resources.
+- [x] Assert the rewritten reference in the cascade test and measure chains longer than two resources. The chain of four resources took 120 ms for four saves.
 - [ ] Build the modeler with Tycho. The BPMN2 update site in the build file is no longer available, and `releases/2022-06` carries the same bundles.
 - [ ] Report the output of `BpmnIpfsExample` and of the modeler self-tests against a running Kubo node.
-- [ ] Attach the MoDisco test reports, the output of the byte-level checks and the measured load and traversal times.
+- [x] Attach the MoDisco test reports in `eval/results/modisco-case-study`, together with the byte-level check results and the measured load and traversal times.
 - [ ] Archive the MoDisco dataset (1.04 GiB) and the published CIDs under a DOI for the data availability statement.
 - [ ] Refactor the IPFS Java code to the project rules: object-oriented structure, no nested functions, intelligible names, an effective comment on every class and method, and `// EcoreFS begin` and `// EcoreFS end` markers around additions to existing files. This item is not in the manuscript.
 - [x] Write the declarations: funding (self-funded), competing interests, ethics approval, consent for publication, author contribution and the Springer statement on the use of large language models (in the Research method section).

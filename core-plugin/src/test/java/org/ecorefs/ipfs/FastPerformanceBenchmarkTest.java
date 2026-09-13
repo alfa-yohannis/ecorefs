@@ -41,7 +41,9 @@ import java.util.List;
  * persistence. Each iteration stamps the copy with the iteration number, so
  * every iteration stores new content and receives a new content identifier.
  * Durations are kept in nanoseconds and reported in milliseconds with three
- * decimals, so differences below one millisecond stay visible.
+ * decimals, so differences below one millisecond stay visible. A garbage
+ * collection runs between the iterations, outside the measured region, because
+ * every iteration allocates a full copy of the model.
  */
 public class FastPerformanceBenchmarkTest {
 
@@ -340,6 +342,9 @@ public class FastPerformanceBenchmarkTest {
             long ipfsLoadTime = measureIpfsLoad(ipfsResource.getURI());
 
             Files.deleteIfExists(temporaryFile);
+            // A collection between the iterations keeps the copies of the previous
+            // iteration out of the next measurement.
+            System.gc();
 
             boolean isWarmup = iteration < WARMUP_ITERATIONS;
             if (isWarmup) {
