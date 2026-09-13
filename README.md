@@ -143,6 +143,14 @@ RQ2 is considered the main new contribution and targets the MODELS conference. R
 
 Open work for the SoSyM manuscript in `papers/01-SoSym/paper/main.tex` and for the code, most significant first. Every item marked here also appears as a `\todo` note in the manuscript, except where noted.
 
+The first five items come from a review of the current draft. The draft reads as a solid tool and case study paper, and these five items address what a reviewer would raise first.
+
+- [ ] Measure against a remote IPFS node. Every number in the paper comes from one local Kubo node on one laptop, so a paper about decentralized persistence never measures the decentralized part. The run needs a second node, the lookup through the distributed hash table, and the publish and resolve times of an IPNS name.
+- [ ] Compare against CDO, NeoEMF and a Git-based store on the same models. The paper argues properties against the alternatives without measuring any of them.
+- [ ] Evaluate the cascade save on a large dependency graph, for example inside the MoDisco model with its 26 components and 92 dependency edges. The current evidence covers four small resources.
+- [ ] State which challenges are specific to EMF and which apply to other modeling frameworks. The generalizability sub-question of RQ1 is open, and an answer raises the conceptual contribution beyond one framework.
+- [ ] Evaluate the tool support with a realistic editing workflow or with users. The two Eclipse tools are described but never tried by anyone outside the project.
+
 - [x] Repeat the XMI load benchmark with a fresh `ResourceSet`. Every load now runs in a fresh resource set, the copy of the model sits outside the measured region, and each iteration stamps the copy, so every iteration stores new content.
 - [x] Check `cascadeSave` when two reference paths reach the changed resource. `ResourceDependencyGraph` now orders the affected resources by their dependencies, and `CascadeReferenceIntegrityTest` checks a chain, a diamond and a chain of four resources.
 - [ ] Run the BPMN cascade case study with a live Kubo node and record the real CIDs before and after the cascade save.
