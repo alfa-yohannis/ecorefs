@@ -32,17 +32,17 @@ node "IPFS node\n(Kubo)" as Kubo
 ' Layout as a grid of two columns and four rows:
 '   ResourceFactoryImpl   IPFSResourceFactoryImpl
 '   XMIResourceImpl       IPFSResourceImpl
-'   ReferenceMode         URIHandlerImpl
-'   IPFS node (Kubo)      IPFSURIHandlerImpl
+'   URIHandlerImpl        ReferenceMode
+'   IPFSURIHandlerImpl    IPFS node (Kubo)
 ResourceFactoryImpl <|-right- IPFSResourceFactoryImpl
 XMIResourceImpl <|-right- IPFSResourceImpl
 URIHandlerImpl <|-down- IPFSURIHandlerImpl
 
 ResourceFactoryImpl -[hidden]down- XMIResourceImpl
-XMIResourceImpl -[hidden]down- ReferenceMode
+XMIResourceImpl -[hidden]down- URIHandlerImpl
+URIHandlerImpl -[hidden]right- ReferenceMode
 ReferenceMode -[hidden]down- Kubo
-ReferenceMode -[hidden]right- URIHandlerImpl
-Kubo -[hidden]right- IPFSURIHandlerImpl
+IPFSURIHandlerImpl -[hidden]right- Kubo
 
 IPFSResourceFactoryImpl ..> IPFSResourceImpl : <<create>>
 IPFSResourceImpl ..> ReferenceMode : mode
