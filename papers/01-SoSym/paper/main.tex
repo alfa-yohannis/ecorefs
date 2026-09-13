@@ -79,13 +79,13 @@
 %% breakurl, but \burl stays undefined under pdfLaTeX, so map \burl to \url.
 \providecommand{\burl}[1]{\url{#1}}
 
-%% The class sets tables in 8bp. The tables here use the body size (10bp/12bp)
-%% instead, so the numbers read like the surrounding text.
+%% The class sets tables in 8bp, which reads too small next to the 10bp body
+%% text. The tables here sit between the two sizes.
 \makeatletter
-\def\tablecaptionfont{\reset@font\fontsize{10bp}{12bp}\selectfont}
-\def\tablebodyfont{\reset@font\fontsize{10bp}{12bp}\selectfont}
-\def\tablecolheadfont{\reset@font\fontsize{10bp}{12bp}\selectfont\bfseries\boldmath}
-\def\tablefootnotefont{\reset@font\fontsize{10bp}{12bp}\selectfont}
+\def\tablecaptionfont{\reset@font\fontsize{9bp}{11bp}\selectfont}
+\def\tablebodyfont{\reset@font\fontsize{9bp}{11bp}\selectfont}
+\def\tablecolheadfont{\reset@font\fontsize{9bp}{11bp}\selectfont\bfseries\boldmath}
+\def\tablefootnotefont{\reset@font\fontsize{9bp}{11bp}\selectfont}
 \makeatother
 
 %% Drafting aid: remove every \todo before submission
@@ -102,7 +102,7 @@
 
 \affil*[1]{\orgdiv{Department of Informatics}, \orgname{Pradita University}, \orgaddress{\city{Kabupaten Tangerang}, \state{Banten}, \country{Indonesia}}}
 
-\abstract{Model persistence frameworks such as the Eclipse Modeling Framework (EMF) identify a model by a location, for example a file path. The content at a location can change while the location stays the same. The InterPlanetary File System (IPFS) identifies a file by a content identifier (CID) instead. The CID is computed from the file content, so every change to a model produces a new identifier. The paper examines the consequences for model persistence and for references between model resources. An EMF resource implementation saves models to a local IPFS node and loads the models back by CID. References can point to fixed CIDs or to mutable names of the InterPlanetary Name System (IPNS). A cascade save stores every resource with a reference to a changed resource again. IPFS support was also added to the Eclipse BPMN2 Modeler. A benchmark used generated models of 100 to 10,000 elements. A save through IPFS took 9 to 10~ms longer than a save to a local XML Metadata Interchange (XMI) file, which is about ten times the XMI time at 100 elements and about 1.3 times at 10,000 elements. A case study split 39 MoDisco models of the Eclipse Java development tools (1.04~GiB) into 6,933 resources and published the resources on IPFS. For eight components with 1,639 resources, EMF Compare found no differences between the local models and the copies fetched from IPFS.}
+\abstract{Model persistence frameworks such as the Eclipse Modeling Framework (EMF) identify a model by a location, for example a file path. The content at a location can change while the location stays the same. The InterPlanetary File System (IPFS) identifies a file by a content identifier (CID) instead. The CID is computed from the file content, so every change to a model produces a new identifier. The paper examines the consequences for model persistence and for references between model resources. An EMF resource implementation saves models to a local IPFS node and loads the models back by CID. References can point to fixed CIDs or to mutable names of the InterPlanetary Name System (IPNS). A cascade save stores every resource with a reference to a changed resource again. IPFS support was also added to the Eclipse BPMN2 Modeler. A benchmark used generated models of 100 to 500,000 elements. A save through IPFS took 29 to 32~ms longer than a save to a local XML Metadata Interchange (XMI) file for models up to 10,000 elements, and the relative cost fell from about 25 times the XMI time at 100 elements to 1.4 times at 500,000 elements. A case study split 39 MoDisco models of the Eclipse Java development tools (1.04~GiB) into 6,933 resources and published the resources on IPFS. For eight components with 1,639 resources, EMF Compare found no differences between the local models and the copies fetched from IPFS.}
 
 \keywords{Model-driven engineering, Model persistence, Eclipse Modeling Framework, IPFS, Content-addressed storage, Cross-resource references}
 
@@ -112,28 +112,24 @@
 
 Model-driven engineering (MDE) uses models to manage the complexity of platforms and to express domain concepts~\cite{schmidt2006mde}. MDE tools store models in files or in model repositories. The Eclipse Modeling Framework (EMF)~\cite{steinberg2008emf}, a software framework for implementing MDE, stores each model in a resource, and a Uniform Resource Identifier (URI) names the resource. Resources are usually serialized in the XML Metadata Interchange (XMI) format~\cite{omg2015xmi}. Common URIs such as \texttt{file://} and \texttt{platform://} name a location. The content at a location can change, but the URI stays the same. A reference to another resource therefore resolves to the current content at the location. The referenced model may have changed since the reference was created.
 
-One example shows what the gap between a location and a version costs. A supplier and a buyer agree on a collaboration model in Business Process Model and Notation (BPMN)~\cite{omg2010bpmn}. The collaboration refers to an order process, and both models refer to a payment process of the supplier. Each reference is a file path with a fragment. After that, the supplier changes the payment process and saves the changed model at the same path. Every copy of the collaboration then resolves to the changed payment process, although the buyer agreed to the earlier version. Moreover, no reference in the collaboration records the agreed version, and no check reveals the change. The same three models return as a case study in Section~\ref{sec:evaluation-rq2}.
+One example shows what the gap between a location and a version costs. A supplier and a buyer agree on a collaboration model in Business Process Model and Notation (BPMN)~\cite{omg2010bpmn}, where the collaboration refers to an order process and both models refer to a payment process of the supplier. Each reference is a file path with a fragment. After that, the supplier changes the payment process and saves the changed model at the same path. Every copy of the collaboration then resolves to the changed payment process, although the buyer agreed to the earlier version. Moreover, no reference records the agreed version, and no check reveals the change. The same three models return as a case study in Section~\ref{sec:evaluation-rq2}.
 
-The gap appears in other modeling tasks as well. Teams keep models in shared folders or in model repositories, and several models often reference one metamodel or one shared library model~\cite{dirocco2015repositories,franzago2018collaborative}. As a result, an edit to the shared resource changes what every referring model means. Reverse engineering gives a second setting. MoDisco builds models of an existing code base~\cite{bruneliere2010modisco,bruneliere2014modisco}. A later analysis should run on the same snapshot as an earlier analysis, yet a file path does not name a snapshot. Therefore, a model reference that names a version would remove the ambiguity in every case above.
+The gap appears in other modeling tasks as well. Teams keep models in shared folders or in model repositories, where several models often reference one metamodel or one shared library model~\cite{dirocco2015repositories,franzago2018collaborative}, so an edit to the shared resource changes what every referring model means. Reverse engineering gives a second setting, because MoDisco builds models of an existing code base~\cite{bruneliere2010modisco,bruneliere2014modisco}, and a later analysis should run on the same snapshot as an earlier analysis. Therefore, a model reference that names a version would remove the ambiguity in every case above.
 
 Content-addressed storage takes a different approach. The InterPlanetary File System (IPFS) identifies content by a content identifier (CID)~\cite{benet2014ipfs,ipfsdocscid}. The CID is computed from the content, so a changed file receives a new CID~\cite{ipfsdocsipns}. Content under a given CID cannot change. In addition, any IPFS node with a copy of the content can serve the content~\cite{trautwein2022ipfs}. The InterPlanetary Name System (IPNS) adds mutable names on top of CIDs~\cite{ipfsdocsipns}.
 
-Content addressing has two consequences for models. First, a reference to a CID pins the exact version of the referenced model. Package managers use a similar idea. For example, a lock file records the exact dependency tree of a project~\cite{npmpackagelock}, and Nix derives unique component paths from cryptographic hashes~\cite{dolstra2004nix}. Second, every save of a model creates a new CID. References to the model then need a deliberate update, and tools need support for the update. Dependency updates are a known source of problems in software ecosystems~\cite{cox2019dependencies,decan2019ecosystems}.
-
-Content addressing has further effects on the cases above. A CID is a cryptographic hash of the content, so a reader can check that fetched content matches the requested identifier. A CID also stays valid wherever the content is stored. However, both properties have costs. Content stays available only while at least one node stores the content. Each resource is also loaded as a whole, without the on-demand loading of database-backed persistence~\cite{pagan2015repository,daniel2017neoemf}.
+Content addressing has two consequences for models. First, a reference to a CID pins the exact version of the referenced model, in the way that a lock file records the exact dependency tree of a project~\cite{npmpackagelock} and Nix derives unique component paths from cryptographic hashes~\cite{dolstra2004nix}. Second, every save of a model creates a new CID, so references to the model need a deliberate update, and tools need support for the update. Dependency updates are a known source of problems in software ecosystems~\cite{cox2019dependencies,decan2019ecosystems}. A CID is also a cryptographic hash, so a reader can check that fetched content matches the requested identifier wherever the content is stored. However, the properties have costs. Content stays available only while at least one node stores the content, and each resource is loaded as a whole, without the on-demand loading of database-backed persistence~\cite{pagan2015repository,daniel2017neoemf}.
 
 The properties open several uses in model-driven engineering:
 \begin{itemize}
-\item Model versioning. Every save produces a fixed snapshot under a new identifier, so a version history needs only a record of identifiers, without a central version control server~\cite{koegel2010emfstore,brosch2012versioning}.
-\item Traceability. A trace link that carries a CID names the exact version of the target, so a link written during a review still points at the reviewed version after the target evolves.
-\item Preservation of models. A published model stays readable while at least one node stores the content, which matches the aim of source code archives~\cite{dicosmo2017heritage} and of web archives on IPFS~\cite{kelly2016wayback}.
-\item Deduplication and incremental publication. Identical content always receives the same CID, so an unchanged resource needs no second copy. After a change to one component of a partitioned model, every other component keeps the CID of the previous publication (Section~\ref{sec:rq2-partitioned}).
-\item Collaboration across organizations. Partners exchange models without agreed paths and without a shared namespace, because a CID is independent of location~\cite{dirocco2015repositories,franzago2018collaborative}.
-\item Less dependence on a central server. Any IPFS node with a copy of the content can serve a model~\cite{benet2014ipfs,trautwein2022ipfs}, so access survives the loss of one server while another node keeps a copy. Every reader with the identifier reaches the model through any node that stores the content, and every added copy widens the access.
-\item Simple caching and offline reading. Content under a CID cannot change, so a cached copy never goes stale and needs no check against the source. A node with a stored copy also serves the model without a network connection.
-\item Reproducible evaluation. A paper, a report or an audit can name the exact model behind a result, in the way that reproducible builds identify an exact binary~\cite{lamb2022reproducible}.
+\item Model versioning and reproducible evaluation. Every save produces a fixed snapshot under a new identifier, so a version history needs only a record of identifiers, and a paper or an audit can name the exact model behind a result~\cite{koegel2010emfstore,lamb2022reproducible}.
+\item Traceability. A trace link that carries a CID names the exact version of the target, so the link still points at the reviewed version after the target evolves.
+\item Preservation and less dependence on a central server. A published model stays readable while at least one node stores the content, and any node with a copy can serve the model~\cite{dicosmo2017heritage,kelly2016wayback}.
+\item Deduplication and incremental publication. Identical content always receives the same CID, so an unchanged component keeps the CID of the previous publication (Section~\ref{sec:rq2-partitioned}).
+\item Collaboration across organizations. Partners exchange models without agreed paths and without a shared namespace~\cite{dirocco2015repositories,franzago2018collaborative}.
+\item Simple caching and offline reading. A cached copy never goes stale and serves the model without a network connection, because content under a CID cannot change.
 \end{itemize}
-The paper covers the persistence layer, the references between resources and the cost of both. The uses above follow from the properties of content addressing, and the evaluation does not measure the uses.
+The paper covers the persistence layer, the references between resources and the cost of both, while the uses above follow from the properties and stay outside the evaluation.
 
 Content-addressed persistence also brings challenges, and the paper addresses four. First, a resource has no identifier before the first save, and every later save changes the identifier, so the persistence layer needs a lifecycle that the resource model of EMF does not expect (Section~\ref{sec:rq1}). Second, a reference by CID becomes outdated as soon as the target changes, so an upgrade needs a cascade of saves along the referencing resources (Section~\ref{sec:rq2}). Third, a load fetches a whole resource, so a large model needs a split into many resources together with a publication structure that keeps the parts connected (Section~\ref{sec:rq2-partitioned}). Fourth, the layer has to fit the existing EMF ecosystem, so file resources and IPFS resources share one resource set, and the editors keep the standard save and load actions (Sections~\ref{sec:rq1-differences} and~\ref{sec:tool}). Finally, partial loading inside a single resource stays open, and Section~\ref{sec:limitations} lists the remaining limits.
 
@@ -158,7 +154,7 @@ The paper makes four contributions:
 \item An evaluation with generated models and with large MoDisco models of Java code (Section~\ref{sec:evaluation}).
 \end{itemize}
 
-Section~\ref{sec:background} introduces EMF persistence and IPFS. Section~\ref{sec:rq1} describes the persistence layer, and Section~\ref{sec:rq2} covers references between resources. Section~\ref{sec:tool} presents the tool support. Section~\ref{sec:evaluation} reports the evaluation. Section~\ref{sec:discussion} answers the research questions and discusses threats to validity. Section~\ref{sec:related} covers related work, and Section~\ref{sec:conclusion} concludes the paper.
+Section~\ref{sec:background} introduces EMF persistence and IPFS, and Section~\ref{sec:method} describes the research method. Sections~\ref{sec:rq1} to~\ref{sec:tool} present the persistence layer, the references between resources and the tool support. Section~\ref{sec:evaluation} reports the evaluation, Section~\ref{sec:discussion} answers the research questions, and Section~\ref{sec:related} covers related work before the conclusion in Section~\ref{sec:conclusion}.
 
 \section{Background}\label{sec:background}
 
@@ -208,11 +204,11 @@ Figure~\ref{fig:architecture} shows the three extension points of the plugin as 
 
 Listing~\ref{lst:setup} shows the configuration of a resource set. The factory is registered for the \texttt{ipfs} and \texttt{ipns} schemes. The URI handler is added at the front of the handler list, so the handler receives IPFS URIs before the default handlers.
 
-\begin{figure}[tbp]
+\begin{figure*}[tbp]
 \centering
-\includegraphics[width=.7\columnwidth]{figures/architecture.pdf}
-\caption{Unified Modeling Language (UML) class diagram of the ecorefs core plugin. Each class marked ecorefs extends one class of the EMF persistence API. The IPFS node runs Kubo and offers the HTTP API for saving and loading.}\label{fig:architecture}
-\end{figure}
+\includegraphics[width=\textwidth]{figures/architecture.pdf}
+\caption{Unified Modeling Language (UML) class diagram of the ecorefs core plugin. Each class marked ecorefs extends one class of the EMF persistence API. The IPFS node runs Kubo and offers the HTTP API for saving and loading. The rows read from left to right, from right to left and from left to right again.}\label{fig:architecture}
+\end{figure*}
 
 \begin{lstlisting}[language=Java,float=tbp,caption={Configuration of a resource set for IPFS, adapted from the test code},label={lst:setup}]
 IPFS ipfs = new IPFS("/ip4/127.0.0.1/tcp/5001");
@@ -366,7 +362,37 @@ Large models are often split into many resources. The MoDisco case study (Sectio
 \item One IPNS name points to the current project version manifest. A local file records the IPNS name and the CID of the current manifest.
 \end{enumerate}
 
-Figure~\ref{fig:layers} shows the layers. The layers combine three strategies from Table~\ref{tab:strategies}: directories, a manifest and IPNS indirection.
+Figure~\ref{fig:layers} shows the layers. The layers combine three strategies from Table~\ref{tab:strategies}: directories, a manifest and IPNS indirection. Listing~\ref{lst:manifests} shows the three documents of the case study. The head record holds the IPNS name and the CID of the current manifest. The project version manifest holds the CID of the root model, the CIDs of the shared resources and one entry per component. The component manifest lists the resources of one component together with the dependencies of the component.
+
+
+\begin{lstlisting}[language=Java,float=*,caption={The three documents of the publication layers, taken from the MoDisco case study. Content identifiers and one resource path are shortened.},label={lst:manifests}]
+// project-head.json: the mutable head of the project
+{ "ipns": "ipns://k51qzi5uqu5dhr...cazg3yro",
+  "currentManifestCid": "QmWekVvHnjWnn4...1L5dM",
+  "currentManifestPath": "project-version-manifest.json" }
+
+// project-version-manifest.json: one immutable version of the project
+{ "rootModel": { "path": "all-repos-merged.root.xmi",
+                 "cid": "Qmbu2ygFf6afX...Bbrmjr" },
+  "sharedResources": [
+    { "kind": "aux", "path": "aux/orphan-types.xmi",
+      "cid": "QmZQRTvAUPGhb...hvrRdr" } ],
+  "components": [
+    { "componentId": "eclipse.jdt.core/org.eclipse.jdt.core",
+      "resourceCount": 1066,
+      "componentRootCid": "QmWimKegjsRD9...pLy3Ms",
+      "componentManifestCid": "QmaJtyLNYBEN...SL7SS",
+      "dependencyCount": 3 } ] }
+
+// component-manifest.json: one component of that version
+{ "componentId": "eclipse.jdt.core/org.eclipse.jdt.core",
+  "resourceCount": 1066,
+  "resources": [ "compilation-units/.../CompletionEngine.xmi" ],
+  "dependencies": [],
+  "sharedResourceDependencies": [
+    { "path": "aux/orphan-types.xmi",
+      "crossReferenceCount": 45748 } ] }
+\end{lstlisting}
 
 \begin{figure}[tbp]
 \centering
@@ -410,7 +436,7 @@ The evaluation uses the tests and example programs of the ecorefs repository for
 
 \subsection{Setup}\label{sec:evaluation-setup}
 
-The measurements ran on a laptop with an Intel Core i7-1165G7 processor (four cores, eight threads, up to 4.70~GHz) and 16~GB of memory, under Ubuntu 24.04.3 with Linux 6.8.0. The Java code ran on OpenJDK 21.0.9, and the plugin is compiled for Java~11. The local IPFS node ran Kubo 0.40.1 in Docker 29.8.0 and offered the HTTP API on port 5001. The plugin uses EMF Ecore 2.23.0, EMF XMI 2.16.0, EMF Common 2.21.0 and the Java client for the IPFS HTTP API 1.4.3. The tests of the core plugin run with JUnit 5.10.0, and the build uses Maven 3.8.7 with the Surefire plugin 3.1.2. The XMI copy of each benchmark model goes to a temporary file on an ext4 file system on a solid state disk. Each benchmark first runs three warm-up iterations and then ten measured iterations. The tests measure wall-clock time with \texttt{System.nanoTime}. The test code truncates each measurement and each mean to whole milliseconds.
+The measurements ran on a laptop with an Intel Core i7-1165G7 processor (four cores, eight threads, up to 4.70~GHz) and 16~GB of memory, under Ubuntu 24.04.3 with Linux 6.8.0. The Java code ran on OpenJDK 21.0.9, and the plugin is compiled for Java~11. The local IPFS node ran Kubo 0.40.1 in Docker 29.8.0 and offered the HTTP API on port 5001. The plugin uses EMF Ecore 2.23.0, EMF XMI 2.16.0, EMF Common 2.21.0 and the Java client for the IPFS HTTP API 1.4.3. The tests of the core plugin run with JUnit 5.10.0, and the build uses Maven 3.8.7 with the Surefire plugin 3.1.2. The XMI copy of each benchmark model goes to a temporary file on an ext4 file system on a solid state disk. Each benchmark first runs three warm-up iterations and then thirty measured iterations. The tests measure wall-clock time with \texttt{System.nanoTime} and report milliseconds with three decimals.
 
 \subsection{RQ1: Functional validation}\label{sec:evaluation-rq1}
 
@@ -422,38 +448,63 @@ Large models need a stronger check than an example program. The case study of Se
 
 \subsection{RQ2: Reference evolution}\label{sec:evaluation-rq2}
 
-The cascade test builds two resources with one object each. The object in resource A has a non-containment reference to the object in resource B. The test calls \texttt{cascadeSave} on B and measures the time for both saves. Over ten runs, the cascade save took 15~ms on average, with a median of 15~ms and a standard deviation of 2.28~ms. The measurement covers two IPFS saves of very small resources. However, the test does not measure the cross-reference search separately, and the test does not check the rewritten reference. \todo{Add an assertion on the rewritten reference and measure longer chains.}
+The cascade test builds two resources with one object each. The object in resource A has a non-containment reference to the object in resource B. The test calls \texttt{cascadeSave} on B and measures the time for both saves. Over ten runs, the cascade save took 47~ms on average, with a median of 47~ms and a standard deviation of 2.77~ms. The measurement covers two IPFS saves of very small resources, so the time comes almost completely from the two calls to the local node. However, the test does not measure the search for cross-references separately.
+
+Three further tests check the rewritten references. Each test builds resources with one node, saves every resource, changes the last resource and calls \texttt{cascadeSave}. After the cascade, each test fetches the stored bytes of every referencing resource from the node and checks that the reference carries the current CID of the target. The first test uses a chain of two resources. The second test uses the diamond of Figure~\ref{fig:cascade}, where the collaboration refers to the order process and to the payment process. The third test uses a chain of four resources, where the cascade save took 120~ms for four saves. All three tests pass.
 
 A BPMN case study prepares a longer chain of three resources. \texttt{payment-process.bpmn} defines a payment process with three tasks. \texttt{order-process.bpmn} refers to the payment process. \texttt{collaboration.bpmn} refers to the order process and to the payment process. A change to the payment process should therefore give new CIDs to all three files. \todo{Run the case study with real CIDs and report the CIDs before and after the cascade save.}
 
 \subsection{RQ3: Performance}\label{sec:evaluation-rq3}
 
-The benchmark uses generated models with 100, 1,000 and 10,000 elements. The models conform to a small metamodel with one class, \texttt{Component}. Each component has an integer identifier and contains child components. In each iteration, the test copies the model into two new resources. One copy is saved as an XMI file, and the other copy is saved to IPFS. The IPFS copy is then loaded again through the new CID. Table~\ref{tab:rq3} lists the results, and Figure~\ref{fig:rq3} shows the means with standard deviations.
+The benchmark uses generated models with 100 to 500,000 elements. The models conform to a small metamodel with one class, \texttt{Component}. Each component has an integer identifier and contains child components. Each iteration copies the source model and stamps the copy with the iteration number, so every iteration stores new content and receives a new CID. The copy is first saved to a temporary XMI file. After that, the same content moves to an IPFS resource and is saved again. Both loads run in a fresh resource set, so a load reads the file or fetches the content from the node. Tables~\ref{tab:rq3-save} and~\ref{tab:rq3-load} list the results, and Figure~\ref{fig:rq3} shows the means on logarithmic axes.
 
 \begin{figure}[tbp]
 \centering
 \includegraphics[width=\columnwidth]{figures/rq3-performance.pdf}
-\caption{Mean save and load times for generated models over ten measured runs. Error bars show one standard deviation. Table~\ref{tab:rq3} lists the values.}\label{fig:rq3}
+\caption{Mean save and load times for generated models over thirty measured runs, on logarithmic axes. Hue separates the two persistence paths, and the line style separates a save from a load. Tables~\ref{tab:rq3-save} and~\ref{tab:rq3-load} list the values.}\label{fig:rq3}
 \end{figure}
 
-\begin{table*}[t]
-\caption{Save and load times for generated models over ten measured runs, given as mean / median / standard deviation. XMI load times are not reported (Section~\ref{sec:evaluation-rq3}).}\label{tab:rq3}
-\begin{tabular*}{\textwidth}{@{\extracolsep\fill}lccc@{}}
+\begin{table}[t]
+\caption{Save times for generated models over thirty measured runs, given as mean and standard deviation. Size is the size of the serialized XMI file.}\label{tab:rq3-save}
+%% Four numeric columns in one text column, so the table uses the class size
+\fontsize{8bp}{9.5bp}\selectfont
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}rrrr@{}}
 \toprule
-Elements & XMI save (ms) & IPFS save (ms) & IPFS load (ms) \\
+Elements & Size (MB) & XMI save (ms) & IPFS save (ms) \\
 \midrule
-100 & 1 / 1 / 0.67 & 10 / 10 / 0.70 & 3 / 3 / 1.02 \\
-1,000 & 4 / 4 / 0.66 & 13 / 13 / 1.11 & 7 / 7 / 1.25 \\
-10,000 & 31 / 33 / 4.34 & 41 / 38 / 11.15 & 39 / 40 / 7.30 \\
+100 & 0.004 & 1.22 $\pm$ 0.33 & 30.39 $\pm$ 3.82 \\
+1,000 & 0.049 & 4.06 $\pm$ 1.74 & 35.38 $\pm$ 6.27 \\
+10,000 & 0.605 & 9.73 $\pm$ 2.58 & 41.81 $\pm$ 4.66 \\
+100,000 & 7.146 & 65.94 $\pm$ 15.89 & 126.25 $\pm$ 24.85 \\
+500,000 & 39.566 & 496.47 $\pm$ 328.79 & 702.64 $\pm$ 223.93 \\
 \botrule
-\end{tabular*}
-\end{table*}
+\end{tabular}
+\end{table}
 
-Saving to IPFS took 9 to 10~ms longer than saving to an XMI file at all three sizes. In relative terms, a save through IPFS took about ten times the XMI time at 100 elements, about three times at 1,000 elements and about 1.3 times at 10,000 elements. The absolute difference changed little with model size, so the relative overhead falls as models grow. The small change therefore suggests a fixed cost per call to the local Kubo node. Nevertheless, the standard deviation of IPFS saves grew to 11.15~ms at 10,000 elements. Loading from IPFS took 3~ms, 7~ms and 39~ms on average. A separate shorter run also gave similar values for 100 and 1,000 elements. IPFS saves took 12~ms and 13~ms, and IPFS loads took 4~ms and 7~ms.
+\begin{table}[t]
+\caption{Load times for the same models over thirty measured runs, given as mean and standard deviation. Every load runs in a fresh resource set.}\label{tab:rq3-load}
+%% Four numeric columns in one text column, so the table uses the class size
+\fontsize{8bp}{9.5bp}\selectfont
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+Elements & Size (MB) & XMI load (ms) & IPFS load (ms) \\
+\midrule
+100 & 0.004 & 4.30 $\pm$ 2.11 & 6.39 $\pm$ 4.11 \\
+1,000 & 0.049 & 8.73 $\pm$ 3.09 & 13.43 $\pm$ 8.33 \\
+10,000 & 0.605 & 25.24 $\pm$ 6.47 & 33.40 $\pm$ 10.98 \\
+100,000 & 7.146 & 154.66 $\pm$ 34.00 & 204.52 $\pm$ 42.73 \\
+500,000 & 39.566 & 888.52 $\pm$ 317.44 & 1,300.45 $\pm$ 373.84 \\
+\botrule
+\end{tabular}
+\end{table}
 
-Table~\ref{tab:rq3} leaves out the XMI load times. In the current test, the saved XMI resource stays in the resource set. The load step therefore returns the resource from memory without reading the file. \todo{Load the XMI file in a fresh resource set and repeat the benchmark.}
+A save through IPFS took 29 to 32~ms longer than a save to an XMI file for models up to 10,000 elements. The difference therefore stays almost constant while the model grows, which points to a fixed cost per call to the local Kubo node. In relative terms, a save through IPFS took about 25 times the XMI time at 100 elements, 8.7 times at 1,000 elements and 4.3 times at 10,000 elements. For the two largest models, the difference grows to 60~ms and 206~ms, while the ratio falls to 1.9 and 1.4. Loading from IPFS took 1.3 to 1.5 times the time of loading the XMI file at every size.
 
-The benchmark covers models up to 10,000 elements and a local Kubo node. Network latency between IPFS nodes is outside the measurement. \todo{Add larger models, 30 runs per size, a network file system baseline and a statistical test, as planned in the project README. The benchmark code already lists 100,000 and 500,000 elements.}
+A Wilcoxon signed-rank test compares the thirty paired iterations of each model size, because both paths run inside the same iteration on the same content. The test gives $p < 0.001$ for every model size and for both operations, so the differences are unlikely to come from noise. Nevertheless, single iterations vary. The standard deviation of the XMI save reaches 328.79~ms at 500,000 elements, and the median of 390.32~ms stays well below the mean of 496.47~ms, so a few slow iterations carry the mean. The full distribution of every measurement is in the result file of the repository.
+
+The benchmark covers models up to 500,000 elements and a local Kubo node. Network latency between IPFS nodes stays outside the measurement, and a shared network file system as a further baseline stays open.
 
 \subsection{Case study: MoDisco models of Eclipse JDT}\label{sec:evaluation-modisco}
 
@@ -479,7 +530,7 @@ The 39 models were merged into one model. A partitioner then split the merged mo
 
 The merged model was published on IPFS as one file. The partitioned model was published as one IPFS directory and through the layers of Section~\ref{sec:rq2-partitioned}.
 
-The case study uses four kinds of checks. Byte-level checks compare the published merged model, the project version manifest and the partitioned root model with the local files. Loader tests load the merged model and the partitioned root model, navigate into the models and resolve cross-references. A traversal test visits every element of the logical model. In the traversal test, the merged model and the partitioned resource set both contained 4,282,694 elements. \todo{Attach the test reports and the output of the byte-level checks.}
+The case study uses four kinds of checks. Byte-level checks compare the published merged model, the project version manifest and the partitioned root model with the local files. Loader tests load the merged model and the partitioned root model, navigate into the models and resolve cross-references. A traversal test visits every element of the logical model. In the traversal test, the merged model and the partitioned resource set both contained 4,282,694 elements. The byte-level checks matched for the merged model, for the project version manifest and for the partitioned root model. The reports of every test are in the \texttt{eval/results/modisco-case-study} folder of the repository.
 
 The fourth check compares selected components with copies fetched from IPFS. A script downloads the published root model and the directories of the selected components. The root model and the component manifests are compared byte by byte. EMF Compare compares the XMI resources of the selected components~\cite{emfcompare}. Shared auxiliary resources and unselected components are excluded, because the shared resources would dominate every comparison of a single component. The byte-level checks cover the shared resources instead. Table~\ref{tab:compare} lists four comparison runs.
 
@@ -507,7 +558,7 @@ In the recheck on 24 March 2026, the comparison of eight components with 1,639 r
 \caption{EMF Compare time per component against the XMI size of the component, on logarithmic axes. The first run took 168,992~ms in total, and the recheck took 186,696~ms for the same eight components.}\label{fig:compare}
 \end{figure}
 
-According to the notes of the case study, whole-model scans ran faster on the merged model. By contrast, the partitioned model loaded faster at the start and suited checks of single components. \todo{Add the measured load and traversal times.}
+The two forms of the model differ in load time and in traversal time. Loading the merged model took 79,982~ms, and a traversal of the loaded model took 84,304~ms. Loading the partitioned root model took 809~ms, while a traversal of the whole logical model took 380,256~ms and touched all 6,934 resources. Both traversals visited 4,282,694 elements. The partitioned form therefore suits a start on one component, and the merged form suits a scan of the whole model.
 
 \section{Discussion}\label{sec:discussion}
 
@@ -517,7 +568,7 @@ For RQ1, the main challenges come from the changing identity of a resource. A re
 
 For RQ2, references by CID pin versions. A deliberate upgrade requires new saves along the chain of referencing resources. The cascade save automates the saves for acyclic references. IPNS names avoid the cascade but give up immutability. For the large partitioned model, component directories, manifests and one IPNS name gave a workable publication structure.
 
-For RQ3, a save through a local Kubo node added 9 to 10~ms per model for models up to 10,000 elements. The added time equals about ten times the XMI time at 100 elements and about 1.3 times at 10,000 elements, so the relative cost falls as models grow. Loading from IPFS took up to 39~ms. The measured costs appear acceptable for interactive editing of models up to 10,000 elements. Nevertheless, larger models, remote nodes and IPNS resolution still need measurement.
+For RQ3, a save through a local Kubo node added 29 to 32~ms per model for models up to 10,000 elements, and 60~ms to 206~ms for the two largest models. The relative cost falls from about 25 times the XMI time at 100 elements to 1.4 times at 500,000 elements, because the added time comes mostly from a fixed cost per call. Loading from IPFS took 1.3 to 1.5 times the time of loading a local XMI file. The measured costs appear acceptable for interactive editing, where a save of a model with 10,000 elements stays under 50~ms. Nevertheless, remote nodes and IPNS resolution still need measurement.
 
 \subsection{Limitations}\label{sec:limitations}
 
@@ -525,7 +576,7 @@ The approach loads each resource as a whole. Database-backed persistence can loa
 
 \subsection{Threats to validity}\label{sec:threats}
 
-The main threat to internal validity is the XMI load measurement, because the test did not read the XMI file (Section~\ref{sec:evaluation-rq3}). The truncation to whole milliseconds also hides differences below 1~ms. The cascade test also covers only two very small resources.
+The main threat to internal validity comes from the shared Java virtual machine, because garbage collection can affect single iterations. The standard deviations at 500,000 elements show the effect. The benchmark reduces the risk with three warm-up iterations, thirty measured iterations per model size and a paired statistical test. The cascade tests also cover small resources only.
 
 External validity is limited by the setup. The benchmarks use one generated metamodel and a local Kubo node. The case study covers Java code models only. Therefore, results may differ for other metamodels, for remote IPFS nodes and for the public IPFS network.
 
@@ -553,9 +604,9 @@ Package managers record exact dependency versions. The npm lock file describes t
 
 The paper studied EMF model persistence on IPFS. An EMF resource implementation saves models to IPFS and assigns the new CID to the resource URI. A URI handler also loads models by CID or IPNS name. References by CID pin exact versions, and a cascade save updates referencing resources in CID mode. IPFS support was also added to the Eclipse BPMN2 Modeler and to the generated BPMN2 tree editor.
 
-With a local Kubo node, a save through IPFS added 9 to 10~ms per model for models up to 10,000 elements, which is about ten times the XMI time at 100 elements and about 1.3 times at 10,000 elements. The MoDisco case study published 1.04~GiB of Java models as 6,933 resources. EMF Compare found no differences for eight components with 1,639 resources.
+With a local Kubo node, a save through IPFS added 29 to 32~ms per model for models up to 10,000 elements, and the relative cost fell from about 25 times the XMI time at 100 elements to 1.4 times at 500,000 elements. The MoDisco case study published 1.04~GiB of Java models as 6,933 resources. EMF Compare found no differences for eight components with 1,639 resources.
 
-Future work includes a corrected XMI load benchmark, larger models and remote IPFS nodes. The cascade save also needs tests with longer reference chains and with several reference paths to one resource.
+Future work includes remote IPFS nodes, a shared network file system as a further baseline and measurements of IPNS resolution. The cascade save also needs tests with longer reference chains and with several reference paths to one resource.
 
 \backmatter
 

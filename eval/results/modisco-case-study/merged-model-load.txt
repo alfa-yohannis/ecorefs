@@ -1,0 +1,14 @@
+-------------------------------------------------------------------------------
+Test set: org.ecorefs.modisco.jdt.reverse.tests.ModiscoMergedModelLoadTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 72.97 s -- in org.ecorefs.modisco.jdt.reverse.tests.ModiscoMergedModelLoadTest
+org.ecorefs.modisco.jdt.reverse.tests.ModiscoMergedModelLoadTest.loadsConfiguredMergedModelWhenRequested -- Time elapsed: 72.90 s
+
+Console output:
+[merged-test] merged model: /data2/projects/ecorefs/eval/datasets/modisco-java-models-by-repo/all-repos-merged.xmi
+[merged-test] loading merged model... size=1.06 GiB (1133800978 bytes), this may take some time
+[merged-test] root loaded: name=all-repos-merged, topLevelEntries=23196
+[merged-test] first descendant: Model[name=all-repos-merged] @ file:/data2/projects/ecorefs/eval/datasets/modisco-java-models-by-repo/all-repos-merged.xmi
+[merged-test] scan progress: scanned=0 current=Model[name=all-repos-merged] @ file:/data2/projects/ecorefs/eval/datasets/modisco-java-models-by-repo/all-repos-merged.xmi
+[merged-test] xref source: Package[name=org] @ file:/data2/projects/ecorefs/eval/datasets/modisco-java-models-by-repo/all-repos-merged.xmi
+[merged-test] resolved target: PackageAccess @ file:/data2/projects/ecorefs/eval/datasets/modisco-java-models-by-repo/all-repos-merged.xmi

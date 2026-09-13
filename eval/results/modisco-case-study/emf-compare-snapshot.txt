@@ -1,0 +1,18 @@
+-------------------------------------------------------------------------------
+Test set: org.ecorefs.modisco.jdt.reverse.tests.ModiscoEmfCompareSnapshotTest
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 2, Time elapsed: 1.582 s -- in org.ecorefs.modisco.jdt.reverse.tests.ModiscoEmfCompareSnapshotTest
+org.ecorefs.modisco.jdt.reverse.tests.ModiscoEmfCompareSnapshotTest.emfCompareFindsNoDifferencesForConfiguredComponentSnapshotWhenConfigured -- Time elapsed: 1.489 s
+org.ecorefs.modisco.jdt.reverse.tests.ModiscoEmfCompareSnapshotTest.mergedSnapshotMatchesByteForByteWhenConfigured skipped
+org.ecorefs.modisco.jdt.reverse.tests.ModiscoEmfCompareSnapshotTest.emfCompareFindsNoDifferencesForPartitionedSnapshotWhenConfigured skipped
+
+Console output:
+[emf-compare] component-compare: localRoot=/data2/projects/ecorefs/eval/datasets/modisco-java-models-by-repo/all-repos-merged-by-compilation-unit/all-repos-merged.root.xmi
+[emf-compare] component-compare: snapshotRoot=/tmp/modisco_component_snapshot_verify/all-repos-merged.root.xmi
+[emf-compare] component-compare: componentCount=1, componentIds=eclipse.jdt.debug/org.eclipse.jdt.launching.javaagent
+[emf-compare] component-compare: componentId=eclipse.jdt.debug/org.eclipse.jdt.launching.javaagent
+[emf-compare] component-compare: localSubsetResources=2, snapshotSubsetResources=2, localXmiBytes=100108, snapshotXmiBytes=100108
+[emf-compare] component-compare: comparing resource 1/2 path=compare:/partitioned/compilation-units/eclipse.jdt.debug/org.eclipse.jdt.launching.javaagent/src/main/java/org/eclipse/jdt/launching/internal/javaagent/Premain.xmi
+[emf-compare] component-compare: componentId=eclipse.jdt.debug/org.eclipse.jdt.launching.javaagent, comparedResources=2, compareMs=1321, status=OK
+[emf-compare] component-compare: wrote reports to /tmp/modisco_component_snapshot_verify/report
+[emf-compare] component-compare: totalComponents=1, totalComparedResources=2, totalCompareMs=1321, status=OK

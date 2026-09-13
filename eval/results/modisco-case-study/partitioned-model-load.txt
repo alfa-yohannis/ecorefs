@@ -1,0 +1,16 @@
+-------------------------------------------------------------------------------
+Test set: org.ecorefs.modisco.jdt.reverse.tests.ModiscoFragmentedModelLoadTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 18.50 s -- in org.ecorefs.modisco.jdt.reverse.tests.ModiscoFragmentedModelLoadTest
+org.ecorefs.modisco.jdt.reverse.tests.ModiscoFragmentedModelLoadTest.loadsFragmentedRootAndNavigatesIntoFragments -- Time elapsed: 18.42 s
+
+Console output:
+[fragmented-test] root model: /data2/projects/ecorefs/eval/datasets/modisco-java-models-by-repo/all-repos-merged-by-compilation-unit/all-repos-merged.root.xmi
+[fragmented-test] loading fragmented root model... rootSize=9.58 MiB (10047439 bytes), compilationUnitFragments=6956, auxiliaryFragments=3, this may take some time
+[fragmented-test] root loaded: name=all-repos-merged, topLevelEntries=23196
+[fragmented-test] compilationUnitScan index=0
+[fragmented-test] sample compilation unit: CompilationUnit[name=BuildJarIndex.java] @ file:/data2/projects/ecorefs/eval/datasets/modisco-java-models-by-repo/all-repos-merged-by-compilation-unit/compilation-units/eclipse.jdt.core/org.eclipse.jdt.core/antadapter/org/eclipse/jdt/core/BuildJarIndex.xmi
+[fragmented-test] sample top-level type: ClassDeclaration[name=BuildJarIndex] @ file:/data2/projects/ecorefs/eval/datasets/modisco-java-models-by-repo/all-repos-merged-by-compilation-unit/compilation-units/eclipse.jdt.core/org.eclipse.jdt.core/antadapter/org/eclipse/jdt/core/BuildJarIndex.xmi
+[fragmented-test]   descendantsVisited=1 current=Javadoc @ file:/data2/projects/ecorefs/eval/datasets/modisco-java-models-by-repo/all-repos-merged-by-compilation-unit/compilation-units/eclipse.jdt.core/org.eclipse.jdt.core/antadapter/org/eclipse/jdt/core/BuildJarIndex.xmi
+[fragmented-test]   descendantsVisited=100 current=MethodDeclaration[name=setIndexPath] @ file:/data2/projects/ecorefs/eval/datasets/modisco-java-models-by-repo/all-repos-merged-by-compilation-unit/compilation-units/eclipse.jdt.core/org.eclipse.jdt.core/antadapter/org/eclipse/jdt/core/BuildJarIndex.xmi
+[fragmented-test] fragment done: visitedDescendants=113, encounteredCrossReferences=50, resolvedCrossReferences=50, loadedResources=3

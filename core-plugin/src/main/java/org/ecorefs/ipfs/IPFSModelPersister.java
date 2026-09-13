@@ -36,12 +36,49 @@ public class IPFSModelPersister {
             // all resources referencing this one via ipns:// automatically see the new CID.
             targetResource.save(options);
         } else {
-            // CID mode: full cascade with cycle detection
-            cascadeSave(targetResource, options, new HashSet<>());
+            // EcoreFS begin
+            // The saved-set check alone can leave an outdated reference when two
+            // reference paths reach the changed resource. The cascade therefore
+            // saves in dependency order, so every resource is stored after the
+            // resources that the resource references.
+            // Old code: cascadeSave(targetResource, options, new HashSet<>());
+            cascadeSaveInDependencyOrder(targetResource, options);
+            // EcoreFS end
         }
     }
 
-    private static void cascadeSave(Resource targetResource, Map<?, ?> options, Set<Resource> alreadySaved) throws IOException {
+    // EcoreFS begin
+    /**
+     * Saves the changed resource and every resource that reaches the changed
+     * resource, in an order that keeps each rewritten reference current. The
+     * order comes from {@link ResourceDependencyGraph}. A resource without a
+     * resource set is saved alone, because no other resource can reach the
+     * resource.
+     *
+     * @param changedResource the resource with the new content
+     * @param options         the save options of the resources
+     * @throws IOException when one of the saves fails
+     */
+    private static void cascadeSaveInDependencyOrder(Resource changedResource, Map<?, ?> options) throws IOException {
+        ResourceSet resourceSet = changedResource.getResourceSet();
+        if (resourceSet == null) {
+            changedResource.save(options);
+            return;
+        }
+        ResourceDependencyGraph graph = ResourceDependencyGraph.of(resourceSet);
+        for (Resource resource : graph.planSaveOrder(changedResource)) {
+            resource.save(options);
+        }
+    }
+    // EcoreFS end
+
+    /**
+     * Earlier cascade that saved a resource as soon as a reference to the changed
+     * resource appeared. The method stays for reference, because the saved-set
+     * check can skip a needed second save.
+     */
+    @SuppressWarnings("unused")
+    private static void cascadeSaveBySavedSet(Resource targetResource, Map<?, ?> options, Set<Resource> alreadySaved) throws IOException {
         // Prevent infinite loops on circular resource dependencies 
         if (alreadySaved.contains(targetResource)) {
             return;
@@ -78,7 +115,7 @@ public class IPFSModelPersister {
             // queued parent resources, it polls the targetResource for its URI. Since the URI was 
             // mutated to the new IPFS CID in step 1, the new XMI href automatically reflects the upgrade.
             for (Resource parentResource : resourcesToSave) {
-                cascadeSave(parentResource, options, alreadySaved);
+                cascadeSaveBySavedSet(parentResource, options, alreadySaved);
             }
         }
     }

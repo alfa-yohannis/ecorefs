@@ -1,0 +1,14 @@
+-------------------------------------------------------------------------------
+Test set: org.ecorefs.modisco.jdt.reverse.tests.ModiscoTraversalBenchmarkTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 614.1 s -- in org.ecorefs.modisco.jdt.reverse.tests.ModiscoTraversalBenchmarkTest
+org.ecorefs.modisco.jdt.reverse.tests.ModiscoTraversalBenchmarkTest.benchmarksMergedAndFragmentedTraversalWhenConfigured -- Time elapsed: 614.0 s
+
+Console output:
+[traversal-bench] merged: loading model /data2/projects/ecorefs/eval/datasets/modisco-java-models-by-repo/all-repos-merged.xmi size=1.06 GiB (1133800978 bytes)
+[traversal-bench] merged: load done topLevelEntries=23196, loadedResources=1, extraResources=0, loadMs=79982
+[traversal-bench] merged: traversal done elements=4282694, traverseMs=84304, loadedResources=1
+[traversal-bench] fragmented: loading model /data2/projects/ecorefs/eval/datasets/modisco-java-models-by-repo/all-repos-merged-by-compilation-unit/all-repos-merged.root.xmi size=9.58 MiB (10047439 bytes)
+[traversal-bench] fragmented: load done topLevelEntries=23196, loadedResources=6934, extraResources=6933, loadMs=809
+[traversal-bench] fragmented: traversal done elements=4282694, traverseMs=380256, loadedResources=6934
+[traversal-bench] comparison: mergedElements=4282694, fragmentedElements=4282694, mergedLoadMs=79982, fragmentedLoadMs=809, mergedTraverseMs=84304, fragmentedTraverseMs=380256
