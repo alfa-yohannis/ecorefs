@@ -1,0 +1,208 @@
+%% Software and Systems Modeling (SoSyM) manuscript
+%% Based on the Springer Nature LaTeX template, version 3.1 (December 2024),
+%% kept unmodified in template/. sn-jnl.cls and sn-mathphys-num.bst sit next to
+%% this file because the submission must include all style files.
+%%
+%% SoSyM submission guidelines (checked 2026-09-13):
+%%   - LaTeX with the [iicol] option; upload the full source and a compiled PDF
+%%   - abstract of 150 to 250 words, without undefined abbreviations or citations
+%%   - numbered citations in square brackets (sn-mathphys-num)
+%%   - decimal headings, at most three levels
+%%   - a "Statements and Declarations" section with Competing Interests,
+%%     plus a data availability statement
+%%   - single-blind review, so author names and repository links can stay
+%% The template asks for a single .tex file, so avoid \input.
+
+\documentclass[iicol,pdflatex,sn-mathphys-num]{sn-jnl}
+
+%%%% Standard packages from the template
+\usepackage{graphicx}%
+\usepackage{multirow}%
+\usepackage{amsmath,amssymb,amsfonts}%
+\usepackage{amsthm}%
+\usepackage{mathrsfs}%
+\usepackage[title]{appendix}%
+\usepackage{xcolor}%
+\usepackage{textcomp}%
+\usepackage{manyfoot}%
+\usepackage{booktabs}%
+\usepackage{algorithm}%
+\usepackage{algorithmicx}%
+\usepackage{algpseudocode}%
+\usepackage{listings}%
+
+%% Code listings for Java and XMI snippets
+\lstset{basicstyle=\ttfamily\footnotesize,columns=fullflexible,
+  breaklines=true,frame=single,captionpos=b}
+
+\theoremstyle{thmstylethree}%
+\newtheorem{definition}{Definition}%
+
+%% Drafting aid: remove every \todo before submission
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+
+\raggedbottom
+
+\begin{document}
+
+\title[Decentralized Model Persistence]{Towards Decentralized Model Persistence}
+
+\author*[1]{\fnm{Alfa} \sur{Yohannis}}\email{alfa.ryano@pradita.ac.id}
+%% Further authors: \author[1]{\fnm{Given} \sur{Family}}\email{name@example.org}
+
+\affil*[1]{\orgdiv{Department}, \orgname{Pradita University}, \orgaddress{\city{City}, \country{Indonesia}}}
+
+\abstract{\todo{150 to 250 words: the problem of location-based model
+persistence, the content-addressed alternative, the answers to RQ1--RQ3, and
+the main quantitative result.}}
+
+\keywords{Model-driven engineering, Model persistence, Eclipse Modeling Framework, IPFS, Content-addressed storage, Cross-resource references}
+
+\maketitle
+
+\section{Introduction}\label{sec:introduction}
+
+\todo{Motivation, problem statement, contributions, and paper outline. The
+introduction should not have subheadings.}
+
+%% Research questions, verbatim from research_questions.md.
+%% conversation_summary.md suggests RQ2 for MODELS and RQ1/RQ3 for the
+%% journal version; drop or shorten RQ2 here if it is published separately.
+\begin{enumerate}
+\item[RQ1] What are the architectural challenges of extending model persistence frameworks to support content-addressed decentralized storage, and how can they be addressed?
+\item[RQ2] How can cross-resource references be maintained and resolved in an immutable, content-addressed environment where resource identifiers change on every modification?
+\item[RQ3] What is the performance overhead of content-addressed model persistence, and under what conditions is it practical for MDE toolchains?
+\end{enumerate}
+
+\section{Background}\label{sec:background}
+
+\subsection{Model persistence in EMF}\label{sec:background-emf}
+
+\todo{Resource, ResourceSet, URIConverter, proxies and lazy resolution in
+EMF~\cite{steinberg2008emf}; location-based URIs such as file:// and
+platform://.}
+
+\subsection{Content-addressed storage with IPFS}\label{sec:background-ipfs}
+
+\todo{CIDs, immutability, IPNS names, and the Kubo HTTP API~\cite{benet2014ipfs}.}
+
+\section{Content-addressed model persistence}\label{sec:rq1}
+
+%% RQ1. Sources: context.md, core-plugin/
+\subsection{Architecture}\label{sec:rq1-architecture}
+
+\todo{IPFSResourceImpl, IPFSResourceFactoryImpl and IPFSURIHandlerImpl, and
+how ipfs:// URIs plug into URIConverter and the resource factory registry.}
+
+\subsection{Resource lifecycle}\label{sec:rq1-lifecycle}
+
+\todo{Create, save (new CID), modify, save again (another CID).}
+
+\subsection{Mixing file-based and content-addressed resources}\label{sec:rq1-mixed}
+
+\todo{One ResourceSet holding both XMIResource and IPFSResource instances.}
+
+\section{Cross-resource references}\label{sec:rq2}
+
+%% RQ2. Sources: research_questions.md, ipfs_advantages.md
+\subsection{Version pinning by content addressing}\label{sec:rq2-pinning}
+
+\todo{Why a CID reference pins the exact version of the referenced resource.}
+
+\subsection{Reference management strategies}\label{sec:rq2-strategies}
+
+\todo{Direct CID references, IPFS directories, IPNS indirection, and a
+manifest or registry, with their trade-offs.}
+
+\subsection{Cascade save}\label{sec:rq2-cascade}
+
+\todo{The cascadeSave() algorithm, cycle protection, and the stale-CID case for
+bidirectional references.}
+
+\section{Tool support in the Eclipse BPMN2 Modeler}\label{sec:tool}
+
+%% Sources: README.md of org.eclipse.bpmn2-modeler-1.5.4-ecorefs
+\todo{Opening and publishing models and projects from the BPMN2 IPFS menu,
+the JSON project manifest, IPNS publishing, and per-project Kubo settings.}
+
+\section{Evaluation}\label{sec:evaluation}
+
+\subsection{Setup}\label{sec:evaluation-setup}
+
+\todo{Kubo daemon in Docker, Java runtime, hardware, warm-up and measured
+iterations.}
+
+\subsection{RQ1: Functional validation}\label{sec:evaluation-rq1}
+
+\todo{Save and load round trips and proxy resolution over ipfs:// URIs.}
+
+\subsection{RQ2: Reference evolution}\label{sec:evaluation-rq2}
+
+\todo{Version-pin test, intentional upgrade test, cascadeSave latency, and the
+BPMN case study with cross-file references.}
+
+\subsection{RQ3: Performance}\label{sec:evaluation-rq3}
+
+%% Results: eval/results/
+\todo{Save and load latency against local XMI files for models of increasing
+size, with mean, median, and standard deviation.}
+
+\subsection{Large-scale models: MoDisco models of Eclipse JDT}\label{sec:evaluation-modisco}
+
+%% Sources: eval/modisco_jdt_reverse/README.md and MANUAL-CHECKS.md
+\todo{Partitioning by compilation unit, component manifests published under
+IPNS, and EMF Compare checks against snapshots fetched from IPFS.}
+
+\section{Discussion}\label{sec:discussion}
+
+\todo{Limitations: no lazy loading, no query support, IPNS resolution
+latency, cascade cost, and circular references.}
+
+\subsection{Threats to validity}\label{sec:threats}
+
+\todo{Internal, external, and construct validity.}
+
+\section{Related work}\label{sec:related}
+
+\todo{XMI file persistence, CDO, NeoEMF, and model versioning approaches.}
+
+\section{Conclusion}\label{sec:conclusion}
+
+\todo{Answers to RQ1--RQ3 and future work.}
+
+\backmatter
+
+\bmhead{Acknowledgements}
+
+\todo{Optional.}
+
+\section*{Statements and Declarations}
+
+\bmhead{Funding}
+\todo{Funding statement.}
+
+\bmhead{Competing interests}
+\todo{Competing interests statement.}
+
+\bmhead{Ethics approval and consent to participate}
+\todo{Write ``Not applicable'' if it does not apply.}
+
+\bmhead{Consent for publication}
+\todo{Write ``Not applicable'' if it does not apply.}
+
+\bmhead{Data availability}
+\todo{Where the benchmark results and model datasets can be obtained.}
+
+\bmhead{Code availability}
+The implementation is available at
+\url{https://github.com/alfa-yohannis/ecorefs}, the BPMN2 Modeler integration at
+\url{https://github.com/alfa-yohannis/org.eclipse.bpmn2-modeler-1.5.4-ecorefs},
+and the BPMN~2.0 metamodel changes at
+\url{https://github.com/alfa-yohannis/org.eclipse.bpmn2-ecorefs}.
+
+\bmhead{Author contribution}
+\todo{Contribution of each author.}
+
+\bibliography{references}
+
+\end{document}
