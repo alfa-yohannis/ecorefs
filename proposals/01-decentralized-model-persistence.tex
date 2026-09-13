@@ -8,6 +8,7 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[margin=25mm]{geometry}
+\usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{enumitem}
@@ -37,7 +38,7 @@
 \toprule
 Duration & 12 months \\
 Target venue & Software and Systems Modeling (SoSyM), with an earlier conference paper \\
- & on the reference question \\
+ & on the two of the research questions \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -64,7 +65,13 @@ Second, reverse engineering produces models of a code base. A later analysis sho
 
 Third, organizations exchange models across a boundary. A path inside one organization has no meaning inside another organization, so the parties need agreed names or a shared server.
 
-A reference that names a version would remove the ambiguity in all three settings. Content addressing offers such a reference, yet the model persistence frameworks of MDE assume a stable address with changing content. The assumption runs through the resource, the factory, the URI handler and the serialization of references, so the transfer is not a configuration change.
+Figure~\ref{fig:pinning} contrasts the two kinds of address. A reference that names a version would remove the ambiguity in all three settings. Content addressing offers such a reference, yet the model persistence frameworks of MDE assume a stable address with changing content. The assumption runs through the resource, the factory, the URI handler and the serialization of references, so the transfer is not a configuration change.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.62\textwidth]{../papers/01-SoSym/paper/figures/version-pinning.pdf}
+\caption{Two kinds of address. (a) A file path resolves to the current content at the path. (b) A content identifier resolves to one version, so a reference keeps pointing at the version that was referenced.}\label{fig:pinning}
+\end{figure}
 
 \section{State of the art and the gap}
 
@@ -86,6 +93,12 @@ The study will answer three questions.
 
 \paragraph{RQ3. Performance.} What is the overhead of content-addressed persistence, and under which conditions is the approach practical for an MDE toolchain? Sub-questions cover the cost of a save, the cost of a load, the behaviour as the model grows, and the point where the overhead stops being acceptable for interactive work.
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.82\textwidth]{figures/planned-layer.pdf}
+\caption{Planned place of the persistence layer. The framework above stays unchanged, the layer in the middle is the artifact of the study, and the node below gives the storage.}\label{fig:layer}
+\end{figure}
+
 \section{Method}
 
 The study follows design science, where a designed artifact answers the research questions and an evaluation of the artifact gives the evidence~\cite{hevner2004design}. The case study part follows the guidelines of Runeson and H\"ost~\cite{runeson2009case}. The work has four steps.
@@ -96,7 +109,13 @@ The second step designs and builds the artifact. The artifact is a plugin that a
 
 The third step validates the functions. Automated tests and example programs check save and load round trips, mixed resource sets, cross-resource references and proxy resolution.
 
-The fourth step measures cost and scale. A benchmark on generated models compares a save through IPFS with a save to a local XMI file, and a case study on large reverse-engineered models tests the approach at a realistic size.
+The fourth step measures cost and scale. A benchmark on generated models compares a save through IPFS with a save to a local XMI file, and a case study on large reverse-engineered models tests the approach at a realistic size. Figure~\ref{fig:design} shows the four steps with the output of each step and with the question that each step serves.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/research-design.pdf}
+\caption{Research design. The four steps of the study, the output of each step, and the research question that each step serves.}\label{fig:design}
+\end{figure}
 
 \section{Work plan}
 
@@ -115,7 +134,13 @@ WP6 & Writing, artifact release and submission & 10 to 12 \\
 \end{tabular}
 \end{center}
 
-Milestones follow the packages. M1 at month 2 is the problem analysis with the reference list. M2 at month 5 is a persistence layer that saves and loads a model through a local node. M3 at month 8 is a working update of referencing resources with tests. M4 at month 9 is the tool support inside an editor. M5 at month 11 is the complete evaluation data. M6 at month 12 is the submitted manuscript with a public artifact.
+Figure~\ref{fig:workplan} shows the schedule. Milestones follow the packages. M1 at month 2 is the problem analysis with the reference list. M2 at month 5 is a persistence layer that saves and loads a model through a local node. M3 at month 8 is a working update of referencing resources with tests. M4 at month 9 is the tool support inside an editor. M5 at month 11 is the complete evaluation data. M6 at month 12 is the submitted manuscript with a public artifact.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/work-plan.pdf}
+\caption{Schedule of the work packages over twelve months, with the six milestones.}\label{fig:workplan}
+\end{figure}
 
 \section{Evaluation plan}
 
