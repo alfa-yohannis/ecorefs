@@ -106,7 +106,7 @@ The deliverables are public repositories with the plugin and the tool integratio
 
 ## 11. Resources and budget
 
-The core work needs one researcher, a development machine and a local IPFS node. The evaluation beyond a single machine needs rented nodes, because a claim about decentralized persistence needs more than one node.
+The core work needs one researcher, a development machine and a local IPFS node. The evaluation beyond a single machine needs rented nodes, because a claim about decentralized persistence needs more than one node. Each rented node is reached through a tunnel that is bound to a domain name, so the application programming interface of a node stays closed to the open internet.
 
 | Category | Purpose | USD | IDR |
 | --- | --- | ---: | ---: |
@@ -114,11 +114,12 @@ The core work needs one researcher, a development machine and a local IPFS node.
 | Assistant | Part-time help with the evaluation scripts and the dataset, twelve months at IDR 2,000,000 per month | 1,412 | 24,000,000 |
 | Virtual machines | Four nodes on different networks, twelve months | 300 | 5,100,000 |
 | Storage and pinning | Retention of the published dataset during and after the project | 250 | 4,250,000 |
+| Domain names | Two domain names at Cloudflare, so a rented node stays reachable through a tunnel, where the tunnel service costs nothing | 22 | 374,000 |
 | Archiving | Deposit of the dataset under a DOI, free of charge on Zenodo | 0 | 0 |
 | Travel | One conference presentation of the reference paper | 2,500 | 42,500,000 |
-| **Subtotal** | Without the open access fee | **5,874** | **99,850,000** |
+| **Subtotal** | Without the open access fee | **5,896** | **100,224,000** |
 | Publication | Open access fee of the journal, needed only for the open access route | 3,190 | 54,230,000 |
-| **Total** | With the open access fee | **9,064** | **154,080,000** |
+| **Total** | With the open access fee | **9,086** | **154,454,000** |
 
 The amounts are estimates at an exchange rate of IDR 17,000 per USD, and the figures follow public provider prices of September 2026. The open access fee comes from the price list of the journal, where the current article processing charge is USD 3,190. The subscription route of the same journal carries no fee, so the last row stays optional. Personnel amounts follow institutional rates and need a check against the rules of the funding scheme.
 
