@@ -6,7 +6,7 @@ Research proposal for a study of content-addressed storage in model-driven engin
 | --- | --- |
 | Applicant | Alfa Yohannis, Department of Informatics, Pradita University, Kabupaten Tangerang, Banten, Indonesia |
 | Duration | 12 months |
-| Target venue | Software and Systems Modeling (SoSyM), with an earlier conference paper on the reference question |
+| Target venue | [Software and Systems Modeling (SoSyM)](https://link.springer.com/journal/10270), with an earlier conference paper on two of the research questions |
 | Prepared | September 2026 |
 
 ## 1. Summary
