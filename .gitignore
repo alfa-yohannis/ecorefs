@@ -77,3 +77,22 @@ eval/modisco_jdt_reverse/org.ecorefs.modisco.jdt.reverse.tests/target
 # Symlinks to the separate BPMN2 Modeler and BPMN 2.0 Metamodel repos
 /org.eclipse.bpmn2-modeler-1.5.4-ecorefs
 /org.eclipse.bpmn2-ecorefs
+
+# LaTeX build files (*.log is already ignored above)
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.out
+*.synctex.gz
+*.synctex(busy)
+*.toc
+*.lof
+*.lot
+*.dvi
+*.xdv
+*.bcf
+*.run.xml
+papers/01-SoSym/main.pdf
+
