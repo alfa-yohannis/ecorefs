@@ -8,7 +8,7 @@
 allowmixing
 hide empty members
 skinparam defaultFontSize 11
-skinparam nodesep 14
+skinparam nodesep 48
 skinparam ranksep 24
 
 class ResourceFactoryImpl <<EMF>>
