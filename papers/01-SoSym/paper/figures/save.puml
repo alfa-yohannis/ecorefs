@@ -1,0 +1,28 @@
+@startuml save
+' UML sequence diagram: saving a resource to IPFS in both reference modes.
+' Kept narrow (about one text column): the caller is a found message, the
+' participant names break over lines, and the messages stay short.
+!include style.iuml
+hide footbox
+skinparam defaultFontSize 11
+skinparam maxMessageSize 110
+skinparam ParticipantPadding 4
+
+participant "IPFS\nResource\nImpl" as Res
+participant "IPFS node\n(Kubo)" as Kubo
+
+[-> Res : save(options)
+activate Res
+Res -> Res : write XMI to\na temporary file
+Res -> Kubo : add(temporary file)
+Kubo --> Res : CID
+alt CID mode (default)
+  Res -> Res : setURI(ipfs://CID)
+else IPNS mode
+  Res -> Kubo : key/gen (first save only)
+  Res -> Kubo : name/publish(CID)
+  Kubo --> Res : key id
+  Res -> Res : setURI(ipns://\nkey id)
+end
+deactivate Res
+@enduml

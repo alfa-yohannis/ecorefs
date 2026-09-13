@@ -1,0 +1,25 @@
+@startuml cascade-after
+' UML object diagram: the same three BPMN resources after a complete cascade save.
+' Every resource has a new CID, and every reference points to a new CID.
+' The CIDs are placeholders, not real content identifiers.
+!include style.iuml
+skinparam defaultFontSize 11
+skinparam nodesep 12
+skinparam ranksep 26
+
+object "collaboration.bpmn" as C {
+  URI = ipfs://QmC'
+  refs = QmB', QmA'
+}
+object "order-process.bpmn" as O {
+  URI = ipfs://QmB'
+  refs = QmA'
+}
+object "payment-process.bpmn" as P {
+  URI = ipfs://QmA'
+}
+
+C --> O : processRef
+C --> P : processRef
+O --> P : supports
+@enduml

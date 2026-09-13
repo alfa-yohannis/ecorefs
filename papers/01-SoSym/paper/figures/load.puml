@@ -1,0 +1,29 @@
+@startuml load
+' UML sequence diagram: loading a resource from IPFS by CID or by IPNS name.
+' Kept narrow (about one text column): the caller is a found message, the
+' participant names break over lines, and the messages stay short.
+!include style.iuml
+hide footbox
+skinparam defaultFontSize 11
+skinparam maxMessageSize 110
+skinparam ParticipantPadding 4
+
+participant "IPFS\nResource\nImpl" as Res
+participant "IPFS\nURIHandler\nImpl" as Handler
+participant "IPFS node\n(Kubo)" as Kubo
+
+[-> Res : load()
+activate Res
+Res -> Handler : createInputStream\n(uri)
+activate Handler
+opt IPNS name
+  Handler -> Kubo : name/resolve
+  Kubo --> Handler : CID
+end
+Handler -> Kubo : cat(CID)
+Kubo --> Handler : XMI bytes
+Handler --> Res : input stream
+deactivate Handler
+[<-- Res : model
+deactivate Res
+@enduml

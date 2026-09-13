@@ -1,58 +1,40 @@
 @startuml architecture
 ' UML class diagram: how the ecorefs core plugin extends the EMF persistence API.
 ' Stereotypes mark the origin of each class; the ecorefs classes also get a light fill.
+' Laid out top to bottom and about one text column wide, so hidden edges stack the
+' three extension points instead of placing them side by side.
 !include style.iuml
 allowmixing
 hide empty members
 skinparam defaultFontSize 11
-skinparam nodesep 22
-skinparam ranksep 34
+skinparam nodesep 12
+skinparam ranksep 22
 
-class ResourceSet <<EMF>>
-interface Resource <<EMF>>
-class XMIResourceImpl <<EMF>>
 class ResourceFactoryImpl <<EMF>>
-interface URIConverter <<EMF>>
-interface URIHandler <<EMF>>
-class URIHandlerImpl <<EMF>>
-class "EcoreUtil.CrossReferencer" as CrossReferencer <<EMF>>
-
-class IPFSResourceImpl <<ecorefs>> {
-  +save(options)
-}
 class IPFSResourceFactoryImpl <<ecorefs>> {
   +createResource(uri)
 }
+class XMIResourceImpl <<EMF>>
+class IPFSResourceImpl <<ecorefs>> {
+  +save(options)
+}
+class URIHandlerImpl <<EMF>>
 class IPFSURIHandlerImpl <<ecorefs>> {
-  +canHandle(uri)
-  +createInputStream(uri, options)
-  +createOutputStream(uri, options)
+  +createInputStream(uri)
 }
-class IPFSModelPersister <<ecorefs>> {
-  {static} +cascadeSave(resource, options)
-}
+node "IPFS node\n(Kubo)" as Kubo
 enum ReferenceMode <<ecorefs>> {
   CID
   IPNS
 }
 
-node "Kubo node" as Kubo
-
-ResourceSet "1" o-- "*" Resource : resources
-ResourceSet --> ResourceFactoryImpl : factory per\nURI scheme
-ResourceSet --> URIConverter
-URIConverter o-- "*" URIHandler : handlers
-Resource <|.. XMIResourceImpl
-URIHandler <|.. URIHandlerImpl
-
-XMIResourceImpl <|-- IPFSResourceImpl
 ResourceFactoryImpl <|-- IPFSResourceFactoryImpl
+IPFSResourceFactoryImpl -[hidden]down-> XMIResourceImpl
+XMIResourceImpl <|-- IPFSResourceImpl
+IPFSResourceImpl -[hidden]down-> URIHandlerImpl
 URIHandlerImpl <|-- IPFSURIHandlerImpl
 IPFSResourceFactoryImpl ..> IPFSResourceImpl : <<create>>
-IPFSResourceImpl ..> ReferenceMode
-IPFSModelPersister ..> CrossReferencer
-IPFSModelPersister ..> Resource : save
-
 IPFSResourceImpl --> Kubo : add,\nname/publish
 IPFSURIHandlerImpl --> Kubo : cat,\nname/resolve
+IPFSResourceImpl ..> ReferenceMode : mode
 @enduml
