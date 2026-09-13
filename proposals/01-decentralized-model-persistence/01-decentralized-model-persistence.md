@@ -115,10 +115,13 @@ The core work needs one researcher, a development machine and a local IPFS node.
 | Storage and pinning | Retention of the published dataset during and after the project | 250 | 4,250,000 |
 | Domain names | Two domain names at Cloudflare, so a rented node stays reachable through a tunnel, where the tunnel service costs nothing | 22 | 374,000 |
 | Archiving | Deposit of the dataset under a DOI, free of charge on Zenodo | 0 | 0 |
-| Travel | One conference presentation of the reference paper | 2,500 | 42,500,000 |
-| **Subtotal** | Without the open access fee | **5,596** | **95,124,000** |
+| Flight | Return flight to a regional conference in Japan or Korea | 600 | 10,200,000 |
+| Accommodation | Four nights near the venue | 360 | 6,120,000 |
+| Registration | One full conference registration | 600 | 10,200,000 |
+| Meals and transport | Five days of meals and local transport | 250 | 4,250,000 |
+| **Subtotal** | Without the open access fee | **4,906** | **83,394,000** |
 | Publication | Open access fee of the journal, needed only for the open access route | 3,190 | 54,230,000 |
-| **Total** | With the open access fee | **8,786** | **149,354,000** |
+| **Total** | With the open access fee | **8,096** | **137,624,000** |
 
 The amounts are estimates at an exchange rate of IDR 17,000 per USD, and the figures follow public provider prices of September 2026. The open access fee comes from the price list of the journal, where the current article processing charge is USD 3,190. The subscription route of the same journal carries no fee, so the last row stays optional. Personnel amounts follow institutional rates and need a check against the rules of the funding scheme.
 
