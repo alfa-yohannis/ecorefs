@@ -31,17 +31,17 @@
 
 % (a) Location-based persistence
 \node[paneltitle] (ta) at (\panelcenter,0) {(a) Location-based persistence};
-\node[mutable] (a) at (0,-4.5mm) {a.xmi\\[-1pt]\scriptsize href = b.xmi\#//Person};
-\node[mutable] (b) at ($(a.north east)+(\gap,0)$) {b.xmi\\[-1pt]\scriptsize version 2 (current)};
+\node[mutable] (a) at (0,-4.5mm) {\textbf{a.xmi}\\[-1pt]\scriptsize href = b.xmi\#//Person};
+\node[mutable] (b) at ($(a.north east)+(\gap,0)$) {\textbf{b.xmi}\\[-1pt]\scriptsize version 2 (current)};
 \draw[ref] (a.east) -- (a.east-|b.west);
 \node[note] (noteA) at ($(a.south west)+(0,-1.5mm)$) {The reference resolves to whatever b.xmi holds now.};
 \node[note] (noteB) at ($(b.south west)+(0,-1.5mm)$) {Version 1 was overwritten at the same address.};
 
 % (b) Content-addressed persistence
 \node[paneltitle] (tb) at ($(noteA.south-|ta.south)+(0,-4.5mm)$) {(b) Content-addressed persistence};
-\node[immutable] (A) at ($(tb.south-|a.north west)+(0,-2.5mm)$) {ipfs://QmA\\[-1pt]\scriptsize href = ipfs://QmB1\#//Person};
-\node[immutable] (B1) at ($(A.north east)+(\gap,0)$) {ipfs://QmB1\\[-1pt]\scriptsize B, version 1};
-\node[immutable] (B2) at ($(B1.south west)+(0,-8mm)$) {ipfs://QmB2\\[-1pt]\scriptsize B, version 2};
+\node[immutable] (A) at ($(tb.south-|a.north west)+(0,-2.5mm)$) {\textbf{ipfs://QmA}\\[-1pt]\scriptsize href = ipfs://QmB1\#//Person};
+\node[immutable] (B1) at ($(A.north east)+(\gap,0)$) {\textbf{ipfs://QmB1}\\[-1pt]\scriptsize B, version 1};
+\node[immutable] (B2) at ($(B1.south west)+(0,-8mm)$) {\textbf{ipfs://QmB2}\\[-1pt]\scriptsize B, version 2};
 \draw[ref] (A.east) -- (A.east-|B1.west);
 \draw[change] (B1.south) -- node[left, font=\scriptsize, text=inksoft, align=right] {save after\\a change} (B2.north);
 \node[note] at ($(A.south west)+(0,-1.5mm)$) {Pinned to version 1 until A is saved with a new reference.};

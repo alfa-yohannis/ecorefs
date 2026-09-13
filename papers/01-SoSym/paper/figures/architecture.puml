@@ -1,9 +1,9 @@
 @startuml architecture
 ' UML class diagram: how the ecorefs core plugin extends the EMF persistence API.
 ' Stereotypes mark the origin of each class; the ecorefs classes also get a light fill.
-' The layout follows a snake: the first row reads from left to right, the second
-' row from right to left, the third row from left to right again. Hidden edges
-' link the end of one row to the start of the next row.
+' The layout is a grid of three rows. Each row holds one class of EMF on the left
+' and the ecorefs class that extends the EMF class on the right, so the rows read
+' from left to right. Hidden edges stack the rows.
 !include style.iuml
 allowmixing
 hide empty members
@@ -29,17 +29,20 @@ enum ReferenceMode <<ecorefs>> {
 }
 node "IPFS node\n(Kubo)" as Kubo
 
-' Row 1, from left to right
+' Layout as a grid of two columns and four rows:
+'   ResourceFactoryImpl   IPFSResourceFactoryImpl
+'   XMIResourceImpl       IPFSResourceImpl
+'   ReferenceMode         URIHandlerImpl
+'   IPFS node (Kubo)      IPFSURIHandlerImpl
 ResourceFactoryImpl <|-right- IPFSResourceFactoryImpl
-' Row 2, from right to left
-XMIResourceImpl <|-left- IPFSResourceImpl
-' Row 3, from left to right
-URIHandlerImpl <|-right- IPFSURIHandlerImpl
+XMIResourceImpl <|-right- IPFSResourceImpl
+URIHandlerImpl <|-down- IPFSURIHandlerImpl
 
-' Turns of the snake
-IPFSResourceFactoryImpl -[hidden]down- XMIResourceImpl
-IPFSResourceImpl -[hidden]down- URIHandlerImpl
-IPFSURIHandlerImpl -[hidden]down- Kubo
+ResourceFactoryImpl -[hidden]down- XMIResourceImpl
+XMIResourceImpl -[hidden]down- ReferenceMode
+ReferenceMode -[hidden]down- Kubo
+ReferenceMode -[hidden]right- URIHandlerImpl
+Kubo -[hidden]right- IPFSURIHandlerImpl
 
 IPFSResourceFactoryImpl ..> IPFSResourceImpl : <<create>>
 IPFSResourceImpl ..> ReferenceMode : mode

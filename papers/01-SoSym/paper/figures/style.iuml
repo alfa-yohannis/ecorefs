@@ -15,6 +15,16 @@ skinparam PackageFontStyle bold
 skinparam NoteBackgroundColor #f0efec
 skinparam NoteBorderColor #898781
 
+' The name of a class, object, state, participant or node prints in bold, so the
+' title of every box stands out from the content of the box.
+skinparam ClassFontStyle bold
+skinparam ObjectFontStyle bold
+skinparam StateFontStyle bold
+skinparam ParticipantFontStyle bold
+skinparam NodeFontStyle bold
+skinparam ClassAttributeFontStyle plain
+skinparam ObjectAttributeFontStyle plain
+
 skinparam ClassAttributeIconSize 0
 skinparam ClassBackgroundColor #ffffff
 skinparam ClassBorderColor #52514e

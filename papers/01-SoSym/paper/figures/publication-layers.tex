@@ -26,23 +26,23 @@
 ]
 
 % Mutable head and the local record of the head
-\node[pointer, minimum width=36mm] (ipns) at (0,0) {IPNS name (mutable)\\[-1pt]\scriptsize ipns://k51\ldots};
-\node[local, minimum width=26mm] (head) at ($(ipns.north east)+(4mm,0)$) {project-head.json\\[-1pt]\scriptsize local record};
+\node[pointer, minimum width=36mm] (ipns) at (0,0) {\textbf{IPNS name (mutable)}\\[-1pt]\scriptsize ipns://k51\ldots};
+\node[local, minimum width=26mm] (head) at ($(ipns.north east)+(4mm,0)$) {\textbf{project-head.json}\\[-1pt]\scriptsize local record};
 \draw[->, draw=muted, line width=0.6pt] (head.west) -- (head.west-|ipns.east);
 
 % Project version manifest
-\node[immutable, minimum width=66mm, text width=63mm] (manifest) at ($(ipns.south west)+(0,-7mm)$) {Project version manifest (CID)\\[-1pt]\scriptsize root model CID, 4 shared resource CIDs,\\[-2pt]\scriptsize 26 component entries};
+\node[immutable, minimum width=66mm, text width=63mm] (manifest) at ($(ipns.south west)+(0,-7mm)$) {\textbf{Project version manifest (CID)}\\[-1pt]\scriptsize root model CID, 4 shared resource CIDs,\\[-2pt]\scriptsize 26 component entries};
 \draw[link] (ipns.south) -- node[right, small] {points to} (ipns.south|-manifest.north);
 
 % Entries of the manifest
-\node[immutable, minimum width=16mm] (root) at ($(manifest.south west)+(0,-7mm)$) {Root model\\[-1pt]\scriptsize by CID};
-\node[immutable, minimum width=16mm] (shared) at ($(root.north east)+(2.5mm,0)$) {Shared\\[-1pt]\scriptsize by CID};
-\node[immutable, minimum width=29mm] (component) at ($(shared.north east)+(2.5mm,0)$) {Component entry\\[-1pt]\scriptsize root CID, manifest CID};
+\node[immutable, minimum width=16mm] (root) at ($(manifest.south west)+(0,-7mm)$) {\textbf{Root model}\\[-1pt]\scriptsize by CID};
+\node[immutable, minimum width=16mm] (shared) at ($(root.north east)+(2.5mm,0)$) {\textbf{Shared}\\[-1pt]\scriptsize by CID};
+\node[immutable, minimum width=29mm] (component) at ($(shared.north east)+(2.5mm,0)$) {\textbf{Component entry}\\[-1pt]\scriptsize root CID, manifest CID};
 \foreach \target in {root, shared, component}
   \draw[link] (\target.north|-manifest.south) -- (\target.north);
 
 % Content of one component
-\node[immutable, minimum width=29mm, anchor=north] (dir) at ($(component.south)+(0,-7mm)$) {Component directory\\[-1pt]\scriptsize component-manifest.json,\\[-2pt]\scriptsize compilation-unit XMI files};
+\node[immutable, minimum width=29mm, anchor=north] (dir) at ($(component.south)+(0,-7mm)$) {\textbf{Component directory}\\[-1pt]\scriptsize component-manifest.json,\\[-2pt]\scriptsize compilation-unit XMI files};
 \draw[link] (component.south) -- (dir.north);
 
 \end{tikzpicture}
