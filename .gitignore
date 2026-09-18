@@ -99,3 +99,8 @@ papers/01-SoSym/paper/main.pdf
 # Python virtual environment
 .venv/
 
+
+# Beamer auxiliary files
+*.nav
+*.snm
+*.vrb
