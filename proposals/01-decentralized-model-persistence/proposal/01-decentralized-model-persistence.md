@@ -5,7 +5,7 @@ Research proposal for a study of content-addressed storage in model-driven engin
 | Field | Value |
 | --- | --- |
 | Applicant | Alfa Yohannis, Department of Informatics, Pradita University, Kabupaten Tangerang, Banten, Indonesia |
-| Duration | 12 months |
+| Duration | 6 months |
 | Target venue | [Software and Systems Modeling (SoSyM)](https://link.springer.com/journal/10270), with an earlier conference paper on two of the research questions |
 | Prepared | September 2026 |
 
@@ -71,14 +71,14 @@ The fourth step measures cost and scale. A benchmark on generated models compare
 
 | Package | Work | Months |
 | --- | --- | --- |
-| WP1 | Problem analysis and literature review, including a verified reference list | 1 to 2 |
-| WP2 | Persistence layer: resource, resource factory and URI handler for `ipfs://` and `ipns://` (RQ1) | 2 to 5 |
-| WP3 | Reference strategies, the cascade update of referencing resources, and the publication structure for partitioned models (RQ2) | 4 to 8 |
-| WP4 | Tool support: IPFS commands in the Eclipse BPMN2 Modeler and in the generated BPMN2 tree editor | 6 to 9 |
-| WP5 | Evaluation: benchmark, functional tests and the case study on reverse-engineered models (RQ3) | 8 to 11 |
-| WP6 | Writing, artifact release and submission | 10 to 12 |
+| WP1 | Problem analysis and literature review, including a verified reference list | 1 |
+| WP2 | Persistence layer: resource, resource factory and URI handler for `ipfs://` and `ipns://` (RQ1) | 1 to 3 |
+| WP3 | Reference strategies, the cascade update of referencing resources, and the publication structure for partitioned models (RQ2) | 2 to 4 |
+| WP4 | Tool support: IPFS commands in the Eclipse BPMN2 Modeler and in the generated BPMN2 tree editor | 3 to 4 |
+| WP5 | Evaluation: benchmark, functional tests and the case study on reverse-engineered models (RQ3) | 4 to 5 |
+| WP6 | Writing, artifact release and submission | 5 to 6 |
 
-Milestones follow the packages. M1 at month 2 is the problem analysis with the reference list. M2 at month 5 is a persistence layer that saves and loads a model through a local node. M3 at month 8 is a working update of referencing resources with tests. M4 at month 9 is the tool support inside an editor. M5 at month 11 is the complete evaluation data. M6 at month 12 is the submitted manuscript with a public artifact.
+Milestones follow the packages. M1 at month 1 is the problem analysis with the reference list. M2 at month 3 is a persistence layer that saves and loads a model through a local node. M3 at month 4 is a working update of referencing resources with tests, together with the tool support inside an editor. M4 at month 5 is the complete evaluation data. M5 at month 6 is the submitted manuscript with a public artifact.
 
 ## 8. Evaluation plan
 
@@ -112,8 +112,8 @@ The core work needs one researcher, a development machine and a local IPFS node.
 
 | Category | Purpose | USD | IDR |
 | --- | --- | ---: | ---: |
-| Researcher | Honorarium of the principal researcher, twelve months at IDR 2,000,000 per month | 1,412 | 24,000,000 |
-| Assistant | Part-time help with the evaluation scripts and the dataset, twelve months at IDR 2,000,000 per month | 1,412 | 24,000,000 |
+| Researcher | Honorarium of the principal researcher, six months at IDR 2,000,000 per month | 706 | 12,000,000 |
+| Assistant | Part-time help with the evaluation scripts and the dataset, six months at IDR 2,000,000 per month | 706 | 12,000,000 |
 | Storage and pinning | Retention of the published dataset during and after the project | 250 | 4,250,000 |
 | Domain names | Two domain names at Cloudflare, so a rented node stays reachable through a tunnel, where the tunnel service costs nothing | 22 | 374,000 |
 | Archiving | Deposit of the dataset under a DOI, free of charge on Zenodo | 0 | 0 |
@@ -121,9 +121,9 @@ The core work needs one researcher, a development machine and a local IPFS node.
 | Accommodation | Four nights near the venue | 360 | 6,120,000 |
 | Registration | One full conference registration | 600 | 10,200,000 |
 | Meals and transport | Five days of meals and local transport | 250 | 4,250,000 |
-| **Subtotal** | Without the open access fee | **4,906** | **83,394,000** |
+| **Subtotal** | Without the open access fee | **3,494** | **59,394,000** |
 | Publication | Open access fee of the journal, needed only for the open access route | 3,190 | 54,230,000 |
-| **Total** | With the open access fee | **8,096** | **137,624,000** |
+| **Total** | With the open access fee | **6,684** | **113,624,000** |
 
 The amounts are estimates at an exchange rate of IDR 17,000 per USD, and the figures follow public provider prices of September 2026. The open access fee comes from the price list of the journal, where the current article processing charge is USD 3,190. The subscription route of the same journal carries no fee, so the last row stays optional. Personnel amounts follow institutional rates and need a check against the rules of the funding scheme.
 
