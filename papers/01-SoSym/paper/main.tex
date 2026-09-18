@@ -118,6 +118,14 @@ The gap appears in other modeling tasks as well. Teams keep models in shared fol
 
 Content-addressed storage takes a different approach. The InterPlanetary File System (IPFS) identifies content by a content identifier (CID)~\cite{benet2014ipfs,ipfsdocscid}. The CID is computed from the content, so a changed file receives a new CID~\cite{ipfsdocsipns}. Content under a given CID cannot change. In addition, any IPFS node with a copy of the content can serve the content~\cite{trautwein2022ipfs}. The InterPlanetary Name System (IPNS) adds mutable names on top of CIDs~\cite{ipfsdocsipns}.
 
+Figure~\ref{fig:settings} contrasts the two settings for a model that is split into several fragments. In a local setting, the fragments sit in a shared folder or on a repository server, and each reference names a path, so every party reads and writes the same location. In a decentralized setting, every fragment is an immutable block on IPFS, and each reference names the CID of the target. A party then fetches a fragment from any node that holds a copy, while a mutable IPNS name marks the current version of the project.
+
+\begin{figure*}[tbp]
+\centering
+\includegraphics[width=\textwidth]{figures/development-settings.pdf}
+\caption{Development of a model that is split into fragments. (a) In a local setting, the fragments sit in one shared location, and each reference names a path. (b) In a decentralized setting, each fragment is an immutable block on IPFS, each reference names a CID, and a mutable IPNS name marks the current version of the project.}\label{fig:settings}
+\end{figure*}
+
 Content addressing has two consequences for models. First, a reference to a CID pins the exact version of the referenced model, in the way that a lock file records the exact dependency tree of a project~\cite{npmpackagelock} and Nix derives unique component paths from cryptographic hashes~\cite{dolstra2004nix}. Second, every save of a model creates a new CID, so references to the model need a deliberate update, and tools need support for the update. Dependency updates are a known source of problems in software ecosystems~\cite{cox2019dependencies,decan2019ecosystems}. A CID is also a cryptographic hash, so a reader can check that fetched content matches the requested identifier wherever the content is stored. However, the properties have costs. Content stays available only while at least one node stores the content, and each resource is loaded as a whole, without the on-demand loading of database-backed persistence~\cite{pagan2015repository,daniel2017neoemf}.
 
 The properties open several uses in model-driven engineering:

@@ -1,0 +1,93 @@
+% Figure: a local multi-fragment XMI development setting next to a decentralized
+% one. Both panels share one layout: the fragments inside a dashed container,
+% the parties below with their access, and a note that states the difference.
+% Standalone TikZ source. The colors match the other figures: grey for mutable
+% files, blue for immutable blocks and orange for a mutable name.
+\documentclass[tikz,border=2pt]{standalone}
+\usetikzlibrary{arrows.meta,calc}
+
+\definecolor{ink}{HTML}{0B0B0B}
+\definecolor{inksoft}{HTML}{52514E}
+\definecolor{muted}{HTML}{898781}
+\definecolor{mutablefill}{HTML}{F0EFEC}
+\definecolor{immutablefill}{HTML}{CDE2FB}
+\definecolor{immutableborder}{HTML}{1C5CAB}
+\definecolor{pointerfill}{HTML}{FBE1D6}
+\definecolor{pointerborder}{HTML}{B8501F}
+
+\begin{document}
+\begin{tikzpicture}[
+  font={\footnotesize\hyphenpenalty=10000},
+  >={Stealth[length=4.5pt]},
+  box/.style={rounded corners=2pt, text=ink, align=center, inner sep=2.5pt,
+    minimum height=7.5mm, text width=24mm},
+  file/.style={box, draw=inksoft, fill=mutablefill},
+  block/.style={box, draw=immutableborder, fill=immutablefill},
+  pointer/.style={box, draw=pointerborder, fill=pointerfill, text width=30mm},
+  actor/.style={box, draw=inksoft, fill=white, text width=20mm},
+  container/.style={draw=muted, dashed, rounded corners=3pt},
+  ref/.style={->, draw=ink, line width=0.6pt},
+  access/.style={<->, draw=inksoft, line width=0.6pt},
+  soft/.style={->, draw=muted, line width=0.6pt},
+  peer/.style={draw=muted, line width=0.6pt, densely dashed},
+  paneltitle/.style={font=\footnotesize\bfseries, text=ink, anchor=north},
+  small/.style={font={\scriptsize\hyphenpenalty=10000}, text=inksoft, align=center},
+  note/.style={font={\scriptsize\hyphenpenalty=10000\exhyphenpenalty=10000}, text=inksoft,
+    align=center, text width=72mm, anchor=north}
+]
+
+% ---------------------------------------------------------------------------
+% (a) Local multi-fragment development
+% ---------------------------------------------------------------------------
+\node[paneltitle] at (37mm,0) {(a) Local multi-fragment development};
+
+\draw[container] (0,-6mm) rectangle (74mm,-46mm);
+\node[small, anchor=north west] at (1.5mm,-7mm) {Shared folder or repository server};
+
+\node[file] (root) at (37mm,-17mm) {\textbf{root.xmi}};
+\node[file] (pa) at (18mm,-31mm) {\textbf{part-a.xmi}};
+\node[file] (pb) at (56mm,-31mm) {\textbf{part-b.xmi}};
+\draw[ref] (root) -- (pa);
+\draw[ref] (root) -- (pb);
+\node[small] at (37mm,-41.5mm) {references by path, \texttt{href="part-a.xmi\#//..."}};
+
+\node[actor] (devA) at (18mm,-58mm) {\textbf{Developer A}};
+\node[actor] (devB) at (56mm,-58mm) {\textbf{Developer B}};
+\draw[access] (devA.north) -- (devA.north|-0,-46mm);
+\draw[access] (devB.north) -- (devB.north|-0,-46mm);
+\node[small] at (37mm,-50.5mm) {read and write in place};
+
+\node[note] at (37mm,-65mm) {A path names a location. An edit in place changes what every reader sees, and every reader needs the shared location.};
+
+% ---------------------------------------------------------------------------
+% (b) Decentralized development
+% ---------------------------------------------------------------------------
+\begin{scope}[xshift=84mm]
+\node[paneltitle] at (37mm,0) {(b) Decentralized development};
+
+\draw[container] (0,-6mm) rectangle (74mm,-46mm);
+\node[small, anchor=north west] at (1.5mm,-7mm) {IPFS network};
+
+\node[pointer] (head) at (37mm,-13mm) {\textbf{ipns://k51...}\\[-1pt]\scriptsize project head, mutable};
+\node[block] (croot) at (37mm,-24mm) {\textbf{root}\\[-1pt]\scriptsize ipfs://QmR...};
+\node[block] (cpa) at (18mm,-35mm) {\textbf{part-a}\\[-1pt]\scriptsize ipfs://QmA...};
+\node[block] (cpb) at (56mm,-35mm) {\textbf{part-b}\\[-1pt]\scriptsize ipfs://QmB...};
+\draw[soft] (head) -- (croot);
+\draw[ref] (croot) -- (cpa);
+\draw[ref] (croot) -- (cpb);
+\node[small] at (37mm,-42.5mm) {references by content, \texttt{href="ipfs://QmA...\#//..."}};
+
+\node[actor] (nA) at (12mm,-58mm) {\textbf{Node of A}};
+\node[actor] (nB) at (40mm,-58mm) {\textbf{Node of B}};
+\node[actor] (nP) at (66mm,-58mm) {\textbf{Pinning node}};
+\draw[access] (nA.north) -- (nA.north|-0,-46mm);
+\draw[access] (nB.north) -- (nB.north|-0,-46mm);
+\draw[peer] (nA) -- (nB);
+\draw[peer] (nB) -- (nP);
+\node[small] at (26mm,-50.5mm) {add and fetch\\by content};
+
+\node[note] at (37mm,-65mm) {A content identifier names a version. A reference stays fixed, and a reader fetches a fragment from whichever node holds a copy.};
+\end{scope}
+
+\end{tikzpicture}
+\end{document}

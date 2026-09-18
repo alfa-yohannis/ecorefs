@@ -66,6 +66,14 @@ Second, reverse engineering produces models of a code base. A later analysis sho
 
 Third, organizations exchange models across a boundary. A path inside one organization has no meaning inside another organization, so the parties need agreed names or a shared server.
 
+Figure~\ref{fig:settings} contrasts a local development setting for a model that is split into fragments with the decentralized setting that the study targets. In the local setting, every party reads and writes one shared location, and each reference names a path. In the decentralized setting, every fragment becomes an immutable block, each reference names the CID of the target, and a mutable IPNS name marks the current version.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{../../papers/01-SoSym/paper/figures/development-settings.pdf}
+\caption{Development of a model that is split into fragments. (a) In a local setting, the fragments sit in one shared location, and each reference names a path. (b) In the decentralized setting of the study, each fragment is an immutable block on IPFS, each reference names a CID, and a mutable IPNS name marks the current version of the project.}\label{fig:settings}
+\end{figure}
+
 Figure~\ref{fig:pinning} contrasts the two kinds of address. A reference that names a version would remove the ambiguity in all three settings. Content addressing offers such a reference, yet the model persistence frameworks of MDE assume a stable address with changing content. The assumption runs through the resource, the factory, the URI handler and the serialization of references, so the transfer is not a configuration change.
 
 \begin{figure}[htbp]
