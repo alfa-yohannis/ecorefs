@@ -162,6 +162,7 @@ The first five items come from a review of the current draft. The draft reads as
 - [x] Show the cycle limit of the cascade in a test. `CascadeReferenceIntegrityTest#leavesOneDirectionOfACycleOutdated` saves two resources that refer to each other, and one direction keeps an outdated CID after the cascade. This item is not in the manuscript.
 - [x] Run two local Kubo nodes in a private network with Docker Compose (`docker/kubo`), so the tests and the tutorial never reach the public IPFS network. This item is not in the manuscript.
 - [x] Write a tutorial with screenshots for Kubo, the modeler and the cascade (`docs/tutorial.md`). This item is not in the manuscript.
+- [x] Write a guide that installs eclipse-mcp into the IDE, activates it in the modeler and connects Claude Code (`docs/eclipse-mcp.md`). This item is not in the manuscript.
 - [ ] Build the modeler with Tycho. The BPMN2 update site in the build file is no longer available, and `releases/2022-06` carries the same bundles.
 - [x] Let the modeler fork open an IPFS project when the Project Explorer is empty, by creating a workspace project for it, and name downloaded models after their content instead of their CID. This item is not in the manuscript.
 - [x] Resolve relative BPMN import locations in the modeler fork against the importing file. `ImportUtil` read them from the working directory of Eclipse, so the collaboration of the case study failed with "Cannot load Resource". This item is not in the manuscript.
@@ -293,5 +294,6 @@ The BPMN2 work lives in separate repositories:
 
 - [org.eclipse.bpmn2-modeler-1.5.4-ecorefs](https://github.com/alfa-yohannis/org.eclipse.bpmn2-modeler-1.5.4-ecorefs): Eclipse BPMN2 Modeler 1.5.4 with commands to open and publish BPMN models on IPFS
 - [org.eclipse.bpmn2-ecorefs](https://github.com/alfa-yohannis/org.eclipse.bpmn2-ecorefs): Eclipse BPMN 2.0 Metamodel with a generated tree editor that reads `ipfs://` and `ipns://` URIs
+- [eclipse-mcp](https://github.com/alfa-yohannis/eclipse-mcp): an Eclipse plug-in that lets an AI assistant such as Claude Code, or a script, drive the IDE and edit BPMN2 diagrams
 
-[docs/tutorial.md](docs/tutorial.md) walks through both: it starts a Kubo node, launches the modeler from an Eclipse IDE, and publishes and opens BPMN models on IPFS.
+[docs/tutorial.md](docs/tutorial.md) walks through the first two: it starts a Kubo node, launches the modeler from an Eclipse IDE, and publishes and opens BPMN models on IPFS. [docs/eclipse-mcp.md](docs/eclipse-mcp.md) installs eclipse-mcp into the same IDE and activates it in the modeler.

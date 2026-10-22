@@ -466,3 +466,5 @@ The two modes match the two kinds of versions in Maven. A reference by CID behav
 ## Next steps
 
 The persistence layer of ecorefs also works without the modeler. The section on the core plug-in in the [README](../README.md) shows how to run its tests, and [`examples/BpmnIpfsExample.java`](../examples/BpmnIpfsExample.java) saves two BPMN models to IPFS and resolves a reference between them by CID.
+
+To let an AI assistant such as Claude Code work with the IDE and the modeler, install the eclipse-mcp plug-in as described in [eclipse-mcp.md](eclipse-mcp.md).
