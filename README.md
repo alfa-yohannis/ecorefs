@@ -214,10 +214,12 @@ Results:
 
 ## Running the tests
 
-The tests need a local Kubo node on port 5001:
+The tests need a local Kubo node on port 5001. `docker/kubo/compose.yaml` starts two local nodes in a private IPFS network, which never connects to the public one ([docs/tutorial.md](docs/tutorial.md), Part 1, explains the setup):
 
 ```bash
-docker run -d --name ipfs_node -p 5001:5001 -p 8080:8080 -p 4001:4001 ipfs/kubo:latest
+sh docker/kubo/new-swarm-key.sh                  # once
+docker compose -f docker/kubo/compose.yaml up -d
+sh docker/kubo/peer-nodes.sh                     # once, after the first start
 ```
 
 The core plugin compiles for Java 11 (`maven.compiler.source` is 11) and uses `java-ipfs-http-client` v1.4.3 from JitPack. Run Maven with JDK 11 or newer, for example 21 or 25. Java 8 does not work.
@@ -261,7 +263,7 @@ The same content added with the same IPFS settings produces the same CID, indepe
 
 ### Circular references
 
-`cascadeSave` handles circular dependencies (A referring to B and B referring to A) with its set of already saved resources. CDO and NeoEMF do not face the problem, because their references use mutable identifiers on the server.
+`cascadeSave` terminates on circular dependencies (A referring to B and B referring to A), because `ResourceDependencyGraph` breaks the cycle when it plans the save order. One direction of the cycle still keeps an outdated CID, and `CascadeReferenceIntegrityTest#leavesOneDirectionOfACycleOutdated` shows it. CDO and NeoEMF do not face the problem, because their references use mutable identifiers on the server.
 
 ### Limitations
 
@@ -281,3 +283,5 @@ The BPMN2 work lives in separate repositories:
 
 - [org.eclipse.bpmn2-modeler-1.5.4-ecorefs](https://github.com/alfa-yohannis/org.eclipse.bpmn2-modeler-1.5.4-ecorefs): Eclipse BPMN2 Modeler 1.5.4 with commands to open and publish BPMN models on IPFS
 - [org.eclipse.bpmn2-ecorefs](https://github.com/alfa-yohannis/org.eclipse.bpmn2-ecorefs): Eclipse BPMN 2.0 Metamodel with a generated tree editor that reads `ipfs://` and `ipns://` URIs
+
+[docs/tutorial.md](docs/tutorial.md) walks through both: it starts a Kubo node, launches the modeler from an Eclipse IDE, and publishes and opens BPMN models on IPFS.
