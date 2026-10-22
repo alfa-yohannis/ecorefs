@@ -287,13 +287,30 @@ This part needs node 1 of Part 1, a JDK 11 or newer and Maven. The commands run 
 
 ### The case study
 
-The folder `examples/case-study` holds three BPMN models. `payment-process.bpmn` stands alone, `order-process.bpmn` supports the payment process, and the two participants of `collaboration.bpmn` refer to both processes. Two reference paths therefore lead from the collaboration to the payment process.
+The folder `examples/case-study` holds three BPMN models. `payment-process.bpmn` stands alone, and `order-process.bpmn` supports the payment process. In `collaboration.bpmn`, the participant Seller runs the order process and the participant Payment Provider runs the payment process. Two message flows connect tasks of the two processes: Payment request goes from Reserve Item to Validate Card Details, and Payment confirmation goes from Issue Receipt back to Package and Ship. Two reference paths therefore lead from the collaboration to the payment process.
 
-To look at the models, copy the three files into one project of the modeler, for example `case-study`, and open them. The two process files carry no diagram layout, so their editors first offer to create the diagram elements. The collaboration shows its two participants, Seller and Payment Provider, as pools. To see the three editors at once, drag an editor tab to the lower edge of the editor area, and Eclipse splits the area.
+The files refer to each other through BPMN imports. An import binds a namespace to a file, and an `xmlns` prefix for that namespace lets a reference name an element of the file. The collaboration starts like this:
 
-![The case-study project in the modeler: the payment process, the order process and the collaboration with the pools Seller and Payment Provider](images/eclipse-case-study-models.png)
+```xml
+<bpmn2:definitions ...
+    xmlns:order="http://ecorefs.org/case-study/order-process"
+    xmlns:payment="http://ecorefs.org/case-study/payment-process" ...>
+  <bpmn2:import importType="http://www.omg.org/spec/BPMN/20100524/MODEL"
+      location="order-process.bpmn" namespace="http://ecorefs.org/case-study/order-process"/>
+  <bpmn2:import importType="http://www.omg.org/spec/BPMN/20100524/MODEL"
+      location="payment-process.bpmn" namespace="http://ecorefs.org/case-study/payment-process"/>
+  <bpmn2:collaboration id="Collaboration_ECommerce" name="E-Commerce Collaboration">
+    <bpmn2:participant id="Participant_Seller" name="Seller" processRef="order:OrderFulfillmentProcess"/>
+    <bpmn2:participant id="Participant_PaymentProvider" name="Payment Provider" processRef="payment:PaymentProcess"/>
+    <bpmn2:messageFlow id="MessageFlow_PaymentRequest" name="Payment request"
+        sourceRef="order:Task_ReserveItem" targetRef="payment:Task_ValidateCard"/>
+```
 
-The files hold no references to each other yet. The test of the next section connects them before the first save: the order process gets `supports` to the payment process, and the participants get `processRef` to the two processes. Each saved reference then names its target by CID.
+The diagram part of the collaboration uses the same prefixes. A shape with `bpmnElement="order:Task_ReserveItem"` draws a task of `order-process.bpmn` inside the Seller pool. Each process therefore stays defined in its own file, and the collaboration holds only the participants, the message flows and the layout. `order-process.bpmn` imports `payment-process.bpmn` in the same way for `<bpmn2:supports>payment:PaymentProcess</bpmn2:supports>`. Once the models are saved to IPFS, each of these references names its target by CID instead of a prefix.
+
+To look at the models, copy the three files into one project of the modeler, for example `case-study`, and open them. The two process files carry no diagram layout, so their editors first offer to create the diagram elements. The collaboration draws both processes inside the pools Seller and Payment Provider, with the two message flows between them. To see the three editors at once, drag an editor tab to the lower edge of the editor area, and Eclipse splits the area.
+
+![The case-study project in the modeler: the payment process and the order process at the top, and below them the collaboration, which draws both processes in the pools Seller and Payment Provider](images/eclipse-case-study-models.png)
 
 ![The three models before the change: each refers to the CIDs of the models below it](images/cascade-before.png)
 
@@ -308,15 +325,15 @@ The test loads the three files, saves them to node 1, changes the name of the pa
 ```
 [case study] before the change
 [case study]   payment-process.bpmn ipfs://QmfGiCCe3C6dtHFvRtMipQ7c3hxhLZawmrcajgNWavRen5
-[case study]   order-process.bpmn ipfs://QmR7odKRyn4XsgdFzDUwRjqw5LVxKXxywRDDyN2T3stYZZ
-[case study]   collaboration.bpmn ipfs://QmXHTRDJb1QmK79hp7JULkL3QPufev63bNXB6yB13MFgbY
-[case study] after the cascade save, 55.55 ms
+[case study]   order-process.bpmn ipfs://QmdxkpeaqrmqCZKhCfoEaVXK4PgzTvtz9yD4Sfb5ShoGsV
+[case study]   collaboration.bpmn ipfs://QmQtNqodGo5CuvfXNJ7yjhAqBTwYtCsRXB3J9wYU9wjAps
+[case study] after the cascade save, 41.09 ms
 [case study]   payment-process.bpmn ipfs://QmTLbqPgHxUmS82rDLDCKgrncmkdHi9J6nQu38KT8AE3PJ
-[case study]   order-process.bpmn ipfs://QmPDp6KaNcZiKx6Tx1wj4X9cg7SGZB17rHzAndxfjcAyk2
-[case study]   collaboration.bpmn ipfs://Qmeg1dqvfD5sKM6m7ui3JhWx2BraaenC1H5KszGzDmLtdY
+[case study]   order-process.bpmn ipfs://QmZ5N7EA943sqWB89osfiykwxvKrvk9H4xZnDj6S9vJUde
+[case study]   collaboration.bpmn ipfs://QmWkyZHJ7ULGebfnjHbNNgJcasjgiew3GrKkVF7f2FwhyL
 ```
 
-The test also runs in Eclipse. Import `core-plugin` with **File > Import > Existing Projects into Workspace**, choose **Maven > Update Project** on it once, open `BpmnCaseStudyCascadeTest` and choose **Run As > JUnit Test**. The **Console** prints the same CIDs, because the same content always gets the same CID.
+The test also runs in Eclipse. Import `core-plugin` with **File > Import > Existing Projects into Workspace**, choose **Maven > Update Project** on it once, open `BpmnCaseStudyCascadeTest` and choose **Run As > JUnit Test**. The **Console** prints the same CIDs, because the same content always gets the same CID. Only the time changes from run to run.
 
 ![The case study test in Eclipse: JUnit reports 1 of 1 passed, and the Console prints the CIDs before and after the cascade save](images/eclipse-cascade-case-study.png)
 
@@ -326,16 +343,16 @@ One change gave all three models a new CID. The cascade saves in dependency orde
 
 ### What works
 
-- Every reference carries the current CID. Open the new collaboration through the gateway: `http://127.0.0.1:8080/ipfs/Qmeg1dqvfD5sKM6m7ui3JhWx2BraaenC1H5KszGzDmLtdY`. Both `processRef` entries point to the new CIDs of the two processes.
+- Every reference carries the current CID. Open the new collaboration through the gateway: `http://127.0.0.1:8080/ipfs/QmWkyZHJ7ULGebfnjHbNNgJcasjgiew3GrKkVF7f2FwhyL`. The two `processRef` entries, the ends of the two message flows and the shapes of the diagram all point to the new CIDs of the two processes. The imports keep their file names, because the references no longer need them.
 
-  ![The collaboration after the cascade, with processRef entries to QmPDp6… and QmTLbq…](images/cascade-collaboration-after.png)
+  ![The collaboration after the cascade: the processRef entries, the message flows and the diagram shapes refer to QmZ5N7… and QmTLbq…](images/cascade-collaboration-after.png)
 
-- The old version stays intact. The previous CID of the collaboration still returns the collaboration with the old references, so it reproduces the exact state before the change: `http://127.0.0.1:8080/ipfs/QmXHTRDJb1QmK79hp7JULkL3QPufev63bNXB6yB13MFgbY`.
+- The old version stays intact. The previous CID of the collaboration still returns the collaboration with the old references, so it reproduces the exact state before the change: `http://127.0.0.1:8080/ipfs/QmQtNqodGo5CuvfXNJ7yjhAqBTwYtCsRXB3J9wYU9wjAps`.
 
-  ![The collaboration before the change, with processRef entries to QmR7od… and QmfGiC…](images/cascade-collaboration-before.png)
+  ![The collaboration before the change: the same references lead to Qmdxkp… and QmfGiC…](images/cascade-collaboration-before.png)
 
-- The run is reproducible. The same files and the same change give the same CIDs on every node. The CIDs above are the ones in the two figures, which come from an earlier run for the paper.
-- Node 2 serves both versions as well, for example at `http://127.0.0.1:8081/ipfs/Qmeg1dqvfD5sKM6m7ui3JhWx2BraaenC1H5KszGzDmLtdY`, because it fetches the files from node 1.
+- The run is reproducible. The same files and the same change give the same CIDs on every node. The CIDs above are the ones in the two figures.
+- Node 2 serves both versions as well, for example at `http://127.0.0.1:8081/ipfs/QmWkyZHJ7ULGebfnjHbNNgJcasjgiew3GrKkVF7f2FwhyL`, because it fetches the files from node 1.
 
 ### What goes wrong
 
@@ -345,7 +362,7 @@ One change gave all three models a new CID. The cascade saves in dependency orde
 
 ```bash
 PAYMENT=QmTLbqPgHxUmS82rDLDCKgrncmkdHi9J6nQu38KT8AE3PJ
-ORDER=QmPDp6KaNcZiKx6Tx1wj4X9cg7SGZB17rHzAndxfjcAyk2
+ORDER=QmZ5N7EA943sqWB89osfiykwxvKrvk9H4xZnDj6S9vJUde
 curl -s -X POST "http://127.0.0.1:5001/api/v0/cat?arg=$PAYMENT" \
   | sed 's/second version/third version/' > payment-v3.xmi
 curl -s -X POST -F "file=@payment-v3.xmi" http://127.0.0.1:5001/api/v0/add
@@ -432,6 +449,7 @@ The two modes match the two kinds of versions in Maven. A reference by CID behav
 - **Eclipse or Maven runs on the wrong Java.** Check `java -version`, `echo $JAVA_HOME` and the `-vm` lines in `eclipse.ini`. All three should point to Java 17.
 - **Publishing fails with "Connection refused".** Kubo is not running. Start it with `docker compose -f docker/kubo/compose.yaml start` and check the API with the `curl` command of Part 1.
 - **IPNS publishing asks for a key name.** Set **Default IPNS publish key name** in the project properties, and make sure the key exists: `docker exec ecorefs-kubo ipfs key list`.
+- **Opening `collaboration.bpmn` reports "Cannot load Resource" for `payment-process.bpmn`.** Older builds of the modeler fork look for an imported file in the working directory of Eclipse instead of the folder of the importing file. Pull the modeler repository, which resolves import locations against the importing file, let Eclipse rebuild it, and start the runtime again.
 
 ## Next steps
 

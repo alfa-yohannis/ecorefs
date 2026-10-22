@@ -8,11 +8,11 @@ skinparam nodesep 12
 skinparam ranksep 26
 
 object "collaboration.bpmn" as C {
-  URI = ipfs://QmXHTR...FgbY
-  refs = QmR7od..., QmfGiC...
+  URI = ipfs://QmQtNq...jAps
+  refs = Qmdxkp..., QmfGiC...
 }
 object "order-process.bpmn" as O {
-  URI = ipfs://QmR7od...tYZZ
+  URI = ipfs://Qmdxkp...oGsV
   refs = QmfGiC...
 }
 object "payment-process.bpmn" as P {

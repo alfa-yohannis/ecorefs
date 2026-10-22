@@ -13,6 +13,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -23,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -72,14 +74,21 @@ public class BpmnCaseStudyCascadeTest {
     }
 
     /**
-     * Loads one model of the case study.
+     * Loads one model of the case study and resolves its references. The BPMN
+     * loader keeps references into the diagram, such as the participant of a
+     * pool shape, as proxies with the URI of the local file. Resolved now, they
+     * move into the IPFS resource together with their targets, so the stored
+     * model holds no local file path and its identifier does not depend on where
+     * the repository lies.
      *
      * @param resourceSet the resource set of the load
      * @param fileName    file name inside the case study directory
      * @return the loaded resource
      */
     private Resource loadCaseStudyModel(ResourceSet resourceSet, String fileName) {
-        return resourceSet.getResource(URI.createFileURI(CASE_STUDY_DIRECTORY + fileName), true);
+        Resource resource = resourceSet.getResource(URI.createFileURI(CASE_STUDY_DIRECTORY + fileName), true);
+        EcoreUtil.resolveAll(resource);
+        return resource;
     }
 
     /**
@@ -122,6 +131,22 @@ public class BpmnCaseStudyCascadeTest {
         for (RootElement element : definitions.getRootElements()) {
             if (element instanceof Collaboration) {
                 return (Collaboration) element;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the participant with the given identifier.
+     *
+     * @param collaboration the collaboration of the case study
+     * @param participantId identifier of the participant
+     * @return the participant, or null when no participant carries the identifier
+     */
+    private Participant findParticipant(Collaboration collaboration, String participantId) {
+        for (Participant participant : collaboration.getParticipants()) {
+            if (participantId.equals(participant.getId())) {
+                return participant;
             }
         }
         return null;
@@ -184,18 +209,14 @@ public class BpmnCaseStudyCascadeTest {
         assertNotNull(orderProcess, "The order process has to load");
         assertNotNull(collaboration, "The collaboration has to load");
 
-        // The files carry placeholder references, so the test wires the real
-        // objects before the first save.
-        orderProcess.getSupports().clear();
-        orderProcess.getSupports().add(paymentProcess);
-        for (Participant participant : collaboration.getParticipants()) {
-            if ("Participant_Seller".equals(participant.getId())) {
-                participant.setProcessRef(orderProcess);
-            }
-            if ("Participant_PaymentProvider".equals(participant.getId())) {
-                participant.setProcessRef(paymentProcess);
-            }
-        }
+        // The files refer to each other through BPMN imports, so the loaded
+        // references already lead to the processes of the other files.
+        assertTrue(orderProcess.getSupports().contains(paymentProcess),
+                "The order process has to support the payment process of payment-process.bpmn");
+        assertSame(orderProcess, findParticipant(collaboration, "Participant_Seller").getProcessRef(),
+                "The seller has to refer to the order process of order-process.bpmn");
+        assertSame(paymentProcess, findParticipant(collaboration, "Participant_PaymentProvider").getProcessRef(),
+                "The payment provider has to refer to the payment process of payment-process.bpmn");
 
         Resource payment = createIpfsResource(resourceSet, "ipfs://pending-payment", paymentFile);
         Resource order = createIpfsResource(resourceSet, "ipfs://pending-order", orderFile);

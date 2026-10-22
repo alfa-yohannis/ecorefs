@@ -4,6 +4,9 @@
     xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL"
     xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
     xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+    xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+    xmlns:order="http://ecorefs.org/case-study/order-process"
+    xmlns:payment="http://ecorefs.org/case-study/payment-process"
     id="Definitions_Collaboration"
     targetNamespace="http://ecorefs.org/case-study/collaboration">
 
@@ -28,26 +31,138 @@
     Three hops, fully automatic. Every intermediate resource gets a
     new CID that reflects the updated dependency.
   -->
-  <!-- Participant.processRef is wired by BpmnCaseStudyCascadeTest, and the save
-       writes the current CID of each referenced process. -->
+  <!-- The imports make the prefixes "order" and "payment" stand for the two
+       process files, so each participant names its process in another file.
+       Saved to IPFS, each processRef carries the CID of that file instead. -->
+  <bpmn2:import importType="http://www.omg.org/spec/BPMN/20100524/MODEL"
+      location="order-process.bpmn" namespace="http://ecorefs.org/case-study/order-process"/>
+  <bpmn2:import importType="http://www.omg.org/spec/BPMN/20100524/MODEL"
+      location="payment-process.bpmn" namespace="http://ecorefs.org/case-study/payment-process"/>
+
   <bpmn2:collaboration id="Collaboration_ECommerce" name="E-Commerce Collaboration">
 
-    <bpmn2:participant id="Participant_Seller" name="Seller"/>
+    <bpmn2:participant id="Participant_Seller" name="Seller" processRef="order:OrderFulfillmentProcess"/>
 
-    <bpmn2:participant id="Participant_PaymentProvider" name="Payment Provider"/>
+    <bpmn2:participant id="Participant_PaymentProvider" name="Payment Provider" processRef="payment:PaymentProcess"/>
+
+    <!-- Each message flow connects a task of one process with a task of the
+         other. The tasks live in the process files, so the message flows name
+         them through the imports, like the processRef of the participants. -->
+    <bpmn2:messageFlow id="MessageFlow_PaymentRequest" name="Payment request"
+        sourceRef="order:Task_ReserveItem" targetRef="payment:Task_ValidateCard"/>
+
+    <bpmn2:messageFlow id="MessageFlow_PaymentConfirmation" name="Payment confirmation"
+        sourceRef="payment:Task_IssueReceipt" targetRef="order:Task_PackageShip"/>
 
   </bpmn2:collaboration>
 
-  <!-- Diagram of the collaboration: one horizontal pool per participant, so a
-       BPMN editor shows the two participants. -->
+  <!-- Diagram of the collaboration. Each pool shows the process of its participant:
+       the shapes and edges inside the pools refer to the elements of
+       order-process.bpmn and payment-process.bpmn through the imports, so the
+       processes stay defined in their own files. -->
   <bpmndi:BPMNDiagram id="BPMNDiagram_Collaboration" name="E-Commerce Collaboration">
     <bpmndi:BPMNPlane id="BPMNPlane_Collaboration" bpmnElement="Collaboration_ECommerce">
       <bpmndi:BPMNShape id="BPMNShape_Participant_Seller" bpmnElement="Participant_Seller" isHorizontal="true">
-        <dc:Bounds x="50" y="50" width="700" height="160"/>
+        <dc:Bounds x="50" y="50" width="1000" height="200"/>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_StartEvent_Order" bpmnElement="order:StartEvent_Order">
+        <dc:Bounds x="100" y="132" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_Task_CheckInventory" bpmnElement="order:Task_CheckInventory">
+        <dc:Bounds x="180" y="125" width="110" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_Gateway_InStock" bpmnElement="order:Gateway_InStock" isMarkerVisible="true">
+        <dc:Bounds x="340" y="125" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_Task_BackOrder" bpmnElement="order:Task_BackOrder">
+        <dc:Bounds x="440" y="75" width="110" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_EndEvent_BackOrdered" bpmnElement="order:EndEvent_BackOrdered">
+        <dc:Bounds x="940" y="82" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_Task_ReserveItem" bpmnElement="order:Task_ReserveItem">
+        <dc:Bounds x="440" y="175" width="110" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_Task_PackageShip" bpmnElement="order:Task_PackageShip">
+        <dc:Bounds x="760" y="175" width="110" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_EndEvent_Shipped" bpmnElement="order:EndEvent_Shipped">
+        <dc:Bounds x="940" y="182" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="BPMNEdge_Flow_O1" bpmnElement="order:Flow_O1">
+        <di:waypoint x="136" y="150"/>
+        <di:waypoint x="180" y="150"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_Flow_O2" bpmnElement="order:Flow_O2">
+        <di:waypoint x="290" y="150"/>
+        <di:waypoint x="340" y="150"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_Flow_InStock" bpmnElement="order:Flow_InStock">
+        <di:waypoint x="365" y="175"/>
+        <di:waypoint x="365" y="200"/>
+        <di:waypoint x="440" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_Flow_OutOfStock" bpmnElement="order:Flow_OutOfStock">
+        <di:waypoint x="365" y="125"/>
+        <di:waypoint x="365" y="100"/>
+        <di:waypoint x="440" y="100"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_Flow_O3" bpmnElement="order:Flow_O3">
+        <di:waypoint x="550" y="200"/>
+        <di:waypoint x="760" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_Flow_O5" bpmnElement="order:Flow_O5">
+        <di:waypoint x="870" y="200"/>
+        <di:waypoint x="940" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_Flow_O4" bpmnElement="order:Flow_O4">
+        <di:waypoint x="550" y="100"/>
+        <di:waypoint x="940" y="100"/>
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="BPMNShape_Participant_PaymentProvider" bpmnElement="Participant_PaymentProvider" isHorizontal="true">
-        <dc:Bounds x="50" y="250" width="700" height="160"/>
+        <dc:Bounds x="50" y="340" width="1000" height="140"/>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_StartEvent_Payment" bpmnElement="payment:StartEvent_Payment">
+        <dc:Bounds x="370" y="392" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_Task_ValidateCard" bpmnElement="payment:Task_ValidateCard">
+        <dc:Bounds x="440" y="385" width="110" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_Task_ChargeCard" bpmnElement="payment:Task_ChargeCard">
+        <dc:Bounds x="600" y="385" width="110" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_Task_IssueReceipt" bpmnElement="payment:Task_IssueReceipt">
+        <dc:Bounds x="760" y="385" width="110" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_EndEvent_PaymentComplete" bpmnElement="payment:EndEvent_PaymentComplete">
+        <dc:Bounds x="920" y="392" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="BPMNEdge_Flow_P1" bpmnElement="payment:Flow_P1">
+        <di:waypoint x="406" y="410"/>
+        <di:waypoint x="440" y="410"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_Flow_P2" bpmnElement="payment:Flow_P2">
+        <di:waypoint x="550" y="410"/>
+        <di:waypoint x="600" y="410"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_Flow_P3" bpmnElement="payment:Flow_P3">
+        <di:waypoint x="710" y="410"/>
+        <di:waypoint x="760" y="410"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_Flow_P4" bpmnElement="payment:Flow_P4">
+        <di:waypoint x="870" y="410"/>
+        <di:waypoint x="920" y="410"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_MessageFlow_PaymentRequest" bpmnElement="MessageFlow_PaymentRequest"
+          sourceElement="BPMNShape_Task_ReserveItem" targetElement="BPMNShape_Task_ValidateCard">
+        <di:waypoint x="495" y="225"/>
+        <di:waypoint x="495" y="385"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_MessageFlow_PaymentConfirmation" bpmnElement="MessageFlow_PaymentConfirmation"
+          sourceElement="BPMNShape_Task_IssueReceipt" targetElement="BPMNShape_Task_PackageShip">
+        <di:waypoint x="815" y="385"/>
+        <di:waypoint x="815" y="225"/>
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 
