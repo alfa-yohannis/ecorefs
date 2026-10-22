@@ -6,7 +6,7 @@ Plan for `paper/main.tex` (15 pages in the JSS `elsarticle` layout on 2026-10-22
 
 Decided on 2026-10-22: the paper goes to JSS (Elsevier) and SoSyM is dropped. JSS fits better than IST, whose scope centers on improving development practice and on systematic reviews. JSS is a hybrid journal ("Supports open access"), so the subscription route costs nothing. Its page showed CiteScore 10.1 and Impact Factor 3.8.
 
-Converted on 2026-10-22. `paper/main.tex` compiles without errors, overfull boxes or undefined references, to 15 pages: an unnumbered highlights page plus 14 article pages. The changes are staged or untracked, not committed.
+Converted on 2026-10-22. `paper/main.tex` compiles without errors, overfull boxes or undefined references, to 15 pages: an unnumbered highlights page plus 14 article pages. Commit 17368c0 holds the conversion.
 
 - [x] Official template: `elsarticle.zip` (April 2024) from the Elsevier LaTeX instructions page (https://www.elsevier.com/researcher/author/policies-and-guidelines/latex-instructions), kept unmodified in `template/`. TeX Live on this machine has no elsarticle, so `elsarticle.cls`, generated with `latex -no-shell-escape elsarticle.ins`, sits next to `main.tex` together with `elsarticle-num.bst`.
 - [x] Folder renamed from `papers/01-SoSym` to `papers/01-JSS`. The Springer class, style and template are removed, and the `.gitignore` path is updated.
@@ -53,14 +53,15 @@ The models are in `eval/datasets/bpmn` (cleaned) and `eval/datasets/bpmn-backup-
 
 ## 3. Decentralized setting and baselines
 
-- [ ] P1 M. Measure more than one node (README item) without renting machines: several Kubo containers on one host, with `tc netem` delays for LAN and WAN profiles. Measure a fetch by CID from a node that has never seen the content, and IPNS publish and resolve times. If possible, add one node on another network, such as a campus machine, for a run through the public DHT.
+- [ ] P1 M. Measure more than one node (README item) without renting machines: several Kubo containers on one host, with `tc netem` delays for LAN and WAN profiles. Measure a fetch by CID from a node that has never seen the content, and IPNS publish and resolve times. If possible, add one node on another network, such as a campus machine, for a run through the public DHT. Two containers in a private network already run from `docker/kubo/compose.yaml` (see `docs/tutorial.md`), so the delays and the measurements remain.
 - [ ] P1 M. Baselines on the same models (README item): a Git repository (commit, push and clone), a shared network file system, and at least one database-backed store, NeoEMF with an embedded back end being the cheapest to set up.
 - [ ] P2 S. Report effect sizes and confidence intervals next to the Wilcoxon tests, and state the practicality threshold explicitly. The README defines it as the model size at which IPFS takes more than five times as long as local I/O.
 - [ ] P3 L. Evaluate the tool support with a scripted editing workflow or a small user study (README item).
 
 ## 4. Manuscript items already flagged
 
-- [ ] P1 S. Report the output of `BpmnIpfsExample` and of the modeler self-tests with a running Kubo node (`\todo` in `sec:evaluation-rq1`), or let the real-model round trip replace the example.
+- [ ] P1 S. Report the output of `BpmnIpfsExample` and of the modeler self-tests with a running Kubo node (`\todo` in `sec:evaluation-rq1`), or let the real-model round trip replace the example. The modeler self-tests pass with `--integration` against Kubo 0.40.1 (2026-10-22).
+- [x] P1 S. Rerun the BPMN case study after the three files gained BPMN imports and the collaboration gained message flows and a diagram (2026-10-22). Figure `fig:cascade` and the 41 ms in `sec:evaluation-rq2` come from that run, and the paragraph names the imports and the message flows.
 - [ ] P2 M. Build the modeler with Tycho against `releases/2022-06` (`\todo` in `sec:tool-editor`).
 - [ ] P1 M. Archive code, scripts and data under a DOI on Zenodo: the MoDisco dataset (1.04 GiB) with the published CIDs (`\todo`, Data availability), plus the MIWG and engine BPMN sets with the change logs. Cite the Camunda set by repository and commit only, since its terms do not cover redistribution.
 - [ ] P1 S. Remove every `\todo` before submission.
