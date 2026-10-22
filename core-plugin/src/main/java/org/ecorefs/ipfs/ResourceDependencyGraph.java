@@ -6,6 +6,8 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -56,12 +58,64 @@ public final class ResourceDependencyGraph {
      * @return the dependency graph of the resource set
      */
     public static ResourceDependencyGraph of(ResourceSet resourceSet) {
+        return of(resourceSet, Collections.<LocationAttributeUpdater>emptyList());
+    }
+
+    /**
+     * Builds the graph from the references between the resources of a resource
+     * set and from the location attributes that the updaters read. A location
+     * attribute counts like a reference, so a resource that names another
+     * resource only through an import still reaches that resource.
+     *
+     * @param resourceSet the resource set with the loaded resources
+     * @param updaters    the updaters of location attributes, possibly empty
+     * @return the dependency graph of the resource set
+     */
+    public static ResourceDependencyGraph of(ResourceSet resourceSet,
+            Collection<? extends LocationAttributeUpdater> updaters) {
         Map<Resource, Set<Resource>> dependencies = new HashMap<>();
         Map<Resource, Set<Resource>> dependents = new HashMap<>();
         for (Resource resource : new ArrayList<>(resourceSet.getResources())) {
             collectReferencesOfResource(resource, dependencies, dependents);
+            collectNamedResources(resource, updaters, dependencies, dependents);
         }
         return new ResourceDependencyGraph(dependencies, dependents);
+    }
+
+    /**
+     * Adds an edge from a resource to every resource that the location attributes
+     * of the resource name.
+     *
+     * @param resource     the resource with the location attributes
+     * @param updaters     the updaters that read the location attributes
+     * @param dependencies outgoing edges under construction
+     * @param dependents   incoming edges under construction
+     */
+    private static void collectNamedResources(Resource resource,
+            Collection<? extends LocationAttributeUpdater> updaters,
+            Map<Resource, Set<Resource>> dependencies, Map<Resource, Set<Resource>> dependents) {
+        for (LocationAttributeUpdater updater : updaters) {
+            addEdgesToNamedResources(resource, updater.findNamedResources(resource), dependencies, dependents);
+        }
+    }
+
+    /**
+     * Adds an edge from a resource to each of the resources that the resource
+     * names, except the resource itself.
+     *
+     * @param resource       the resource with the location attributes
+     * @param namedResources the resources that the location attributes name
+     * @param dependencies   outgoing edges under construction
+     * @param dependents     incoming edges under construction
+     */
+    private static void addEdgesToNamedResources(Resource resource, Collection<Resource> namedResources,
+            Map<Resource, Set<Resource>> dependencies, Map<Resource, Set<Resource>> dependents) {
+        for (Resource namedResource : namedResources) {
+            if (namedResource != resource) {
+                addEdge(dependencies, resource, namedResource);
+                addEdge(dependents, namedResource, resource);
+            }
+        }
     }
 
     /**

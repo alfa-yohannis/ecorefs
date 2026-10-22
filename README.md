@@ -154,6 +154,7 @@ The first five items come from a review of the current draft. The draft reads as
 - [x] Repeat the XMI load benchmark with a fresh `ResourceSet`. Every load now runs in a fresh resource set, the copy of the model sits outside the measured region, and each iteration stamps the copy, so every iteration stores new content.
 - [x] Check `cascadeSave` when two reference paths reach the changed resource. `ResourceDependencyGraph` now orders the affected resources by their dependencies, and `CascadeReferenceIntegrityTest` checks a chain, a diamond and a chain of four resources.
 - [x] Run the BPMN cascade case study with a live Kubo node and record the real CIDs before and after the cascade save. `BpmnCaseStudyCascadeTest` loads the three BPMN files with the Eclipse BPMN 2.0 metamodel, publishes them, changes the payment process and checks every rewritten reference. The figure in the paper carries the CIDs of that run. The three files refer to each other through BPMN imports, and the collaboration draws both processes with two message flows between their tasks.
+- [x] Let stored import locations follow the reference mode. `NamespaceImportLocations` writes `ipfs://<CID>` or `ipns://<name>` into the location of each BPMN import before a save, and `cascadeSave` follows imports like references. This item is not in the manuscript.
 - [x] Record the measurement environment: Intel Core i7-1165G7, 16 GB memory, Ubuntu 24.04.3 with Linux 6.8.0, OpenJDK 21.0.9, Kubo 0.40.1 in Docker 29.8.0, EMF 2.23.0, java-ipfs-http-client 1.4.3, JUnit 5.10.0, Maven 3.8.7.
 - [x] Extend the benchmark to larger models with 30 runs per size and a statistical test. The run covers 100 to 500,000 elements, and `eval/analyse_benchmark.py` writes the summary with a Wilcoxon signed-rank test. A shared network file system as a further baseline stays open and is named as such in the paper.
 - [x] Test proxy resolution across `ipfs://` references. `ProxyResolutionTest` loads a referring resource in a fresh resource set, checks that the reference starts as a proxy and checks the object after the resolution.
@@ -184,7 +185,9 @@ The first five items come from a review of the current draft. The draft reads as
 | `IPFSResourceFactoryImpl` | Creates `IPFSResourceImpl` instances for `ipfs://` URIs. |
 | `IPFSURIHandlerImpl` | Added to the URI converter of a `ResourceSet`. The handler reads `ipfs://`, `ipns://`, `http://` and `https://` URIs during `load()`. |
 | `IPFSModelPersister` | Provides `cascadeSave(Resource, Map)`, described below. |
-| `ReferenceMode`, `IPFSResourceOptions` | The save option `IPFSResourceOptions.REFERENCE_MODE` selects `ReferenceMode.CID` (default) or `ReferenceMode.IPNS`. |
+| `ResourceDependencyGraph` | Builds the graph of the references between the resources of a `ResourceSet` and plans the save order of a cascade. |
+| `ReferenceMode`, `IPFSResourceOptions` | The save option `IPFSResourceOptions.REFERENCE_MODE` selects `ReferenceMode.CID` (default) or `ReferenceMode.IPNS`. The option `IPFSResourceOptions.LOCATION_UPDATERS` adds updaters of location attributes. |
+| `LocationAttributeUpdater`, `NamespaceImportLocations` | Keep an attribute that names another resource by its location, such as the location of a BPMN import, in step with the URI of that resource. |
 
 Two command-line tools, `IPFSModelPublishTool` and `IPFSVersionManifestPublisher`, publish larger partitioned models. The MoDisco evaluation uses them.
 
@@ -193,10 +196,12 @@ Two command-line tools, `IPFSModelPublishTool` and `IPFSVersionManifestPublisher
 `resource.save()` saves one resource and gives the resource a new CID. Resources that still reference the old CID stay unchanged. `IPFSModelPersister.cascadeSave()` performs a deliberate upgrade, similar to a Git commit that updates every tree above a changed file:
 
 1. Save the changed resource. The save assigns the new CID to the resource URI.
-2. Use `EcoreUtil.CrossReferencer` to find every resource in the `ResourceSet` with a reference into the saved resource.
-3. Save each referencing resource the same way. The rewritten `href`s point to the new CID, because EMF serializes a reference with the current URI of the target.
+2. Let `ResourceDependencyGraph` find every resource in the `ResourceSet` that reaches the saved resource through references.
+3. Save those resources in dependency order, so each resource is stored after the resources that it references. The rewritten `href`s point to the new CIDs, because EMF serializes a reference with the current URI of the target.
 
-A set of already saved resources prevents endless loops when resources reference each other.
+In a cycle, the order puts one resource of the cycle first, so the cascade ends, but one direction of the cycle keeps an old CID (see [Circular references](#circular-references)).
+
+Some metamodels keep the location of another model in a plain attribute, such as the `location` of a BPMN import. EMF writes such an attribute as text, so a stored import would keep the file name. `NamespaceImportLocations`, passed in the save option `IPFSResourceOptions.LOCATION_UPDATERS`, writes the URI of the imported resource into the location before every save: `ipfs://<CID>` in CID mode and `ipns://<name>` in IPNS mode. The dependency graph then counts an import like a reference. `BpmnCaseStudyCascadeTest` uses the updater for the three BPMN files of the case study.
 
 | Mode | Behavior | Trade-off |
 | --- | --- | --- |

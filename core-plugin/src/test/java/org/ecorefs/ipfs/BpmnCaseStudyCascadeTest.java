@@ -5,6 +5,7 @@ import org.eclipse.bpmn2.Bpmn2Package;
 import org.eclipse.bpmn2.Collaboration;
 import org.eclipse.bpmn2.Definitions;
 import org.eclipse.bpmn2.DocumentRoot;
+import org.eclipse.bpmn2.Import;
 import org.eclipse.bpmn2.Participant;
 import org.eclipse.bpmn2.RootElement;
 import org.eclipse.bpmn2.util.Bpmn2ResourceFactoryImpl;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -32,10 +34,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * the content identifiers before and after a cascade save.
  *
  * The case study has three resources. The payment process stands alone, the
- * order process supports the payment process, and the collaboration refers to
- * both processes through participants. A change to the payment process
- * therefore has to give a new identifier to all three resources, and every
- * reference has to carry the new identifier of the target.
+ * order process imports the payment process, and the collaboration refers to
+ * both processes through participants and message flows. The files name each
+ * other through BPMN imports. A change to the payment process therefore has to
+ * give a new identifier to all three resources, and every reference and every
+ * import location has to carry the new identifier of the target.
  */
 public class BpmnCaseStudyCascadeTest {
 
@@ -44,6 +47,16 @@ public class BpmnCaseStudyCascadeTest {
 
     /** Directory with the three models of the case study. */
     private static final String CASE_STUDY_DIRECTORY = "/data2/projects/ecorefs/examples/case-study/";
+
+    /** Updater that writes the URIs of the imported models into the BPMN import locations. */
+    private static final LocationAttributeUpdater BPMN_IMPORTS = new NamespaceImportLocations(
+            Bpmn2Package.Literals.IMPORT__NAMESPACE,
+            Bpmn2Package.Literals.IMPORT__LOCATION,
+            Bpmn2Package.Literals.DEFINITIONS__TARGET_NAMESPACE);
+
+    /** Save options of every save: CID mode, with import locations that follow the identifiers. */
+    private static final Map<String, Object> SAVE_OPTIONS =
+            Collections.singletonMap(IPFSResourceOptions.LOCATION_UPDATERS, Collections.singletonList(BPMN_IMPORTS));
 
     /** Client for the HTTP application programming interface of the local node. */
     private static IPFS ipfs;
@@ -153,6 +166,22 @@ public class BpmnCaseStudyCascadeTest {
     }
 
     /**
+     * Tells whether definitions import the model with a namespace.
+     *
+     * @param definitions the importing definitions
+     * @param namespace   the target namespace of the imported model
+     * @return true when one import of the definitions names the namespace
+     */
+    private boolean importsNamespace(Definitions definitions, String namespace) {
+        for (Import anImport : definitions.getImports()) {
+            if (namespace.equals(anImport.getNamespace())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Moves the content of a loaded file into a new IPFS resource.
      *
      * @param resourceSet    the resource set of the new resource
@@ -211,8 +240,8 @@ public class BpmnCaseStudyCascadeTest {
 
         // The files refer to each other through BPMN imports, so the loaded
         // references already lead to the processes of the other files.
-        assertTrue(orderProcess.getSupports().contains(paymentProcess),
-                "The order process has to support the payment process of payment-process.bpmn");
+        assertTrue(importsNamespace(findDefinitions(orderFile), findDefinitions(paymentFile).getTargetNamespace()),
+                "The order process has to import payment-process.bpmn");
         assertSame(orderProcess, findParticipant(collaboration, "Participant_Seller").getProcessRef(),
                 "The seller has to refer to the order process of order-process.bpmn");
         assertSame(paymentProcess, findParticipant(collaboration, "Participant_PaymentProvider").getProcessRef(),
@@ -223,9 +252,9 @@ public class BpmnCaseStudyCascadeTest {
         Resource collaborationResource =
                 createIpfsResource(resourceSet, "ipfs://pending-collaboration", collaborationFile);
 
-        payment.save(Collections.emptyMap());
-        order.save(Collections.emptyMap());
-        collaborationResource.save(Collections.emptyMap());
+        payment.save(SAVE_OPTIONS);
+        order.save(SAVE_OPTIONS);
+        collaborationResource.save(SAVE_OPTIONS);
         System.out.println("[case study] before the change");
         System.out.println("[case study]   payment-process.bpmn " + payment.getURI());
         System.out.println("[case study]   order-process.bpmn " + order.getURI());
@@ -233,7 +262,7 @@ public class BpmnCaseStudyCascadeTest {
 
         paymentProcess.setName("Payment Process, second version");
         long start = System.nanoTime();
-        IPFSModelPersister.cascadeSave(payment, Collections.emptyMap());
+        IPFSModelPersister.cascadeSave(payment, SAVE_OPTIONS);
         double elapsedMilliseconds = (System.nanoTime() - start) / 1_000_000.0;
 
         System.out.printf("[case study] after the cascade save, %.2f ms%n", elapsedMilliseconds);
@@ -243,11 +272,35 @@ public class BpmnCaseStudyCascadeTest {
 
         String storedOrder = readStoredContent(order);
         String storedCollaboration = readStoredContent(collaborationResource);
-        assertTrue(storedOrder.contains(payment.getURI().toString()),
-                "The order process has to carry the new identifier of the payment process");
-        assertTrue(storedCollaboration.contains(order.getURI().toString()),
-                "The collaboration has to carry the new identifier of the order process");
-        assertTrue(storedCollaboration.contains(payment.getURI().toString()),
-                "The collaboration has to carry the new identifier of the payment process");
+        assertTrue(storedCollaboration.contains(href(order)),
+                "The references of the collaboration have to carry the new identifier of the order process");
+        assertTrue(storedCollaboration.contains(href(payment)),
+                "The references of the collaboration have to carry the new identifier of the payment process");
+        assertTrue(storedOrder.contains(location(payment)),
+                "The import of the order process has to name the new identifier of the payment process");
+        assertTrue(storedCollaboration.contains(location(order)),
+                "The imports of the collaboration have to name the new identifier of the order process");
+        assertTrue(storedCollaboration.contains(location(payment)),
+                "The imports of the collaboration have to name the new identifier of the payment process");
+    }
+
+    /**
+     * Returns the start of a stored reference into a resource, as XMI writes it.
+     *
+     * @param target the referenced resource
+     * @return the text {@code href="<uri>#}
+     */
+    private String href(Resource target) {
+        return "href=\"" + target.getURI() + "#";
+    }
+
+    /**
+     * Returns a stored import location that names a resource, as XMI writes it.
+     *
+     * @param target the imported resource
+     * @return the text {@code location="<uri>"}
+     */
+    private String location(Resource target) {
+        return "location=\"" + target.getURI() + "\"";
     }
 }

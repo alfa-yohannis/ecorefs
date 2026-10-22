@@ -42,6 +42,9 @@ public class IPFSResourceImpl extends XMIResourceImpl {
         if (options != null && options.containsKey(IPFSResourceOptions.REFERENCE_MODE)) {
             mode = (ReferenceMode) options.get(IPFSResourceOptions.REFERENCE_MODE);
         }
+        // EcoreFS begin: location attributes take the current URIs of the resources they name
+        updateLocationAttributes(options);
+        // EcoreFS end
 
         String cid;
         Path tempFile = Files.createTempFile("ecorefs-ipfs-save-", ".xmi");
@@ -80,6 +83,21 @@ public class IPFSResourceImpl extends XMIResourceImpl {
             this.setURI(URI.createURI("ipfs://" + cid));
         }
     }
+
+    // EcoreFS begin: location attributes take the current URIs of the resources they name
+    /**
+     * Lets every updater of the save options write the current URIs of the named
+     * resources into the location attributes of this resource, so the stored
+     * locations name the same versions as the stored references.
+     *
+     * @param options the save options with the updaters, or null
+     */
+    private void updateLocationAttributes(Map<?, ?> options) {
+        for (LocationAttributeUpdater updater : IPFSResourceOptions.locationUpdaters(options)) {
+            updater.updateLocations(this);
+        }
+    }
+    // EcoreFS end
 
     private void publishIpnsName(String cid, String keyName) throws IOException {
         String endpoint = ipfs.protocol + "://" + ipfs.host + ":" + ipfs.port

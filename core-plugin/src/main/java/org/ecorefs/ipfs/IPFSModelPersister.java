@@ -65,7 +65,10 @@ public class IPFSModelPersister {
             changedResource.save(options);
             return;
         }
-        ResourceDependencyGraph graph = ResourceDependencyGraph.of(resourceSet);
+        // Location attributes, such as BPMN import locations, count like references.
+        // Old code: ResourceDependencyGraph graph = ResourceDependencyGraph.of(resourceSet);
+        ResourceDependencyGraph graph = ResourceDependencyGraph.of(resourceSet,
+                IPFSResourceOptions.locationUpdaters(options));
         for (Resource resource : graph.planSaveOrder(changedResource)) {
             resource.save(options);
         }
