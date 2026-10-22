@@ -1,17 +1,28 @@
-%% Software and Systems Modeling (SoSyM) manuscript
-%% Based on the Springer Nature LaTeX template, version 3.1 (December 2024),
-%% kept unmodified in ../template/. sn-jnl.cls and sn-mathphys-num.bst sit next
-%% to this file because the submission must include all style files.
+%% Journal of Systems and Software (JSS) manuscript
+%% Based on Elsevier's elsarticle template (elsarticle-template-num.tex from
+%% elsarticle.zip of April 2024), kept unmodified in ../template/.
+%% elsarticle.cls, generated from the bundle with "latex elsarticle.ins", and
+%% elsarticle-num.bst sit next to this file, because the submission has to
+%% include every class and style that a TeX installation may lack.
 %%
-%% SoSyM submission guidelines (checked 2026-09-13):
-%%   - LaTeX with the [iicol] option; upload the full source and a compiled PDF
-%%   - abstract of 150 to 250 words, without undefined abbreviations or citations
-%%   - numbered citations in square brackets (sn-mathphys-num)
-%%   - decimal headings, at most three levels
-%%   - a "Statements and Declarations" section with Competing Interests,
-%%     plus a data availability statement
-%%   - single-blind review, so author names and repository links can stay
-%% The template asks for a single .tex file, so avoid \input.
+%% JSS guide for authors (checked 2026-10-22):
+%%   - LaTeX source plus a compiled PDF. Editorial Manager accepts no
+%%     subfolders, so the upload puts the figures, .cls, .bst and .bib next to
+%%     main.tex; \graphicspath lets this file compile in both layouts.
+%%   - a double-column layout is allowed for LaTeX submissions
+%%   - abstract of at most 250 words, and 1 to 7 keywords
+%%   - highlights in a separate editable file (highlights.txt), 3 to 5 bullets
+%%     of at most 85 characters each, including spaces
+%%   - any consistent reference style at submission (elsarticle-num)
+%%   - full papers are encouraged below 18 double-column pages; a longer paper
+%%     needs a justification in the submission
+%%   - CRediT statement, declaration of competing interest, funding,
+%%     declaration of generative AI use, and data availability with the data
+%%     deposited, cited and linked (Option C); acknowledgements come directly
+%%     before the references
+%%   - a biography of at most 100 words per author, in an editable file
+%%   - single anonymized review, so author names and repository links can stay
+%% Keep the manuscript in one .tex file, without \input.
 %%
 %% Writing rules for the manuscript: plain words, no overclaiming, short
 %% sentences, no pronouns, and no em or en dashes in the prose. Give the long
@@ -31,23 +42,28 @@
 
 %% Allow line breaks at hyphens inside long URLs in the reference list
 \PassOptionsToPackage{hyphens}{url}
-\documentclass[iicol,pdflatex,sn-mathphys-num]{sn-jnl}
+%% The journal layout 5p with two columns keeps the figures at the size they
+%% were drawn for: one column wide, with about 8 pt lettering. The option 5p
+%% also switches the preprint mode of the class off.
+\documentclass[5p,times,twocolumn]{elsarticle}
 
-%%%% Standard packages from the template
-\usepackage{graphicx}%
-\usepackage{multirow}%
-\usepackage{amsmath,amssymb,amsfonts}%
-\usepackage{amsthm}%
-\usepackage{mathrsfs}%
-\usepackage[title]{appendix}%
-\usepackage{xcolor}%
-\usepackage{textcomp}%
-\usepackage{manyfoot}%
-\usepackage{booktabs}%
-\usepackage{algorithm}%
-\usepackage{algorithmicx}%
-\usepackage{algpseudocode}%
-\usepackage{listings}%
+%% Packages from the template (elsarticle.cls loads graphicx and natbib)
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+
+%% Packages of this manuscript
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+
+%% The figures live in figures/ during writing and next to main.tex in the
+%% Editorial Manager upload; \includegraphics names the file only.
+\graphicspath{{figures/}}
 
 %% Code listings for Java and XMI snippets. The colors match the figures:
 %% blue for keywords, brown for strings and grey for comments and the frame.
@@ -72,41 +88,52 @@
   xrightmargin=2pt,
   captionpos=b}
 
-\theoremstyle{thmstylethree}%
-\newtheorem{definition}{Definition}%
-
-%% The bibliography style prints web addresses with \burl. The class loads
-%% breakurl, but \burl stays undefined under pdfLaTeX, so map \burl to \url.
-\providecommand{\burl}[1]{\url{#1}}
-
-%% The class sets tables in 8bp, which reads too small next to the 10bp body
-%% text. The tables here sit between the two sizes.
-\makeatletter
-\def\tablecaptionfont{\reset@font\fontsize{9bp}{11bp}\selectfont}
-\def\tablebodyfont{\reset@font\fontsize{9bp}{11bp}\selectfont}
-\def\tablecolheadfont{\reset@font\fontsize{9bp}{11bp}\selectfont\bfseries\boldmath}
-\def\tablefootnotefont{\reset@font\fontsize{9bp}{11bp}\selectfont}
-\makeatother
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
 
 %% Drafting aid: remove every \todo before submission
 \newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
 
 \raggedbottom
 
+\journal{Journal of Systems and Software}
+
 \begin{document}
 
-\title[Decentralized Model Persistence]{Towards Decentralized Model Persistence}
+\begin{frontmatter}
 
-\author*[1]{\fnm{Alfa} \sur{Yohannis}}\email{alfa.ryano@pradita.ac.id}
-%% Further authors: \author[1]{\fnm{Given} \sur{Family}}\email{name@example.org}
+\title{Towards Decentralized Model Persistence}
 
-\affil*[1]{\orgdiv{Department of Informatics}, \orgname{Pradita University}, \orgaddress{\city{Kabupaten Tangerang}, \state{Banten}, \country{Indonesia}}}
+\author{Alfa Yohannis\corref{cor1}}
+\ead{alfa.ryano@pradita.ac.id}
+\cortext[cor1]{Corresponding author.}
+%% Further authors: \author{Given Family} with \ead; for another institution,
+%% label \author and \affiliation as in the template.
 
-\abstract{Model persistence frameworks such as the Eclipse Modeling Framework (EMF) identify a model by a location, for example a file path. The content at a location can change while the location stays the same. The InterPlanetary File System (IPFS) identifies a file by a content identifier (CID) instead. The CID is computed from the file content, so every change to a model produces a new identifier. The paper examines the consequences for model persistence and for references between model resources. An EMF resource implementation saves models to a local IPFS node and loads the models back by CID. References can point to fixed CIDs or to mutable names of the InterPlanetary Name System (IPNS). A cascade save stores every resource with a reference to a changed resource again. IPFS support was also added to the Eclipse BPMN2 Modeler. A benchmark used generated models of 100 to 500,000 elements. A save through IPFS took 20 to 22~ms longer than a save to a local XML Metadata Interchange (XMI) file for models up to 10,000 elements, and the relative cost fell from about 31 times the XMI time at 100 elements to 1.4 times at 500,000 elements. A case study split 39 MoDisco models of the Eclipse Java development tools (1.04~GiB) into 6,933 resources and published the resources on IPFS. For eight components with 1,639 resources, EMF Compare found no differences between the local models and the copies fetched from IPFS.}
+\affiliation{organization={Department of Informatics, Pradita University},
+            city={Kabupaten Tangerang},
+            state={Banten},
+            country={Indonesia}}
 
-\keywords{Model-driven engineering, Model persistence, Eclipse Modeling Framework, IPFS, Content-addressed storage, Cross-resource references}
+\begin{abstract}
+Model persistence frameworks such as the Eclipse Modeling Framework (EMF) identify a model by a location, for example a file path. The content at a location can change while the location stays the same. The InterPlanetary File System (IPFS) identifies a file by a content identifier (CID) instead. The CID is computed from the file content, so every change to a model produces a new identifier. The paper examines the consequences for model persistence and for references between model resources. An EMF resource implementation saves models to a local IPFS node and loads the models back by CID. References can point to fixed CIDs or to mutable names of the InterPlanetary Name System (IPNS). A cascade save stores every resource with a reference to a changed resource again. IPFS support was also added to the Eclipse BPMN2 Modeler. A benchmark used generated models of 100 to 500,000 elements. A save through IPFS took 20 to 22~ms longer than a save to a local XML Metadata Interchange (XMI) file for models up to 10,000 elements, and the relative cost fell from about 31 times the XMI time at 100 elements to 1.4 times at 500,000 elements. A case study split 39 MoDisco models of the Eclipse Java development tools (1.04~GiB) into 6,933 resources and published the resources on IPFS. For eight components with 1,639 resources, EMF Compare found no differences between the local models and the copies fetched from IPFS.
+\end{abstract}
 
-\maketitle
+%% The same bullets go to Editorial Manager as highlights.txt. The class prints
+%% them on an unnumbered page before the article.
+\begin{highlights}
+\item An EMF resource stores models on IPFS and takes each saved content identifier as URI
+\item References by content identifier pin the exact version of the target resource
+\item A cascade save re-saves referring resources in dependency order after a change
+\item A save through a local IPFS node added 20 to 22 ms for models up to 10,000 elements
+\item 1.04 GiB of MoDisco Java models were published on IPFS as 6,933 resources
+\end{highlights}
+
+\begin{keyword}
+Model-driven engineering \sep Model persistence \sep Eclipse Modeling Framework \sep IPFS \sep Content-addressed storage \sep Cross-resource references
+\end{keyword}
+
+\end{frontmatter}
 
 \section{Introduction}\label{sec:introduction}
 
@@ -122,7 +149,7 @@ Figure~\ref{fig:settings} contrasts the two settings for a model that is split i
 
 \begin{figure*}[tbp]
 \centering
-\includegraphics[width=\textwidth]{figures/development-settings.pdf}
+\includegraphics[width=\textwidth]{development-settings.pdf}
 \caption{Development of a model that is split into fragments. (a) In a local setting, the fragments sit in one shared location, and each reference names a path. (b) In a decentralized setting, each fragment is an immutable block on IPFS, each reference names a CID, and a mutable IPNS name marks the current version of the project.}\label{fig:settings}
 \end{figure*}
 
@@ -198,10 +225,6 @@ The fourth step measures cost and scale. A benchmark on generated models compare
 
 Each research question uses a different part of the evidence. The implementation and the functional tests answer RQ1. The reference strategies, the cascade save and the BPMN case study cover RQ2. The benchmark and the measurements of the case study give the numbers for RQ3. Section~\ref{sec:answers} collects the answers, and Section~\ref{sec:threats} discusses the threats to validity.
 
-%% Springer asks for this statement on the use of large language models in the
-%% methods part. Switch "the author" to "the authors" if co-authors are added.
-Claude Code supported the work as a tool for rapid prototyping. The author defined the research design, the idea of how everything should work and the prompts, and the author also wrote code by hand. The assistant produced code for generating the MoDisco Java models, for analysing the measurement data and for drawing the charts. The assistant also helped with collecting related work. The author reviewed the generated output and takes responsibility for the content of the manuscript.
-
 \section{Content-addressed model persistence}\label{sec:rq1}
 
 The ecorefs core plugin adds IPFS persistence to EMF. The plugin is a Java library built with Maven for Java~11. The plugin uses the EMF Ecore library (version 2.23.0) and a Java client for the IPFS HTTP API (version 1.4.3)~\cite{javaipfsclient}.
@@ -214,7 +237,7 @@ Listing~\ref{lst:setup} shows the configuration of a resource set. The factory i
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=\columnwidth]{figures/architecture.pdf}
+\includegraphics[width=\columnwidth]{architecture.pdf}
 \caption{Unified Modeling Language (UML) class diagram of the ecorefs core plugin. Each class marked ecorefs extends one class of the EMF persistence API. The IPFS node runs Kubo and offers the HTTP API for saving and loading.}\label{fig:architecture}
 \end{figure}
 
@@ -241,7 +264,7 @@ In IPNS mode, the third step differs. The resource derives a key name from the r
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=.7\columnwidth]{figures/save.pdf}
+\includegraphics[width=.7\columnwidth]{save.pdf}
 \caption{UML sequence diagram of saving a resource to IPFS. The reference mode of the resource selects the alternative. In CID mode, the new CID becomes the resource URI. In IPNS mode, the resource URI stays an IPNS name.}\label{fig:save}
 \end{figure}
 
@@ -251,7 +274,7 @@ In IPNS mode, the third step differs. The resource derives a key name from the r
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=.8\columnwidth]{figures/load.pdf}
+\includegraphics[width=.8\columnwidth]{load.pdf}
 \caption{UML sequence diagram of loading a resource from IPFS. The URI converter of the resource set selects \texttt{IPFSURIHandlerImpl} for \texttt{ipfs://} and \texttt{ipns://} URIs. An IPNS name costs one extra lookup.}\label{fig:load}
 \end{figure}
 
@@ -269,7 +292,7 @@ Figure~\ref{fig:lifecycle} summarizes the resulting lifecycle as a UML state mac
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=.9\columnwidth]{figures/lifecycle.pdf}
+\includegraphics[width=.9\columnwidth]{lifecycle.pdf}
 \caption{UML state machine of the URI of an \texttt{IPFSResourceImpl}. Each state shows the URI and the effect of a later save after a change. In CID mode, the URI follows the content. In IPNS mode, the URI stays the same, and the IPNS name points to the new CID. Earlier CIDs stay readable while an IPFS node stores the content.}\label{fig:lifecycle}
 \end{figure}
 
@@ -281,7 +304,7 @@ A reference to a resource on IPFS contains the CID of the target resource, for e
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=\columnwidth]{figures/version-pinning.pdf}
+\includegraphics[width=\columnwidth]{version-pinning.pdf}
 \caption{References under location-based and content-addressed persistence. (a) A file path resolves to the current content at the path. (b) A CID reference resolves to the version with the given CID.}\label{fig:pinning}
 \end{figure}
 
@@ -301,7 +324,7 @@ Direct CID references & The reference contains the CID of the target & Full repr
 IPFS directories & Relative paths inside one directory with one root CID & Suits resources developed together & Any change creates a new root CID \\
 IPNS indirection & The reference contains a mutable IPNS name & Resolves to the latest version & No immutability, and resolution needs an extra lookup \\
 Manifest or registry & A document maps logical names to CIDs & Flexible & The manifest also needs management \\
-\botrule
+\bottomrule
 \end{tabular}
 \end{table*}
 
@@ -345,13 +368,13 @@ The order matters as soon as two reference paths reach the changed resource. In 
 \begin{minipage}[t]{0.234\textwidth}
 \centering
 {\footnotesize (a) Before the change}
-\includegraphics[width=\linewidth]{figures/cascade-before.pdf}\\[3pt]
+\includegraphics[width=\linewidth]{cascade-before.pdf}\\[3pt]
 \end{minipage}
 \hfill
 \begin{minipage}[t]{0.234\textwidth}
 \centering
 {\footnotesize (b) After the cascade save}
-\includegraphics[width=\linewidth]{figures/cascade-after.pdf}\\[3pt]
+\includegraphics[width=\linewidth]{cascade-after.pdf}\\[3pt]
 \end{minipage}\\[10pt]
 \caption{UML object diagram of the three BPMN resources of the case study. (a) Each resource refers to the CIDs of the resources below. (b) A change to \texttt{payment-process.bpmn} and a complete cascade save give every resource a new CID. The CIDs come from the run of Section~\ref{sec:evaluation-rq2} and are shortened.}\label{fig:cascade}
 \end{figure}
@@ -404,7 +427,7 @@ Figure~\ref{fig:layers} shows the layers. The layers combine three strategies fr
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=\columnwidth]{figures/publication-layers.pdf}
+\includegraphics[width=\columnwidth]{publication-layers.pdf}
 \caption{Publication layers of a partitioned model. One mutable IPNS name points to an immutable project version manifest. The manifest lists the CIDs of the root model, the shared resources and the component directories.}\label{fig:layers}
 \end{figure} A new publication after a change to one component gives the changed component a new root CID. The other components keep the same root CIDs, because the content of the other components is unchanged. The new project version manifest is then published under the same IPNS name.
 
@@ -424,7 +447,7 @@ Open BPMN2 Model from IPFS & Accepts a CID, an \texttt{/ipfs/} path, an \texttt{
 Publish Current BPMN2 Model to IPFS & Saves the editor if needed and uploads the \texttt{.bpmn} file. Shows the CID, or publishes the CID under the configured IPNS name. \\
 Publish BPMN2 Project to IPFS & Publishes every \texttt{.bpmn} and \texttt{.bpmn2} file of the project by CID. Publishes a manifest with the root model and the CID of each relative path, optionally under an IPNS name. \\
 Open BPMN2 Project from IPFS & Downloads a project manifest, restores the listed files into a new workspace folder and opens the root model. \\
-\botrule
+\bottomrule
 \end{tabular}
 \end{table*}
 
@@ -468,7 +491,7 @@ The benchmark uses generated models with 100 to 500,000 elements. The models con
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=\columnwidth]{figures/rq3-performance.pdf}
+\includegraphics[width=\columnwidth]{rq3-performance.pdf}
 \caption{Mean save and load times for generated models over thirty measured runs, on logarithmic axes. Hue separates the two persistence paths, and the line style separates a save from a load. Tables~\ref{tab:rq3-save} and~\ref{tab:rq3-load} list the values.}\label{fig:rq3}
 \end{figure}
 
@@ -486,7 +509,7 @@ Elements & Size (MB) & XMI save (ms) & IPFS save (ms) \\
 10,000 & 0.605 & 3.10 $\pm$ 0.30 & 25.07 $\pm$ 0.84 \\
 100,000 & 7.146 & 31.50 $\pm$ 7.43 & 77.73 $\pm$ 9.97 \\
 500,000 & 39.566 & 311.14 $\pm$ 24.57 & 423.25 $\pm$ 19.53 \\
-\botrule
+\bottomrule
 \end{tabular}
 \end{table}
 
@@ -504,7 +527,7 @@ Elements & Size (MB) & XMI load (ms) & IPFS load (ms) \\
 10,000 & 0.605 & 7.81 $\pm$ 0.95 & 10.23 $\pm$ 1.12 \\
 100,000 & 7.146 & 69.41 $\pm$ 1.38 & 88.86 $\pm$ 4.67 \\
 500,000 & 39.566 & 505.03 $\pm$ 21.26 & 683.87 $\pm$ 48.97 \\
-\botrule
+\bottomrule
 \end{tabular}
 \end{table}
 
@@ -530,7 +553,7 @@ Repository & Files & Size (MiB) & Elements & Cross-reference targets \\
 \texttt{eclipse.jdt.ui} & 28 & 516.44 & 2,121,557 & 3,130,907 \\
 \midrule
 Total & 39 & 1,069.67 & 4,282,732 & 6,315,163 \\
-\botrule
+\bottomrule
 \end{tabular*}
 \end{table*}
 
@@ -554,7 +577,7 @@ Components & Resources & Size (MiB) & Time (ms) \\
 6 & 223 & 20.75 & 7,138 \\
 8 & 1,639 & 240.61 & 168,992 \\
 8 (recheck) & 1,639 & 240.61 & 186,696 \\
-\botrule
+\bottomrule
 \end{tabular}
 \end{table}
 
@@ -562,7 +585,7 @@ In the recheck on 24 March 2026, the comparison of eight components with 1,639 r
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=\columnwidth]{figures/compare-scaling.pdf}
+\includegraphics[width=\columnwidth]{compare-scaling.pdf}
 \caption{EMF Compare time per component against the XMI size of the component, on logarithmic axes. The first run took 168,992~ms in total, and the recheck took 186,696~ms for the same eight components.}\label{fig:compare}
 \end{figure}
 
@@ -620,39 +643,38 @@ RQ3 asked for the performance overhead and for the conditions of practical use. 
 
 Future work follows the open parts of the same three questions. For RQ1, the challenges specific to EMF have to be separated from the challenges of other modeling frameworks. For RQ2, the cascade save needs a run on a large dependency graph, for example inside the partitioned MoDisco model. For RQ3, remote nodes, IPNS resolution, a shared network file system as a further baseline and a comparison with database-backed persistence remain open.
 
-\backmatter
+%% End matter in the order of the JSS guide for authors. Switch "the author"
+%% to "the authors" if co-authors are added.
 
-\bmhead{Acknowledgements}
+\section*{CRediT authorship contribution statement}
 
+%% Role names follow the CRediT taxonomy verbatim.
+\textbf{Alfa Yohannis:} Conceptualization, Methodology, Software, Validation, Investigation, Writing -- original draft, Writing -- review \& editing. \todo{Confirm the roles. The earlier statement read: defined the research design, implemented the artifact, ran the evaluation and wrote the manuscript.}
+
+\section*{Declaration of competing interest}
+
+The author declares no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+\section*{Funding}
+
+%% The guide prescribes this sentence when no funding was received.
+This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
+
+\section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
+
+%% Wording of the JSS guide, filled in with the earlier statement of the method section
+During the preparation of this work the author used Claude Code to prototype the software, to generate the code for the MoDisco Java models, to analyse the measurement data, to draw the charts and to collect related work. The author defined the research design, the way the system should work and the prompts, and the author also wrote code by hand. After using this tool, the author reviewed and edited the content as needed and takes full responsibility for the content of the published article. \todo{State whether an AI tool also helped draft or edit the text, and if so, add it to the statement.}
+
+\section*{Data availability}
+
+The benchmark summaries are in the \texttt{eval/results} folder of the ecorefs repository. The implementation is available at \url{https://github.com/alfa-yohannis/ecorefs}, the BPMN2 Modeler integration at \url{https://github.com/alfa-yohannis/org.eclipse.bpmn2-modeler-1.5.4-ecorefs}, and the BPMN~2.0 metamodel changes at \url{https://github.com/alfa-yohannis/org.eclipse.bpmn2-ecorefs}. \todo{JSS applies Elsevier's research data Option C: deposit the MoDisco dataset (1.04~GiB), the published CIDs and the scripts with a digital object identifier (DOI), then cite and link the dataset here and in the reference list.}
+
+\section*{Acknowledgements}
+
+%% Elsevier wants this section directly before the reference list.
 The author looks for funding for an evaluation in a production IPFS environment. Such an evaluation needs storage, bandwidth and the operation of several nodes over a long period, so the cost goes beyond the means of the current project.
 
-\section*{Statements and Declarations}
-
-\bmhead{Funding}
-The research is self-funded and received no external funding.
-
-\bmhead{Competing interests}
-The author declares no competing interests.
-
-\bmhead{Ethics approval and consent to participate}
-Not applicable.
-
-\bmhead{Consent for publication}
-Not applicable.
-
-\bmhead{Data availability}
-The benchmark summaries are in the \texttt{eval/results} folder of the ecorefs repository. \todo{Archive the MoDisco dataset (1.04~GiB) and the published CIDs with a digital object identifier (DOI).}
-
-\bmhead{Code availability}
-The implementation is available at
-\url{https://github.com/alfa-yohannis/ecorefs}, the BPMN2 Modeler integration at
-\url{https://github.com/alfa-yohannis/org.eclipse.bpmn2-modeler-1.5.4-ecorefs},
-and the BPMN~2.0 metamodel changes at
-\url{https://github.com/alfa-yohannis/org.eclipse.bpmn2-ecorefs}.
-
-\bmhead{Author contribution}
-Alfa Yohannis defined the research design, implemented the artifact, ran the evaluation and wrote the manuscript.
-
+\bibliographystyle{elsarticle-num}
 \bibliography{references}
 
 \end{document}

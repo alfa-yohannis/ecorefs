@@ -1,0 +1,7 @@
+Highlights
+
+- An EMF resource stores models on IPFS and takes each saved content identifier as URI
+- References by content identifier pin the exact version of the target resource
+- A cascade save re-saves referring resources in dependency order after a change
+- A save through a local IPFS node added 20 to 22 ms for models up to 10,000 elements
+- 1.04 GiB of MoDisco Java models were published on IPFS as 6,933 resources

@@ -137,11 +137,11 @@ In one sentence, the research identifies the architectural challenges of content
 
 ## Publication plan
 
-RQ2 is considered the main new contribution and targets the MODELS conference. RQ1 and RQ3 complete an extended journal version for a Q1 journal such as Software and Systems Modeling (SoSyM).
+RQ2 is considered the main new contribution and targets the MODELS conference. RQ1 and RQ3 complete an extended journal version for the Journal of Systems and Software (JSS), chosen on 2026-10-22 in place of Software and Systems Modeling (SoSyM).
 
 ## To do
 
-Open work for the SoSyM manuscript in `papers/01-SoSym/paper/main.tex` and for the code, most significant first. Every item marked here also appears as a `\todo` note in the manuscript, except where noted.
+Open work for the JSS manuscript in `papers/01-JSS/paper/main.tex` (full revision plan in `papers/01-JSS/TODO.md`) and for the code, most significant first. Every item marked here also appears as a `\todo` note in the manuscript, except where noted.
 
 The first five items come from a review of the current draft. The draft reads as a solid tool and case study paper, and these five items address what a reviewer would raise first.
 

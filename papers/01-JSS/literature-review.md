@@ -1,6 +1,6 @@
 # Literature review: decentralized model persistence
 
-Background reading for the SoSyM manuscript in `paper/main.tex`. The BibTeX keys match `paper/references.bib`.
+Background reading for the JSS manuscript in `paper/main.tex`. The BibTeX keys match `paper/references.bib`.
 
 ## How the sources were checked
 
