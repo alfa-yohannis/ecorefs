@@ -2,6 +2,8 @@
 <bpmn2:definitions
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL"
+    xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+    xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
     id="Definitions_Collaboration"
     targetNamespace="http://ecorefs.org/case-study/collaboration">
 
@@ -35,5 +37,18 @@
     <bpmn2:participant id="Participant_PaymentProvider" name="Payment Provider"/>
 
   </bpmn2:collaboration>
+
+  <!-- Diagram of the collaboration: one horizontal pool per participant, so a
+       BPMN editor shows the two participants. -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Collaboration" name="E-Commerce Collaboration">
+    <bpmndi:BPMNPlane id="BPMNPlane_Collaboration" bpmnElement="Collaboration_ECommerce">
+      <bpmndi:BPMNShape id="BPMNShape_Participant_Seller" bpmnElement="Participant_Seller" isHorizontal="true">
+        <dc:Bounds x="50" y="50" width="700" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_Participant_PaymentProvider" bpmnElement="Participant_PaymentProvider" isHorizontal="true">
+        <dc:Bounds x="50" y="250" width="700" height="160"/>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 
 </bpmn2:definitions>

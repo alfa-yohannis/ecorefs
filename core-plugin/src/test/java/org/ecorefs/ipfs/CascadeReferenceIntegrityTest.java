@@ -22,15 +22,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Checks that a cascade save leaves every reference pointing at the current
  * content identifier of the target resource.
  *
- * The tests cover three shapes of the reference graph: a chain of two
+ * The tests cover four shapes of the reference graph: a chain of two
  * resources, a diamond where two reference paths reach the changed resource,
- * and a chain of four resources. Every check reads the serialized resource back
+ * a chain of four resources, and a cycle of two resources, which shows the
+ * limit of the cascade save. Every check reads the serialized resource back
  * from the local IPFS node, so the check sees the stored bytes instead of the
  * objects in memory.
  */
@@ -265,5 +267,42 @@ public class CascadeReferenceIntegrityTest {
                 "The second resource has to carry the new content identifier of the third resource");
         assertTrue(storedFirst.contains(second.getURI().toString()),
                 "The first resource has to carry the new content identifier of the second resource");
+    }
+
+    /**
+     * Saves two resources that refer to each other, changes the second one and
+     * shows the limit of the cascade save on a cycle. The cascade saves the first
+     * resource before the second, so the first resource keeps the previous content
+     * identifier of the second resource. A content identifier is computed from
+     * the content, so no save order can give both directions of a cycle the
+     * current identifier of the other resource.
+     *
+     * @throws Exception when a save or a read fails
+     */
+    @Test
+    public void leavesOneDirectionOfACycleOutdated() throws Exception {
+        ResourceSet resourceSet = createIpfsResourceSet();
+        Resource first = createResourceWithNode(resourceSet, "ipfs://pendingCycleFirst", "first");
+        Resource second = createResourceWithNode(resourceSet, "ipfs://pendingCycleSecond", "second");
+        addReference(first, second);
+        addReference(second, first);
+
+        first.save(Collections.emptyMap());
+        second.save(Collections.emptyMap());
+        String previousSecondUri = second.getURI().toString();
+
+        changeNodeIdentifier(second, "second-version-2");
+        IPFSModelPersister.cascadeSave(second, Collections.emptyMap());
+
+        String storedFirst = readStoredContent(first);
+        String storedSecond = readStoredContent(second);
+        System.out.println("[cycle] first " + first.getURI() + " refers to second " + previousSecondUri);
+        System.out.println("[cycle] second " + second.getURI() + " refers to first " + first.getURI());
+        assertTrue(storedSecond.contains(first.getURI().toString()),
+                "The second resource has to carry the current content identifier of the first resource");
+        assertTrue(storedFirst.contains(previousSecondUri),
+                "The first resource keeps the previous content identifier of the second resource");
+        assertFalse(storedFirst.contains(second.getURI().toString()),
+                "No save order gives the first resource the current identifier of the second resource");
     }
 }

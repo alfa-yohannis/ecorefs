@@ -8,7 +8,7 @@ skinparam nodesep 12
 skinparam ranksep 26
 
 object "collaboration.bpmn" as C {
-  URI = ipfs://Qmf4CU...X8k7
+  URI = ipfs://Qmeg1d...LtdY
   refs = QmPDp6..., QmTLbq...
 }
 object "order-process.bpmn" as O {
