@@ -287,7 +287,7 @@ This part needs node 1 of Part 1, a JDK 11 or newer and Maven. The commands run 
 
 ### The case study
 
-The folder `examples/case-study` holds three BPMN models. `payment-process.bpmn` stands alone, and `order-process.bpmn` supports the payment process. In `collaboration.bpmn`, the participant Seller runs the order process and the participant Payment Provider runs the payment process. Two message flows connect tasks of the two processes: Payment request goes from Reserve Item to Validate Card Details, and Payment confirmation goes from Issue Receipt back to Package and Ship. Two reference paths therefore lead from the collaboration to the payment process.
+The folder `examples/case-study` holds three BPMN models. `payment-process.bpmn` stands alone, and `order-process.bpmn` imports the payment process. After Reserve Item, the order process sends a payment request in the send task Request Payment and waits in the message event Payment Confirmed before Package and Ship. In `collaboration.bpmn`, the participant Seller runs the order process and the participant Payment Provider runs the payment process. Two message flows connect the two processes: Payment request goes from Request Payment to Validate Card Details, and Payment confirmation goes from Issue Receipt back to Payment Confirmed. Two reference paths therefore lead from the collaboration to the payment process.
 
 The files refer to each other through BPMN imports. An import binds a namespace to a file, and an `xmlns` prefix for that namespace lets a reference name an element of the file. The collaboration starts like this:
 
@@ -303,10 +303,22 @@ The files refer to each other through BPMN imports. An import binds a namespace 
     <bpmn2:participant id="Participant_Seller" name="Seller" processRef="order:OrderFulfillmentProcess"/>
     <bpmn2:participant id="Participant_PaymentProvider" name="Payment Provider" processRef="payment:PaymentProcess"/>
     <bpmn2:messageFlow id="MessageFlow_PaymentRequest" name="Payment request"
-        sourceRef="order:Task_ReserveItem" targetRef="payment:Task_ValidateCard"/>
+        sourceRef="order:Task_RequestPayment" targetRef="payment:Task_ValidateCard"/>
 ```
 
-The diagram part of the collaboration uses the same prefixes. A shape with `bpmnElement="order:Task_ReserveItem"` draws a task of `order-process.bpmn` inside the Seller pool. Each process therefore stays defined in its own file, and the collaboration holds only the participants, the message flows and the layout. `order-process.bpmn` imports `payment-process.bpmn` in the same way for `<bpmn2:supports>payment:PaymentProcess</bpmn2:supports>`. Once the models are saved to IPFS, each of these references names its target by CID instead of a prefix.
+The diagram part of the collaboration uses the same prefixes. A shape with `bpmnElement="order:Task_ReserveItem"` draws a task of `order-process.bpmn` inside the Seller pool. Each process therefore stays defined in its own file, and the collaboration holds only the participants, the message flows and the layout. `order-process.bpmn` imports `payment-process.bpmn` in the same way, but none of its elements refers into that file: the import itself is the link between the two processes. Once the models are saved to IPFS, each of these references names its target by CID instead of a prefix.
+
+The import locations follow the references. EMF treats a location as plain text, so the save needs an updater for BPMN imports in its options:
+
+```java
+Map<String, Object> options = Map.of(IPFSResourceOptions.LOCATION_UPDATERS, List.of(
+        new NamespaceImportLocations(Bpmn2Package.Literals.IMPORT__NAMESPACE,
+                Bpmn2Package.Literals.IMPORT__LOCATION,
+                Bpmn2Package.Literals.DEFINITIONS__TARGET_NAMESPACE)));
+IPFSModelPersister.cascadeSave(payment, options);
+```
+
+Before each save, the updater finds the model that declares the namespace of an import and writes its URI into the location: `location="ipfs://<CID>"` in CID mode and `location="ipns://<name>"` in IPNS mode. The cascade also follows imports like references, so a new version of the payment process reaches the order process through its import alone. The files in `examples/case-study` keep their file names, because a CID exists only after a save. The copies that the run below stores on IPFS are in [`examples/case-study/ipfs`](../examples/case-study/ipfs), where every import location names a CID.
 
 ![The three models before the change: each refers to the CIDs of the models below it](images/cascade-before.png)
 
@@ -320,17 +332,17 @@ To look at the models, copy the three files into one project of the modeler, for
 mvn -q -f core-plugin/pom.xml test -Dtest=BpmnCaseStudyCascadeTest
 ```
 
-The test loads the three files, saves them to node 1, changes the name of the payment process and calls `cascadeSave` on it. It prints the CIDs before and after the change:
+The test loads the three files, saves them to node 1 with the options above, changes the name of the payment process and calls `cascadeSave` on it. It prints the CIDs before and after the change:
 
 ```
 [case study] before the change
 [case study]   payment-process.bpmn ipfs://QmfGiCCe3C6dtHFvRtMipQ7c3hxhLZawmrcajgNWavRen5
-[case study]   order-process.bpmn ipfs://QmdxkpeaqrmqCZKhCfoEaVXK4PgzTvtz9yD4Sfb5ShoGsV
-[case study]   collaboration.bpmn ipfs://QmQtNqodGo5CuvfXNJ7yjhAqBTwYtCsRXB3J9wYU9wjAps
-[case study] after the cascade save, 41.09 ms
+[case study]   order-process.bpmn ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR
+[case study]   collaboration.bpmn ipfs://QmUx9AWXcwUyVYHXXHyWqn1gk2jmTDLzBS7AohN8qQKysJ
+[case study] after the cascade save, 49.76 ms
 [case study]   payment-process.bpmn ipfs://QmTLbqPgHxUmS82rDLDCKgrncmkdHi9J6nQu38KT8AE3PJ
-[case study]   order-process.bpmn ipfs://QmZ5N7EA943sqWB89osfiykwxvKrvk9H4xZnDj6S9vJUde
-[case study]   collaboration.bpmn ipfs://QmWkyZHJ7ULGebfnjHbNNgJcasjgiew3GrKkVF7f2FwhyL
+[case study]   order-process.bpmn ipfs://QmT1Y8EfDTYi7NJCaqMeMfCk5V45iFjRPWGEVarReWrChc
+[case study]   collaboration.bpmn ipfs://QmNxhLjKZ929aWBgga6RzPUDKvyjF7L7kvF1jHNTQ3Aspp
 ```
 
 The test also runs in Eclipse. Import `core-plugin` with **File > Import > Existing Projects into Workspace**, choose **Maven > Update Project** on it once, open `BpmnCaseStudyCascadeTest` and choose **Run As > JUnit Test**. The **Console** prints the same CIDs, because the same content always gets the same CID. Only the time changes from run to run.
@@ -343,16 +355,16 @@ One change gave all three models a new CID. The cascade saves in dependency orde
 
 ### What works
 
-- Every reference carries the current CID. Open the new collaboration through the gateway: `http://127.0.0.1:8080/ipfs/QmWkyZHJ7ULGebfnjHbNNgJcasjgiew3GrKkVF7f2FwhyL`. The two `processRef` entries, the ends of the two message flows and the shapes of the diagram all point to the new CIDs of the two processes. The imports keep their file names, because the references no longer need them.
+- Every reference carries the current CID. Open the new collaboration through the gateway: `http://127.0.0.1:8080/ipfs/QmNxhLjKZ929aWBgga6RzPUDKvyjF7L7kvF1jHNTQ3Aspp`. The two import locations, the two `processRef` entries, the ends of the two message flows and the shapes of the diagram all point to the new CIDs of the two processes.
 
-  ![The collaboration after the cascade: the processRef entries, the message flows and the diagram shapes refer to QmZ5N7… and QmTLbq…](images/cascade-collaboration-after.png)
+  ![The collaboration after the cascade: the import locations, the processRef entries, the message flows and the diagram shapes refer to QmT1Y8… and QmTLbq…](images/cascade-collaboration-after.png)
 
-- The old version stays intact. The previous CID of the collaboration still returns the collaboration with the old references, so it reproduces the exact state before the change: `http://127.0.0.1:8080/ipfs/QmQtNqodGo5CuvfXNJ7yjhAqBTwYtCsRXB3J9wYU9wjAps`.
+- The old version stays intact. The previous CID of the collaboration still returns the collaboration with the old references, so it reproduces the exact state before the change: `http://127.0.0.1:8080/ipfs/QmUx9AWXcwUyVYHXXHyWqn1gk2jmTDLzBS7AohN8qQKysJ`.
 
-  ![The collaboration before the change: the same references lead to Qmdxkp… and QmfGiC…](images/cascade-collaboration-before.png)
+  ![The collaboration before the change: the same imports and references lead to QmYd4B… and QmfGiC…](images/cascade-collaboration-before.png)
 
 - The run is reproducible. The same files and the same change give the same CIDs on every node. The CIDs above are the ones in the two figures.
-- Node 2 serves both versions as well, for example at `http://127.0.0.1:8081/ipfs/QmWkyZHJ7ULGebfnjHbNNgJcasjgiew3GrKkVF7f2FwhyL`, because it fetches the files from node 1.
+- Node 2 serves both versions as well, for example at `http://127.0.0.1:8081/ipfs/QmNxhLjKZ929aWBgga6RzPUDKvyjF7L7kvF1jHNTQ3Aspp`, because it fetches the files from node 1.
 
 ### What goes wrong
 
@@ -362,17 +374,17 @@ One change gave all three models a new CID. The cascade saves in dependency orde
 
 ```bash
 PAYMENT=QmTLbqPgHxUmS82rDLDCKgrncmkdHi9J6nQu38KT8AE3PJ
-ORDER=QmZ5N7EA943sqWB89osfiykwxvKrvk9H4xZnDj6S9vJUde
+ORDER=QmT1Y8EfDTYi7NJCaqMeMfCk5V45iFjRPWGEVarReWrChc
 curl -s -X POST "http://127.0.0.1:5001/api/v0/cat?arg=$PAYMENT" \
   | sed 's/second version/third version/' > payment-v3.xmi
 curl -s -X POST -F "file=@payment-v3.xmi" http://127.0.0.1:5001/api/v0/add
-curl -s -X POST "http://127.0.0.1:5001/api/v0/cat?arg=$ORDER" | grep -o '<supports[^>]*>'
+curl -s -X POST "http://127.0.0.1:5001/api/v0/cat?arg=$ORDER" | grep -o 'location="[^"]*"'
 ```
 
-The third version of the payment process gets the CID `Qmcjxb3ct1NaLvPTLt1hqBnQw4ZpMTYppxpPenrxdMrnvY`, but the order process still supports the second version:
+The third version of the payment process gets the CID `Qmcjxb3ct1NaLvPTLt1hqBnQw4ZpMTYppxpPenrxdMrnvY`, but the import of the order process still names the second version:
 
 ```
-<supports href="ipfs://QmTLbqPgHxUmS82rDLDCKgrncmkdHi9J6nQu38KT8AE3PJ#PaymentProcess"/>
+location="ipfs://QmTLbqPgHxUmS82rDLDCKgrncmkdHi9J6nQu38KT8AE3PJ"
 ```
 
 The BPMN2 Modeler of Parts 3 and 4 behaves the same way. Its publish commands upload the models you choose and rewrite no references in other models.

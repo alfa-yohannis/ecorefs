@@ -61,7 +61,7 @@ The models are in `eval/datasets/bpmn` (cleaned) and `eval/datasets/bpmn-backup-
 ## 4. Manuscript items already flagged
 
 - [ ] P1 S. Report the output of `BpmnIpfsExample` and of the modeler self-tests with a running Kubo node (`\todo` in `sec:evaluation-rq1`), or let the real-model round trip replace the example. The modeler self-tests pass with `--integration` against Kubo 0.40.1 (2026-10-22).
-- [x] P1 S. Rerun the BPMN case study after the three files gained BPMN imports and the collaboration gained message flows and a diagram (2026-10-22). Figure `fig:cascade` and the 41 ms in `sec:evaluation-rq2` come from that run, and the paragraph names the imports and the message flows.
+- [x] P1 S. Rerun the BPMN case study after the three files gained BPMN imports, the order process gained a send task and a message event, and the collaboration gained message flows and a diagram (2026-10-22). The stored import locations now carry CIDs as well. The order process imports the payment process instead of declaring `supports`, which the BPMN standard reserves for a process whose every run also follows the steps of the other process. Figure `fig:cascade` and the 50 ms in `sec:evaluation-rq2` come from that run, and the paragraph names the imports and the message flows.
 - [ ] P2 M. Build the modeler with Tycho against `releases/2022-06` (`\todo` in `sec:tool-editor`).
 - [ ] P1 M. Archive code, scripts and data under a DOI on Zenodo: the MoDisco dataset (1.04 GiB) with the published CIDs (`\todo`, Data availability), plus the MIWG and engine BPMN sets with the change logs. Cite the Camunda set by repository and commit only, since its terms do not cover redistribution.
 - [ ] P1 S. Remove every `\todo` before submission.

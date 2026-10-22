@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="ASCII"?>
+<bpmn2:DocumentRoot xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL-XMI">
+  <definitions id="Definitions_Order" targetNamespace="http://ecorefs.org/case-study/order-process">
+    <imports importType="http://www.omg.org/spec/BPMN/20100524/MODEL" location="ipfs://QmTLbqPgHxUmS82rDLDCKgrncmkdHi9J6nQu38KT8AE3PJ" namespace="http://ecorefs.org/case-study/payment-process"/>
+    <rootElements xsi:type="bpmn2:Process" id="OrderFulfillmentProcess" name="Order Fulfillment Process">
+      <flowElements xsi:type="bpmn2:StartEvent" id="StartEvent_Order" name="Order Placed" outgoing="Flow_O1"/>
+      <flowElements xsi:type="bpmn2:Task" id="Task_CheckInventory" name="Check Inventory" incoming="Flow_O1" outgoing="Flow_O2"/>
+      <flowElements xsi:type="bpmn2:ExclusiveGateway" id="Gateway_InStock" name="Item In Stock?" incoming="Flow_O2" outgoing="Flow_InStock Flow_OutOfStock"/>
+      <flowElements xsi:type="bpmn2:Task" id="Task_ReserveItem" name="Reserve Item" incoming="Flow_InStock" outgoing="Flow_O3"/>
+      <flowElements xsi:type="bpmn2:SendTask" id="Task_RequestPayment" name="Request Payment" incoming="Flow_O3" outgoing="Flow_O6"/>
+      <flowElements xsi:type="bpmn2:IntermediateCatchEvent" id="Event_PaymentConfirmed" name="Payment Confirmed" incoming="Flow_O6" outgoing="Flow_O7">
+        <eventDefinitions xsi:type="bpmn2:MessageEventDefinition" id="MessageEventDefinition_PaymentConfirmed"/>
+      </flowElements>
+      <flowElements xsi:type="bpmn2:Task" id="Task_BackOrder" name="Create Back Order" incoming="Flow_OutOfStock" outgoing="Flow_O4"/>
+      <flowElements xsi:type="bpmn2:Task" id="Task_PackageShip" name="Package and Ship" incoming="Flow_O7" outgoing="Flow_O5"/>
+      <flowElements xsi:type="bpmn2:EndEvent" id="EndEvent_Shipped" name="Order Shipped" incoming="Flow_O5"/>
+      <flowElements xsi:type="bpmn2:EndEvent" id="EndEvent_BackOrdered" name="Back Order Placed" incoming="Flow_O4"/>
+      <flowElements xsi:type="bpmn2:SequenceFlow" id="Flow_O1" sourceRef="StartEvent_Order" targetRef="Task_CheckInventory"/>
+      <flowElements xsi:type="bpmn2:SequenceFlow" id="Flow_O2" sourceRef="Task_CheckInventory" targetRef="Gateway_InStock"/>
+      <flowElements xsi:type="bpmn2:SequenceFlow" id="Flow_InStock" name="Yes" sourceRef="Gateway_InStock" targetRef="Task_ReserveItem"/>
+      <flowElements xsi:type="bpmn2:SequenceFlow" id="Flow_OutOfStock" name="No" sourceRef="Gateway_InStock" targetRef="Task_BackOrder"/>
+      <flowElements xsi:type="bpmn2:SequenceFlow" id="Flow_O3" sourceRef="Task_ReserveItem" targetRef="Task_RequestPayment"/>
+      <flowElements xsi:type="bpmn2:SequenceFlow" id="Flow_O6" sourceRef="Task_RequestPayment" targetRef="Event_PaymentConfirmed"/>
+      <flowElements xsi:type="bpmn2:SequenceFlow" id="Flow_O7" sourceRef="Event_PaymentConfirmed" targetRef="Task_PackageShip"/>
+      <flowElements xsi:type="bpmn2:SequenceFlow" id="Flow_O4" sourceRef="Task_BackOrder" targetRef="EndEvent_BackOrdered"/>
+      <flowElements xsi:type="bpmn2:SequenceFlow" id="Flow_O5" sourceRef="Task_PackageShip" targetRef="EndEvent_Shipped"/>
+    </rootElements>
+  </definitions>
+</bpmn2:DocumentRoot>

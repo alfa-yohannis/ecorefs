@@ -2,16 +2,16 @@
 <bpmn2:definitions
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL"
-    xmlns:payment="http://ecorefs.org/case-study/payment-process"
     id="Definitions_Order"
     targetNamespace="http://ecorefs.org/case-study/order-process">
 
   <!--
-    Cross-resource reference: Process.supports (Process -> Process).
-    The import below makes the prefix "payment" stand for payment-process.bpmn,
-    so payment:PaymentProcess names the process in that file. Saved to IPFS,
-    the reference carries the CID of the payment process instead, which pins
-    the order process to the exact payment process it was saved with.
+    Cross-resource dependency: the import below names payment-process.bpmn.
+    Saved to IPFS, the import location carries the CID of the payment process
+    instead of the file name, which pins the order process to the exact payment
+    process it was saved with. The send task Request Payment and the message
+    event Payment Confirmed talk to that process through the message flows of
+    collaboration.bpmn.
   -->
   <bpmn2:import importType="http://www.omg.org/spec/BPMN/20100524/MODEL"
       location="payment-process.bpmn" namespace="http://ecorefs.org/case-study/payment-process"/>
@@ -38,13 +38,27 @@
       <bpmn2:outgoing>Flow_O3</bpmn2:outgoing>
     </bpmn2:task>
 
+    <!-- The seller asks the payment provider for the payment and waits for the
+         confirmation. The message flows of collaboration.bpmn start and end at
+         these two elements. -->
+    <bpmn2:sendTask id="Task_RequestPayment" name="Request Payment">
+      <bpmn2:incoming>Flow_O3</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_O6</bpmn2:outgoing>
+    </bpmn2:sendTask>
+
+    <bpmn2:intermediateCatchEvent id="Event_PaymentConfirmed" name="Payment Confirmed">
+      <bpmn2:incoming>Flow_O6</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_O7</bpmn2:outgoing>
+      <bpmn2:messageEventDefinition id="MessageEventDefinition_PaymentConfirmed"/>
+    </bpmn2:intermediateCatchEvent>
+
     <bpmn2:task id="Task_BackOrder" name="Create Back Order">
       <bpmn2:incoming>Flow_OutOfStock</bpmn2:incoming>
       <bpmn2:outgoing>Flow_O4</bpmn2:outgoing>
     </bpmn2:task>
 
     <bpmn2:task id="Task_PackageShip" name="Package and Ship">
-      <bpmn2:incoming>Flow_O3</bpmn2:incoming>
+      <bpmn2:incoming>Flow_O7</bpmn2:incoming>
       <bpmn2:outgoing>Flow_O5</bpmn2:outgoing>
     </bpmn2:task>
 
@@ -60,12 +74,11 @@
     <bpmn2:sequenceFlow id="Flow_O2"         sourceRef="Task_CheckInventory" targetRef="Gateway_InStock"/>
     <bpmn2:sequenceFlow id="Flow_InStock"    name="Yes" sourceRef="Gateway_InStock" targetRef="Task_ReserveItem"/>
     <bpmn2:sequenceFlow id="Flow_OutOfStock" name="No"  sourceRef="Gateway_InStock" targetRef="Task_BackOrder"/>
-    <bpmn2:sequenceFlow id="Flow_O3"         sourceRef="Task_ReserveItem"  targetRef="Task_PackageShip"/>
+    <bpmn2:sequenceFlow id="Flow_O3"         sourceRef="Task_ReserveItem"  targetRef="Task_RequestPayment"/>
+    <bpmn2:sequenceFlow id="Flow_O6"         sourceRef="Task_RequestPayment" targetRef="Event_PaymentConfirmed"/>
+    <bpmn2:sequenceFlow id="Flow_O7"         sourceRef="Event_PaymentConfirmed" targetRef="Task_PackageShip"/>
     <bpmn2:sequenceFlow id="Flow_O4"         sourceRef="Task_BackOrder"    targetRef="EndEvent_BackOrdered"/>
     <bpmn2:sequenceFlow id="Flow_O5"         sourceRef="Task_PackageShip"  targetRef="EndEvent_Shipped"/>
-
-    <!-- The order process supports the payment process of payment-process.bpmn. -->
-    <bpmn2:supports>payment:PaymentProcess</bpmn2:supports>
 
   </bpmn2:process>
 

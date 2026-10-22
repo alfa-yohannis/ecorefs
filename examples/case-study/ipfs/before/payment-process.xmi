@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="ASCII"?>
+<bpmn2:DocumentRoot xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL-XMI">
+  <definitions id="Definitions_Payment" targetNamespace="http://ecorefs.org/case-study/payment-process">
+    <rootElements xsi:type="bpmn2:Process" id="PaymentProcess" name="Payment Process">
+      <flowElements xsi:type="bpmn2:StartEvent" id="StartEvent_Payment" name="Payment Requested" outgoing="Flow_P1"/>
+      <flowElements xsi:type="bpmn2:Task" id="Task_ValidateCard" name="Validate Card Details" incoming="Flow_P1" outgoing="Flow_P2"/>
+      <flowElements xsi:type="bpmn2:Task" id="Task_ChargeCard" name="Charge Card" incoming="Flow_P2" outgoing="Flow_P3"/>
+      <flowElements xsi:type="bpmn2:Task" id="Task_IssueReceipt" name="Issue Receipt" incoming="Flow_P3" outgoing="Flow_P4"/>
+      <flowElements xsi:type="bpmn2:EndEvent" id="EndEvent_PaymentComplete" name="Payment Complete" incoming="Flow_P4"/>
+      <flowElements xsi:type="bpmn2:SequenceFlow" id="Flow_P1" sourceRef="StartEvent_Payment" targetRef="Task_ValidateCard"/>
+      <flowElements xsi:type="bpmn2:SequenceFlow" id="Flow_P2" sourceRef="Task_ValidateCard" targetRef="Task_ChargeCard"/>
+      <flowElements xsi:type="bpmn2:SequenceFlow" id="Flow_P3" sourceRef="Task_ChargeCard" targetRef="Task_IssueReceipt"/>
+      <flowElements xsi:type="bpmn2:SequenceFlow" id="Flow_P4" sourceRef="Task_IssueReceipt" targetRef="EndEvent_PaymentComplete"/>
+    </rootElements>
+  </definitions>
+</bpmn2:DocumentRoot>

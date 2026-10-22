@@ -8,11 +8,11 @@ skinparam nodesep 12
 skinparam ranksep 26
 
 object "collaboration.bpmn" as C {
-  URI = ipfs://QmWkyZ...whyL
-  refs = QmZ5N7..., QmTLbq...
+  URI = ipfs://QmNxhL...Aspp
+  refs = QmT1Y8..., QmTLbq...
 }
 object "order-process.bpmn" as O {
-  URI = ipfs://QmZ5N7...JUde
+  URI = ipfs://QmT1Y8...rChc
   refs = QmTLbq...
 }
 object "payment-process.bpmn" as P {
@@ -21,5 +21,5 @@ object "payment-process.bpmn" as P {
 
 C --> O : processRef
 C --> P : processRef
-O --> P : supports
+O --> P : import
 @enduml

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="ASCII"?>
+<bpmn2:DocumentRoot xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL-XMI" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI-XMI">
+  <definitions id="Definitions_Collaboration" targetNamespace="http://ecorefs.org/case-study/collaboration">
+    <imports importType="http://www.omg.org/spec/BPMN/20100524/MODEL" location="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR" namespace="http://ecorefs.org/case-study/order-process"/>
+    <imports importType="http://www.omg.org/spec/BPMN/20100524/MODEL" location="ipfs://QmfGiCCe3C6dtHFvRtMipQ7c3hxhLZawmrcajgNWavRen5" namespace="http://ecorefs.org/case-study/payment-process"/>
+    <rootElements xsi:type="bpmn2:Collaboration" id="Collaboration_ECommerce" name="E-Commerce Collaboration">
+      <participants id="Participant_Seller" name="Seller">
+        <processRef href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#OrderFulfillmentProcess"/>
+      </participants>
+      <participants id="Participant_PaymentProvider" name="Payment Provider">
+        <processRef href="ipfs://QmfGiCCe3C6dtHFvRtMipQ7c3hxhLZawmrcajgNWavRen5#PaymentProcess"/>
+      </participants>
+      <messageFlows id="MessageFlow_PaymentRequest" name="Payment request">
+        <sourceRef href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Task_RequestPayment"/>
+        <targetRef href="ipfs://QmfGiCCe3C6dtHFvRtMipQ7c3hxhLZawmrcajgNWavRen5#Task_ValidateCard"/>
+      </messageFlows>
+      <messageFlows id="MessageFlow_PaymentConfirmation" name="Payment confirmation">
+        <sourceRef href="ipfs://QmfGiCCe3C6dtHFvRtMipQ7c3hxhLZawmrcajgNWavRen5#Task_IssueReceipt"/>
+        <targetRef href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Event_PaymentConfirmed"/>
+      </messageFlows>
+    </rootElements>
+    <diagrams id="BPMNDiagram_Collaboration" name="E-Commerce Collaboration">
+      <plane id="BPMNPlane_Collaboration" bpmnElement="Collaboration_ECommerce">
+        <planeElement xsi:type="bpmndi:BPMNShape" id="BPMNShape_Participant_Seller" bpmnElement="Participant_Seller" isHorizontal="true">
+          <bounds height="200.0" width="1180.0" x="50.0" y="50.0"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNShape" id="BPMNShape_StartEvent_Order">
+          <bounds height="36.0" width="36.0" x="100.0" y="132.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#StartEvent_Order"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNShape" id="BPMNShape_Task_CheckInventory">
+          <bounds height="50.0" width="110.0" x="180.0" y="125.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Task_CheckInventory"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNShape" id="BPMNShape_Gateway_InStock" isMarkerVisible="true">
+          <bounds height="50.0" width="50.0" x="340.0" y="125.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Gateway_InStock"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNShape" id="BPMNShape_Task_BackOrder">
+          <bounds height="50.0" width="110.0" x="440.0" y="75.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Task_BackOrder"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNShape" id="BPMNShape_EndEvent_BackOrdered">
+          <bounds height="36.0" width="36.0" x="1150.0" y="82.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#EndEvent_BackOrdered"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNShape" id="BPMNShape_Task_ReserveItem">
+          <bounds height="50.0" width="110.0" x="440.0" y="175.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Task_ReserveItem"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNShape" id="BPMNShape_Task_RequestPayment">
+          <bounds height="50.0" width="110.0" x="600.0" y="175.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Task_RequestPayment"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNShape" id="BPMNShape_Event_PaymentConfirmed">
+          <bounds height="36.0" width="36.0" x="917.0" y="182.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Event_PaymentConfirmed"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNShape" id="BPMNShape_Task_PackageShip">
+          <bounds height="50.0" width="110.0" x="1000.0" y="175.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Task_PackageShip"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNShape" id="BPMNShape_EndEvent_Shipped">
+          <bounds height="36.0" width="36.0" x="1150.0" y="182.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#EndEvent_Shipped"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNEdge" id="BPMNEdge_Flow_O1">
+          <waypoint x="136.0" y="150.0"/>
+          <waypoint x="180.0" y="150.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Flow_O1"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNEdge" id="BPMNEdge_Flow_O2">
+          <waypoint x="290.0" y="150.0"/>
+          <waypoint x="340.0" y="150.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Flow_O2"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNEdge" id="BPMNEdge_Flow_InStock">
+          <waypoint x="365.0" y="175.0"/>
+          <waypoint x="365.0" y="200.0"/>
+          <waypoint x="440.0" y="200.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Flow_InStock"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNEdge" id="BPMNEdge_Flow_OutOfStock">
+          <waypoint x="365.0" y="125.0"/>
+          <waypoint x="365.0" y="100.0"/>
+          <waypoint x="440.0" y="100.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Flow_OutOfStock"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNEdge" id="BPMNEdge_Flow_O3">
+          <waypoint x="550.0" y="200.0"/>
+          <waypoint x="600.0" y="200.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Flow_O3"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNEdge" id="BPMNEdge_Flow_O6">
+          <waypoint x="710.0" y="200.0"/>
+          <waypoint x="917.0" y="200.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Flow_O6"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNEdge" id="BPMNEdge_Flow_O7">
+          <waypoint x="953.0" y="200.0"/>
+          <waypoint x="1000.0" y="200.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Flow_O7"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNEdge" id="BPMNEdge_Flow_O5">
+          <waypoint x="1110.0" y="200.0"/>
+          <waypoint x="1150.0" y="200.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Flow_O5"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNEdge" id="BPMNEdge_Flow_O4">
+          <waypoint x="550.0" y="100.0"/>
+          <waypoint x="1150.0" y="100.0"/>
+          <bpmnElement href="ipfs://QmYd4Bacip4qw8tuPhXDCBaP2MmVJmYYKcwusbiZvFsDdR#Flow_O4"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNShape" id="BPMNShape_Participant_PaymentProvider" bpmnElement="Participant_PaymentProvider" isHorizontal="true">
+          <bounds height="140.0" width="1180.0" x="50.0" y="340.0"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNShape" id="BPMNShape_StartEvent_Payment">
+          <bounds height="36.0" width="36.0" x="530.0" y="392.0"/>
+          <bpmnElement href="ipfs://QmfGiCCe3C6dtHFvRtMipQ7c3hxhLZawmrcajgNWavRen5#StartEvent_Payment"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNShape" id="BPMNShape_Task_ValidateCard">
+          <bounds height="50.0" width="110.0" x="600.0" y="385.0"/>
+          <bpmnElement href="ipfs://QmfGiCCe3C6dtHFvRtMipQ7c3hxhLZawmrcajgNWavRen5#Task_ValidateCard"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNShape" id="BPMNShape_Task_ChargeCard">
+          <bounds height="50.0" width="110.0" x="740.0" y="385.0"/>
+          <bpmnElement href="ipfs://QmfGiCCe3C6dtHFvRtMipQ7c3hxhLZawmrcajgNWavRen5#Task_ChargeCard"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNShape" id="BPMNShape_Task_IssueReceipt">
+          <bounds height="50.0" width="110.0" x="880.0" y="385.0"/>
+          <bpmnElement href="ipfs://QmfGiCCe3C6dtHFvRtMipQ7c3hxhLZawmrcajgNWavRen5#Task_IssueReceipt"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNShape" id="BPMNShape_EndEvent_PaymentComplete">
+          <bounds height="36.0" width="36.0" x="1020.0" y="392.0"/>
+          <bpmnElement href="ipfs://QmfGiCCe3C6dtHFvRtMipQ7c3hxhLZawmrcajgNWavRen5#EndEvent_PaymentComplete"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNEdge" id="BPMNEdge_Flow_P1">
+          <waypoint x="566.0" y="410.0"/>
+          <waypoint x="600.0" y="410.0"/>
+          <bpmnElement href="ipfs://QmfGiCCe3C6dtHFvRtMipQ7c3hxhLZawmrcajgNWavRen5#Flow_P1"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNEdge" id="BPMNEdge_Flow_P2">
+          <waypoint x="710.0" y="410.0"/>
+          <waypoint x="740.0" y="410.0"/>
+          <bpmnElement href="ipfs://QmfGiCCe3C6dtHFvRtMipQ7c3hxhLZawmrcajgNWavRen5#Flow_P2"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNEdge" id="BPMNEdge_Flow_P3">
+          <waypoint x="850.0" y="410.0"/>
+          <waypoint x="880.0" y="410.0"/>
+          <bpmnElement href="ipfs://QmfGiCCe3C6dtHFvRtMipQ7c3hxhLZawmrcajgNWavRen5#Flow_P3"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNEdge" id="BPMNEdge_Flow_P4">
+          <waypoint x="990.0" y="410.0"/>
+          <waypoint x="1020.0" y="410.0"/>
+          <bpmnElement href="ipfs://QmfGiCCe3C6dtHFvRtMipQ7c3hxhLZawmrcajgNWavRen5#Flow_P4"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNEdge" id="BPMNEdge_MessageFlow_PaymentRequest" bpmnElement="MessageFlow_PaymentRequest" sourceElement="BPMNShape_Task_RequestPayment" targetElement="BPMNShape_Task_ValidateCard">
+          <waypoint x="655.0" y="225.0"/>
+          <waypoint x="655.0" y="385.0"/>
+        </planeElement>
+        <planeElement xsi:type="bpmndi:BPMNEdge" id="BPMNEdge_MessageFlow_PaymentConfirmation" bpmnElement="MessageFlow_PaymentConfirmation" sourceElement="BPMNShape_Task_IssueReceipt" targetElement="BPMNShape_Event_PaymentConfirmed">
+          <waypoint x="935.0" y="385.0"/>
+          <waypoint x="935.0" y="218.0"/>
+        </planeElement>
+      </plane>
+    </diagrams>
+  </definitions>
+</bpmn2:DocumentRoot>
