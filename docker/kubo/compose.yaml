@@ -1,0 +1,56 @@
+# Two Kubo nodes in a private IPFS network on this machine.
+#
+# Both nodes hold the same swarm key, so they connect to each other and refuse
+# every node of the global IPFS network. The init script removes the public
+# bootstrap peers and the internet services Kubo would otherwise contact.
+#
+#   sh docker/kubo/new-swarm-key.sh            # once, before the first start
+#   docker compose -f docker/kubo/compose.yaml up -d
+#
+# Node 1: API http://127.0.0.1:5001 (web interface at /webui), gateway http://127.0.0.1:8080
+# Node 2: API http://127.0.0.1:5002 (web interface at /webui), gateway http://127.0.0.1:8081
+name: ecorefs-ipfs
+
+services:
+  kubo-1:
+    image: ipfs/kubo:v0.40.1
+    container_name: ecorefs-kubo
+    restart: unless-stopped
+    environment:
+      # Refuse to start without a swarm key, so the node can never join the global network
+      LIBP2P_FORCE_PNET: "1"
+    ports:
+      - "127.0.0.1:5001:5001"
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - kubo-1-data:/data/ipfs
+      - ./swarm.key:/run/ecorefs/swarm.key:ro
+      - ./init:/container-init.d:ro
+    networks:
+      - ipfs
+
+  kubo-2:
+    image: ipfs/kubo:v0.40.1
+    container_name: ecorefs-kubo-2
+    restart: unless-stopped
+    environment:
+      LIBP2P_FORCE_PNET: "1"
+    ports:
+      - "127.0.0.1:5002:5001"
+      - "127.0.0.1:8081:8080"
+    volumes:
+      - kubo-2-data:/data/ipfs
+      - ./swarm.key:/run/ecorefs/swarm.key:ro
+      - ./init:/container-init.d:ro
+    networks:
+      - ipfs
+
+volumes:
+  kubo-1-data:
+    name: ecorefs-kubo-1-data
+  kubo-2-data:
+    name: ecorefs-kubo-2-data
+
+networks:
+  ipfs:
+    name: ecorefs-ipfs

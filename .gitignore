@@ -32,6 +32,8 @@ eval/custom_generator/target/
 # IPFS Daemons and Archives
 eval/kubo/
 eval/.ipfs/
+# Secret of the private IPFS network, made by docker/kubo/new-swarm-key.sh
+docker/kubo/swarm.key
 *.tar.gz
 *.tar.zst
 
@@ -74,9 +76,13 @@ eval/modisco_jdt_reverse/org.ecorefs.modisco.jdt.reverse.tests/target
 # Local Eclipse 2022-06 install
 /eclipse.2022.06/
 
-# Symlinks to the separate BPMN2 Modeler and BPMN 2.0 Metamodel repos
+# Workspace of the Eclipse Application launched from the IDE (PDE runtime)
+/runtime-EclipseApplication/
+
+# Symlinks to the separate BPMN2 Modeler, BPMN 2.0 Metamodel and Eclipse MCP repos
 /org.eclipse.bpmn2-modeler-1.5.4-ecorefs
 /org.eclipse.bpmn2-ecorefs
+/eclipse-mcp
 
 # LaTeX build files (*.log is already ignored above)
 *.aux
