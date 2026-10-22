@@ -308,11 +308,11 @@ The files refer to each other through BPMN imports. An import binds a namespace 
 
 The diagram part of the collaboration uses the same prefixes. A shape with `bpmnElement="order:Task_ReserveItem"` draws a task of `order-process.bpmn` inside the Seller pool. Each process therefore stays defined in its own file, and the collaboration holds only the participants, the message flows and the layout. `order-process.bpmn` imports `payment-process.bpmn` in the same way for `<bpmn2:supports>payment:PaymentProcess</bpmn2:supports>`. Once the models are saved to IPFS, each of these references names its target by CID instead of a prefix.
 
+![The three models before the change: each refers to the CIDs of the models below it](images/cascade-before.png)
+
 To look at the models, copy the three files into one project of the modeler, for example `case-study`, and open them. The two process files carry no diagram layout, so their editors first offer to create the diagram elements. The collaboration draws both processes inside the pools Seller and Payment Provider, with the two message flows between them. To see the three editors at once, drag an editor tab to the lower edge of the editor area, and Eclipse splits the area.
 
 ![The case-study project in the modeler: the payment process and the order process at the top, and below them the collaboration, which draws both processes in the pools Seller and Payment Provider](images/eclipse-case-study-models.png)
-
-![The three models before the change: each refers to the CIDs of the models below it](images/cascade-before.png)
 
 ### Run the cascade save
 
