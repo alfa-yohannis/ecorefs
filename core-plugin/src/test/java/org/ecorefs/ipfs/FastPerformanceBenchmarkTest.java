@@ -206,9 +206,9 @@ public class FastPerformanceBenchmarkTest {
      * @return the elapsed time in nanoseconds
      * @throws IOException when the save fails
      */
-    private long measureIpfsSave(Resource ipfsResource) throws IOException {
+    private long measureIpfsSave(IPFSResourceImpl ipfsResource) throws IOException {
         long start = System.nanoTime();
-        ipfsResource.save(Collections.emptyMap());
+        ipfsResource.saveIPFS(Collections.emptyMap());
         return System.nanoTime() - start;
     }
 
@@ -335,7 +335,7 @@ public class FastPerformanceBenchmarkTest {
             long fileLoadTime = measureFileLoad(temporaryFile);
 
             ResourceSet ipfsResourceSet = createIpfsResourceSet();
-            Resource ipfsResource = ipfsResourceSet.createResource(URI.createURI("ipfs://pending"));
+            IPFSResourceImpl ipfsResource = (IPFSResourceImpl) ipfsResourceSet.createResource(URI.createURI("ipfs://pending"));
             ipfsResource.getContents().addAll(fileResource.getContents());
 
             long ipfsSaveTime = measureIpfsSave(ipfsResource);

@@ -11,7 +11,7 @@ These results test the cascade save of the core plugin on reference structures f
 
 - **Models.** The cleaned collections in `eval/datasets/bpmn`, so every file loads without errors. Vendor extensions are removed before a model is published, because plain XMI cannot store them (see `eval/results/bpmn-rq1`). They carry no reference between the resources.
 - **Software and nodes.** As for RQ1: the core plugin with its own dependencies, javac 17, OpenJDK 21.0.9, and for each experiment its own Kubo 0.40.1 container, offline, with an empty repository and reachable only on 127.0.0.1.
-- **Saves.** Every save goes through `IPFSResourceImpl` in CID mode, and every change runs `IPFSModelPersister.cascadeSave`. The first publication saves the resources in dependency order.
+- **Saves.** Every publication goes through `IPFSResourceImpl.saveIPFS` in CID mode, and every change runs `IPFSResourceImpl.saveIPFSCascaded`. The first publication saves the resources in dependency order.
 
 Each change renames one object and runs one cascade save. Three checks follow:
 

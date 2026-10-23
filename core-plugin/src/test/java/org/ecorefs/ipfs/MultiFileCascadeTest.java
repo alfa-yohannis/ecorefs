@@ -107,7 +107,7 @@ public class MultiFileCascadeTest {
                 ipfsResourceSet.getResources().clear();
                 
                 Resource resA = ipfsResourceSet.createResource(URI.createURI("ipfs://pendingA"));
-                Resource resB = ipfsResourceSet.createResource(URI.createURI("ipfs://pendingB"));
+                IPFSResourceImpl resB = (IPFSResourceImpl) ipfsResourceSet.createResource(URI.createURI("ipfs://pendingB"));
 
                 EObject rootNode = dynamicPackage.getEFactoryInstance().create(componentClass);
                 rootNode.eSet(componentClass.getEStructuralFeature("id"), "RootNode_" + iter);
@@ -120,7 +120,7 @@ public class MultiFileCascadeTest {
                 ((java.util.List<EObject>) rootNode.eGet(childrenRef)).add(childNode);
 
                 long t0 = System.nanoTime();
-                IPFSModelPersister.cascadeSave(resB, Collections.emptyMap());
+                resB.saveIPFSCascaded(Collections.emptyMap());
                 long tCascade = (System.nanoTime() - t0) / 1_000_000;
 
                 if (!isWarmup) {

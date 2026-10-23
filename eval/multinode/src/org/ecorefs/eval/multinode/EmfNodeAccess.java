@@ -2,6 +2,7 @@ package org.ecorefs.eval.multinode;
 
 import io.ipfs.api.IPFS;
 import org.ecorefs.ipfs.IPFSResourceFactoryImpl;
+import org.ecorefs.ipfs.IPFSResourceImpl;
 import org.ecorefs.ipfs.IPFSURIHandlerImpl;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -41,9 +42,9 @@ public final class EmfNodeAccess {
      * @throws IOException when the save fails
      */
     public URI save(Collection<EObject> content) throws IOException {
-        Resource resource = createResourceSet().createResource(URI.createURI("ipfs://pending"));
+        IPFSResourceImpl resource = (IPFSResourceImpl) createResourceSet().createResource(URI.createURI("ipfs://pending"));
         resource.getContents().addAll(content);
-        resource.save(Collections.emptyMap());
+        resource.saveIPFS(Collections.emptyMap());
         return resource.getURI();
     }
 

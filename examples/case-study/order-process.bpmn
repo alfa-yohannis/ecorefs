@@ -6,15 +6,14 @@
     targetNamespace="http://ecorefs.org/case-study/order-process">
 
   <!--
-    Cross-resource dependency: the import below names payment-process.bpmn.
-    Saved to IPFS, the import location carries the CID of the payment process
-    instead of the file name, which pins the order process to the exact payment
-    process it was saved with. The send task Request Payment and the message
+    Cross-resource dependency: the import below names payment-process.bpmn by
+    the CID of its published version on IPFS, which pins the order process to
+    exactly that payment process. The send task Request Payment and the message
     event Payment Confirmed talk to that process through the message flows of
     collaboration.bpmn.
   -->
   <bpmn2:import importType="http://www.omg.org/spec/BPMN/20100524/MODEL"
-      location="payment-process.bpmn" namespace="http://ecorefs.org/case-study/payment-process"/>
+      location="ipfs://QmSuDF8o9WhaJG2axWcQpWtkJurEuy6JbaKAAsp753agt5" namespace="http://ecorefs.org/case-study/payment-process"/>
 
   <bpmn2:process id="OrderFulfillmentProcess" name="Order Fulfillment Process" isExecutable="false">
 

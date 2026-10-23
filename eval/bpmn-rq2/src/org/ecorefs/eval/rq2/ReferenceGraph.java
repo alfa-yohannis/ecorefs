@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ecorefs.ipfs.IPFSResourceImpl;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
@@ -210,7 +211,7 @@ final class ReferenceGraph {
     long publishAll() throws IOException {
         long start = System.nanoTime();
         for (Resource resource : publicationOrder()) {
-            resource.save(null);
+            ((IPFSResourceImpl) resource).saveIPFS(null);
         }
         return System.nanoTime() - start;
     }

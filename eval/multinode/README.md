@@ -57,7 +57,7 @@ Every duration is `System.nanoTime` around one call and goes to the CSV in milli
 
 | Workload | Operation | What the timer covers |
 |---|---|---|
-| `models` | `save_a` | `IPFSResourceImpl.save` of a stamped copy on mn-a; the announcement of the root CID runs in the background |
+| `models` | `save_a` | `IPFSResourceImpl.saveIPFS` of a stamped copy on mn-a; the announcement of the root CID runs in the background |
 | `models` | `cat_b` | `cat` of the new CID through the API of mn-b |
 | `models` | `load_c` | `Resource.load` of `ipfs://<CID>` in a fresh resource set bound to mn-c |
 | `bpmn` | `add_a` | `add` of one BPMN file on mn-a |

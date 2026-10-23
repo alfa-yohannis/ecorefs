@@ -10,14 +10,14 @@ import java.util.Set;
 
 import org.ecorefs.eval.bpmn.ExperimentResourceSets;
 import org.ecorefs.eval.bpmn.KuboNode;
-import org.ecorefs.ipfs.IPFSModelPersister;
+import org.ecorefs.ipfs.IPFSResourceImpl;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 
 /**
  * One change and one cascade save on a group of published resources. The trial
- * renames one object, calls {@code IPFSModelPersister.cascadeSave} on its
+ * renames one object, calls {@code IPFSResourceImpl.saveIPFSCascaded} on its
  * resource, and checks the outcome three ways: the resources with a new CID against
  * the affected set of the independent reference graph (Proposition 1 of the paper),
  * the stored bytes of every resource for references to older CIDs (Proposition 2),
@@ -68,7 +68,7 @@ final class CascadeTrial {
         Map<Resource, URI> urisBefore = currentUris();
         String newName = NameChange.apply(changedObject);
         long start = System.nanoTime();
-        IPFSModelPersister.cascadeSave(changedResource, null);
+        ((IPFSResourceImpl) changedResource).saveIPFSCascaded(null);
         long cascadeNanos = System.nanoTime() - start;
         history.record(resources);
 

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.ecorefs.eval.bpmn.ExperimentResourceSets;
+import org.ecorefs.ipfs.IPFSResourceImpl;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 
@@ -40,10 +41,10 @@ final class IpfsXmiPath extends PersistencePath {
      */
     @Override
     SavedModel save(Resource source) throws IOException {
-        Resource target = resourceSets.forIpfsXmi().createResource(PLACEHOLDER);
+        IPFSResourceImpl target = (IPFSResourceImpl) resourceSets.forIpfsXmi().createResource(PLACEHOLDER);
         target.getContents().addAll(source.getContents());
         long start = System.nanoTime();
-        target.save(ExperimentResourceSets.xmiSaveOptions(extendedMetadata));
+        target.saveIPFS(ExperimentResourceSets.xmiSaveOptions(extendedMetadata));
         long saveNanos = System.nanoTime() - start;
         return new SavedModel(target, target.getURI(), target.getURI().authority(), saveNanos);
     }

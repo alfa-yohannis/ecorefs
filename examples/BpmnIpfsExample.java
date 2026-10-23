@@ -1,132 +1,211 @@
 package examples;
 
-import io.ipfs.api.IPFS;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import org.ecorefs.ipfs.IPFSResourceFactoryImpl;
 import org.ecorefs.ipfs.IPFSResourceImpl;
 import org.ecorefs.ipfs.IPFSURIHandlerImpl;
+import org.eclipse.bpmn2.Bpmn2Factory;
+import org.eclipse.bpmn2.Bpmn2Package;
+import org.eclipse.bpmn2.Collaboration;
+import org.eclipse.bpmn2.Definitions;
+import org.eclipse.bpmn2.DocumentRoot;
+import org.eclipse.bpmn2.Participant;
+import org.eclipse.bpmn2.Process;
+import org.eclipse.bpmn2.RootElement;
+import org.eclipse.bpmn2.util.Bpmn2ResourceFactoryImpl;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import java.nio.file.Paths;
-import java.util.Collections;
+import io.ipfs.api.IPFS;
+import io.ipfs.multihash.Multihash;
 
 /**
- * Demonstrates IPFS fragment-based cross-references between two BPMN resources.
+ * Shows the three saves of an IPFS resource on two BPMN models of
+ * {@code examples/bpmn}. The loan model is saved as a local working copy with
+ * {@code save}, then published with {@code saveIPFS}. The order model gains a
+ * collaboration whose second participant runs the loan process, so the order
+ * model refers to the loan model by CID. A change to the loan model followed by
+ * {@code saveIPFSCascaded} publishes both models again, and a load of the order
+ * model by CID in a fresh resource set resolves the reference through IPFS.
  *
- * Model A = loan-application.bpmn   (uploaded to IPFS first)
- * Model B = order-fulfillment.bpmn  (references an element inside A via ipfs://CID#//fragment)
- *
- * Prerequisites:
- *   - IPFS Kubo daemon running on localhost:5001  (run: ipfs daemon)
- *   - core-plugin fat jar on the classpath
- *
- * Build and run from project root:
- *   mvn -pl core-plugin package -q
- *   javac -cp core-plugin/target/ecorefs-ipfs-core-1.0-SNAPSHOT-jar-with-dependencies.jar \
- *         examples/BpmnIpfsExample.java -d examples/out
- *   java  -cp examples/out:core-plugin/target/ecorefs-ipfs-core-1.0-SNAPSHOT-jar-with-dependencies.jar \
- *         examples.BpmnIpfsExample
+ * <p>Run it from the root of the repository with a Kubo node on port 5001:
+ * {@code bash examples/run-bpmn-ipfs-example.sh}, or pass another API address
+ * as the first argument.
  */
-public class BpmnIpfsExample {
+public final class BpmnIpfsExample {
 
-    public static void main(String[] args) throws Exception {
+    private static final String LOAN_MODEL = "examples/bpmn/loan-application.bpmn";
+    private static final String ORDER_MODEL = "examples/bpmn/order-fulfillment.bpmn";
+    private static final String DEFAULT_NODE = "/ip4/127.0.0.1/tcp/5001";
 
-        IPFS ipfs = new IPFS("/ip4/127.0.0.1/tcp/5001");
-        System.out.println("Connected to IPFS daemon: " + ipfs.version());
-
-        ResourceSet rs = buildResourceSet(ipfs);
-
-        // ── Step 1: Upload Model A (loan-application) to IPFS ────────────────
-        String pathA = Paths.get("examples/bpmn/loan-application.bpmn")
-                            .toAbsolutePath().toString();
-        Resource localA = rs.getResource(URI.createFileURI(pathA), true);
-
-        IPFSResourceImpl ipfsA = new IPFSResourceImpl(
-                URI.createURI("ipfs://pending-loan"), ipfs);
-        ipfsA.getContents().addAll(localA.getContents());
-        ipfsA.save(Collections.emptyMap());
-
-        URI cidA = ipfsA.getURI();   // ipfs://Qm...
-        System.out.println("\n[Model A] Uploaded loan-application to IPFS");
-        System.out.println("          CID: " + cidA);
-
-        // ── Step 2: Find the fragment path of a specific element in Model A ───
-        // EMF fragment for the first root object is typically "//ProcessId"
-        // We use getURIFragment() to obtain it precisely.
-        EObject rootA = ipfsA.getContents().get(0);
-        String fragmentA = ipfsA.getURIFragment(rootA);
-
-        URI crossRefUri = URI.createURI(cidA + "#" + fragmentA);
-        System.out.println("\n[Cross-ref] Fragment of root element in A: " + fragmentA);
-        System.out.println("[Cross-ref] Full reference URI: " + crossRefUri);
-
-        // ── Step 3: Upload Model B (order-fulfillment) to IPFS ───────────────
-        rs.getResources().clear();
-        String pathB = Paths.get("examples/bpmn/order-fulfillment.bpmn")
-                            .toAbsolutePath().toString();
-        Resource localB = rs.getResource(URI.createFileURI(pathB), true);
-
-        IPFSResourceImpl ipfsB = new IPFSResourceImpl(
-                URI.createURI("ipfs://pending-order"), ipfs);
-        ipfsB.getContents().addAll(localB.getContents());
-        ipfsB.save(Collections.emptyMap());
-
-        URI cidB = ipfsB.getURI();
-        System.out.println("\n[Model B] Uploaded order-fulfillment to IPFS");
-        System.out.println("          CID: " + cidB);
-
-        // ── Step 4: Resolve the cross-reference from B → A via the fragment ──
-        // This is what EMF does automatically when it encounters an href like:
-        //   href="ipfs://QmXxx...#//LoanApplicationProcess"
-        // inside a serialised XMI resource.
-        rs.getResources().clear();
-
-        // Load Model A fresh from IPFS into the shared ResourceSet
-        Resource resolvedA = rs.getResource(cidA, true);
-
-        // Navigate to the specific element using the fragment
-        EObject referencedElement = resolvedA.getEObject(fragmentA);
-
-        System.out.println("\n[Resolution] Loading Model A from IPFS:  " + cidA);
-        System.out.println("[Resolution] Resolving fragment:          " + fragmentA);
-        System.out.println("[Resolution] Resolved EObject class:      "
-                + (referencedElement != null
-                   ? referencedElement.eClass().getName()
-                   : "null — metamodel not registered, use dynamic loading"));
-
-        // ── Step 5: Show the real CIDs and the persisted cross-reference ────────
-        System.out.println("\n--- Real IPFS addresses ---");
-        System.out.println("  Model A (loan-application):   ipfs://QmVgQCkKWWbmMP7DqjWK6rTEMabcr6iUXGbJHQNvAFdnv9");
-        System.out.println("  Model B (order-fulfillment):  ipfs://QmRkMEnVuSjdjpZ5TFvfCfGszfBjbPx7MBLi2TvoDsxCFv");
-        System.out.println();
-        System.out.println("--- Cross-reference written into order-fulfillment.bpmn ---");
-        System.out.println("  creditCheckRef=\"ipfs://QmVgQCkKWWbmMP7DqjWK6rTEMabcr6iUXGbJHQNvAFdnv9#//LoanApplicationProcess/Task_CreditCheck\"");
-        System.out.println();
-        System.out.println("  When EMF loads Model B and encounters that href, it will:");
-        System.out.println("    1. Download ipfs://QmVgQCkKWWbmMP7DqjWK6rTEMabcr6iUXGbJHQNvAFdnv9");
-        System.out.println("    2. Navigate to fragment: //LoanApplicationProcess/Task_CreditCheck");
-        System.out.println("    3. Return the EObject at that path as the referenced element.");
-
-        System.out.println("\nDone.");
+    /**
+     * Prevents instances; the class is a program.
+     */
+    private BpmnIpfsExample() {
     }
 
-    private static ResourceSet buildResourceSet(IPFS ipfs) {
-        ResourceSet rs = new ResourceSetImpl();
+    /**
+     * Runs the example.
+     *
+     * @param arguments the API address of the Kubo node, optional
+     * @throws Exception when a load, a save or a publication fails
+     */
+    public static void main(String[] arguments) throws Exception {
+        IPFS ipfs = new IPFS(arguments.length > 0 ? arguments[0] : DEFAULT_NODE);
+        Bpmn2Package.eINSTANCE.getName();
+        Path outputFolder = Files.createDirectories(Path.of("examples/out"));
+        ResourceSet resourceSet = createResourceSet(ipfs);
 
+        URI workingCopy = URI.createFileURI(outputFolder.resolve("loan-application.xmi").toAbsolutePath().toString());
+        IPFSResourceImpl loan = copyIntoIpfsResource(resourceSet, LOAN_MODEL, workingCopy, ipfs);
+        loan.save(null);
+        System.out.println("save()              wrote the loan model to " + loan.getURI());
+        loan.saveIPFS(null);
+        System.out.println("saveIPFS()          published the loan model as " + loan.getURI());
+
+        IPFSResourceImpl order = copyIntoIpfsResource(resourceSet, ORDER_MODEL, URI.createURI("ipfs://pending-order"),
+                ipfs);
+        Participant loanParticipant = addCollaboration(order, firstProcess(loan));
+        order.saveIPFS(null);
+        System.out.println("saveIPFS()          published the order model as " + order.getURI());
+        System.out.println("                    " + describeStoredReference(ipfs, order, loan));
+
+        firstProcess(loan).setName("Loan Application Process, second version");
+        loan.saveIPFSCascaded(null);
+        System.out.println("saveIPFSCascaded()  published the changed loan model as " + loan.getURI());
+        System.out.println("                    and the order model again as " + order.getURI());
+        System.out.println("                    " + describeStoredReference(ipfs, order, loan));
+
+        Resource loadedOrder = createResourceSet(ipfs).getResource(order.getURI(), true);
+        Participant loaded = (Participant) loadedOrder.getEObject(loanParticipant.getId());
+        Process calledProcess = loaded.getProcessRef();
+        System.out.println("load by CID         the participant \"" + loaded.getName() + "\" runs \""
+                + calledProcess.getName() + "\" from " + calledProcess.eResource().getURI());
+    }
+
+    /**
+     * Creates a resource set that reads BPMN files and IPFS resources. The IPFS
+     * URI handler goes first, so the handler receives every {@code ipfs} and
+     * {@code ipns} URI.
+     *
+     * @param ipfs the client of the node
+     * @return the resource set
+     */
+    private static ResourceSet createResourceSet(IPFS ipfs) {
+        ResourceSet resourceSet = new ResourceSetImpl();
         IPFSResourceFactoryImpl ipfsFactory = new IPFSResourceFactoryImpl(ipfs);
-        rs.getResourceFactoryRegistry().getProtocolToFactoryMap().put("ipfs",  ipfsFactory);
-        rs.getResourceFactoryRegistry().getProtocolToFactoryMap().put("ipns",  ipfsFactory);
+        resourceSet.getResourceFactoryRegistry().getProtocolToFactoryMap().put("ipfs", ipfsFactory);
+        resourceSet.getResourceFactoryRegistry().getProtocolToFactoryMap().put("ipns", ipfsFactory);
+        resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("bpmn", new Bpmn2ResourceFactoryImpl());
+        resourceSet.getURIConverter().getURIHandlers().add(0, new IPFSURIHandlerImpl(ipfs));
+        return resourceSet;
+    }
 
-        XMIResourceFactoryImpl xmiFactory = new XMIResourceFactoryImpl();
-        rs.getResourceFactoryRegistry().getProtocolToFactoryMap().put("http",  xmiFactory);
-        rs.getResourceFactoryRegistry().getProtocolToFactoryMap().put("https", xmiFactory);
-        rs.getResourceFactoryRegistry().getExtensionToFactoryMap().put("bpmn", xmiFactory);
+    /**
+     * Loads a BPMN file and moves its content into a new IPFS resource of the same
+     * resource set. The references inside the file are resolved first, so the
+     * moved content refers to its own objects and not to the file.
+     *
+     * @param resourceSet the resource set of both resources
+     * @param bpmnFile    the path of the BPMN file
+     * @param uri         the URI of the new resource: a local working copy or a placeholder
+     * @param ipfs        the client of the node
+     * @return the IPFS resource with the content of the file
+     */
+    private static IPFSResourceImpl copyIntoIpfsResource(ResourceSet resourceSet, String bpmnFile, URI uri,
+            IPFS ipfs) {
+        Resource file = resourceSet.getResource(URI.createFileURI(Path.of(bpmnFile).toAbsolutePath().toString()),
+                true);
+        EcoreUtil.resolveAll(file);
+        IPFSResourceImpl resource = new IPFSResourceImpl(uri, ipfs);
+        resourceSet.getResources().add(resource);
+        resource.getContents().addAll(file.getContents());
+        return resource;
+    }
 
-        rs.getURIConverter().getURIHandlers().add(0, new IPFSURIHandlerImpl(ipfs));
-        return rs;
+    /**
+     * Adds a collaboration to the order model with two participants: one for the
+     * order process and one for the loan process of the other resource. The second
+     * participant is the reference across the two resources.
+     *
+     * @param order       the resource of the order model
+     * @param loanProcess the process of the loan model
+     * @return the participant that refers to the loan process
+     */
+    private static Participant addCollaboration(Resource order, Process loanProcess) {
+        Collaboration collaboration = Bpmn2Factory.eINSTANCE.createCollaboration();
+        collaboration.setId("Collaboration_OrderAndLoan");
+        collaboration.getParticipants().add(createParticipant("Participant_Shop", "Shop", firstProcess(order)));
+        Participant bank = createParticipant("Participant_Bank", "Bank", loanProcess);
+        collaboration.getParticipants().add(bank);
+        definitionsOf(order).getRootElements().add(collaboration);
+        return bank;
+    }
+
+    /**
+     * Creates a participant that runs a process.
+     *
+     * @param id      the identifier of the participant
+     * @param name    the name of the participant
+     * @param process the process of the participant
+     * @return the participant
+     */
+    private static Participant createParticipant(String id, String name, Process process) {
+        Participant participant = Bpmn2Factory.eINSTANCE.createParticipant();
+        participant.setId(id);
+        participant.setName(name);
+        participant.setProcessRef(process);
+        return participant;
+    }
+
+    /**
+     * Reads the stored bytes of a resource back from the node and tells whether
+     * they name the current CID of a target resource.
+     *
+     * @param ipfs   the client of the node
+     * @param holder the published resource that holds the reference
+     * @param target the published resource that the reference names
+     * @return a sentence for the console
+     * @throws Exception when the node does not return the content
+     */
+    private static String describeStoredReference(IPFS ipfs, Resource holder, Resource target) throws Exception {
+        byte[] stored = ipfs.cat(Multihash.fromBase58(holder.getURI().authority()));
+        String text = new String(stored, StandardCharsets.UTF_8);
+        String targetUri = target.getURI().toString();
+        return text.contains(targetUri) ? "the stored order model names the current " + targetUri
+                : "the stored order model names an older version of the loan model";
+    }
+
+    /**
+     * Returns the first process of a BPMN resource.
+     *
+     * @param resource the resource
+     * @return the process
+     */
+    private static Process firstProcess(Resource resource) {
+        for (RootElement element : definitionsOf(resource).getRootElements()) {
+            if (element instanceof Process) {
+                return (Process) element;
+            }
+        }
+        throw new IllegalStateException("No process in " + resource.getURI());
+    }
+
+    /**
+     * Returns the definitions element of a BPMN resource.
+     *
+     * @param resource the resource
+     * @return the definitions
+     */
+    private static Definitions definitionsOf(Resource resource) {
+        EObject root = resource.getContents().get(0);
+        return root instanceof DocumentRoot ? ((DocumentRoot) root).getDefinitions() : (Definitions) root;
     }
 }

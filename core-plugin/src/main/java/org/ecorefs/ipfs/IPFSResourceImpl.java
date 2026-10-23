@@ -22,6 +22,18 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * An XMI resource that can also publish its content on IPFS.
+ *
+ * <p>{@link #save(Map)} is the normal EMF save: it writes the XMI to the location
+ * of the resource URI, for example a local file. {@link #saveIPFS(Map)} publishes
+ * the content on the IPFS node instead and gives the resource the URI of the
+ * published version, {@code ipfs://<CID>} in CID mode or {@code ipns://<name>} in
+ * IPNS mode. Content under a CID cannot change, so after a publication a normal
+ * save needs a writable URI again, set with {@link #setURI(URI)}.
+ * {@link #saveIPFSCascaded(Map)} publishes the resource together with every
+ * resource that refers to it, in dependency order.
+ */
 public class IPFSResourceImpl extends XMIResourceImpl {
     private final IPFS ipfs;
 
@@ -31,13 +43,35 @@ public class IPFSResourceImpl extends XMIResourceImpl {
      */
     private String ipnsKeyName;
 
+    /**
+     * Creates a resource that publishes through the given IPFS client.
+     *
+     * @param uri  the URI of the resource: a local location for normal saves, or a
+     *             placeholder such as {@code ipfs://pending} before the first publication
+     * @param ipfs the client of the IPFS node
+     */
     public IPFSResourceImpl(URI uri, IPFS ipfs) {
         super(uri);
         this.ipfs = ipfs;
     }
 
-    @Override
-    public void save(Map<?, ?> options) throws IOException {
+    // EcoreFS begin: save() is the normal EMF save, and saveIPFS() publishes to IPFS
+    // @Override
+    // public void save(Map<?, ?> options) throws IOException {
+    /**
+     * Publishes the content of the resource on the IPFS node. The XMI goes to a
+     * temporary file and from there to the node, which returns the CID. In CID mode
+     * the resource URI becomes {@code ipfs://<CID>}; in IPNS mode the CID is
+     * published under the IPNS key of the resource, and the URI becomes
+     * {@code ipns://<key>}. Resources that refer to this resource keep the old CID
+     * until they are published again, for example by {@link #saveIPFSCascaded(Map)}.
+     *
+     * @param options the save options, including {@link IPFSResourceOptions#REFERENCE_MODE}
+     *                and {@link IPFSResourceOptions#LOCATION_UPDATERS}, or null
+     * @throws IOException when the serialization or the publication fails
+     */
+    public void saveIPFS(Map<?, ?> options) throws IOException {
+    // EcoreFS end
         ReferenceMode mode = ReferenceMode.CID;
         if (options != null && options.containsKey(IPFSResourceOptions.REFERENCE_MODE)) {
             mode = (ReferenceMode) options.get(IPFSResourceOptions.REFERENCE_MODE);
@@ -83,6 +117,22 @@ public class IPFSResourceImpl extends XMIResourceImpl {
             this.setURI(URI.createURI("ipfs://" + cid));
         }
     }
+
+    // EcoreFS begin: saveIPFSCascaded() runs the cascade save of IPFSModelPersister
+    /**
+     * Publishes the resource on IPFS together with every resource of the resource
+     * set that refers to it, directly or through other resources. The resources are
+     * published in dependency order, so every stored reference names the current
+     * CID of its target, unless the references form a cycle. In IPNS mode only this
+     * resource is published, because references by IPNS name stay valid.
+     *
+     * @param options the save options, as for {@link #saveIPFS(Map)}
+     * @throws IOException when one of the publications fails
+     */
+    public void saveIPFSCascaded(Map<?, ?> options) throws IOException {
+        IPFSModelPersister.cascadeSave(this, options);
+    }
+    // EcoreFS end
 
     // EcoreFS begin: location attributes take the current URIs of the resources they name
     /**

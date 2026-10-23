@@ -20,7 +20,7 @@ Requirements: Docker, the JDK 17 in `/usr/lib/jvm/java-17-openjdk-amd64`, `git`,
 | Store | Write | Read |
 |---|---|---|
 | `xmi` | save to an XMI file | load the file in a fresh resource set |
-| `ipfs` | save through `IPFSResourceImpl` to the local Kubo node | load by CID in a fresh resource set |
+| `ipfs` | `IPFSResourceImpl.saveIPFS` to the local Kubo node | load by CID in a fresh resource set |
 | `git` | save the XMI file into a working tree, `git add` and `git commit`, `git push` to a bare repository behind `git daemon` | `git clone --depth 1` into a fresh folder, load the file |
 | `share` | save the XMI file through one `sshfs` mount | load the file through a second mount of the same folder |
 | `neoemf` | create a MapDB database, copy every element into it, commit and close | open the database |

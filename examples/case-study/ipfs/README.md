@@ -1,6 +1,6 @@
 # Stored copies of the case study
 
-These six files are the copies of the case study that `BpmnCaseStudyCascadeTest` stored on IPFS on 2026-10-22, fetched byte for byte from the local Kubo node. They show what a save to IPFS writes. The source files in the folder above keep plain file names in their import locations, because a CID exists only after a save.
+These six files are the copies of the case study that `BpmnCaseStudyCascadeTest` stored on IPFS on 2026-10-22, fetched byte for byte from the local Kubo node. They show what a save to IPFS writes. The source files in the folder above are the published BPMN versions, which import each other by CID; these copies are the XMI that the test writes when it publishes the models with the core plug-in.
 
 | File | CID |
 |---|---|
@@ -11,7 +11,7 @@ These six files are the copies of the case study that `BpmnCaseStudyCascadeTest`
 | `after/order-process.xmi` | `QmT1Y8EfDTYi7NJCaqMeMfCk5V45iFjRPWGEVarReWrChc` |
 | `after/collaboration.xmi` | `QmNxhLjKZ929aWBgga6RzPUDKvyjF7L7kvF1jHNTQ3Aspp` |
 
-`before/` holds the first save of the three models. `after/` holds the copies after the test renamed the payment process and called `cascadeSave`.
+`before/` holds the first save of the three models. `after/` holds the copies after the test renamed the payment process and called `saveIPFSCascaded`.
 
 The core plug-in stores models as XMI, so these files are the XMI form of the BPMN models, which the BPMN2 editor does not open. In each file, every reference is an `href` with the CID of its target, and every import location names the CID of the imported file. `after/order-process.xmi`, for example, imports the new payment process:
 

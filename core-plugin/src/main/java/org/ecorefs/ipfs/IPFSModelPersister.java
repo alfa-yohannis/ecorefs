@@ -15,6 +15,7 @@ public class IPFSModelPersister {
 
     /**
      * Implements the "Git-like" recursive save for content-addressed models.
+     * {@link IPFSResourceImpl#saveIPFSCascaded(Map)} is the entry point on a resource.
      * <p>
      * Behavior depends on the {@link ReferenceMode} option:
      * <ul>
@@ -34,7 +35,10 @@ public class IPFSModelPersister {
         if (mode == ReferenceMode.IPNS) {
             // IPNS mode: just save the target. The mutable pointer update is sufficient —
             // all resources referencing this one via ipns:// automatically see the new CID.
-            targetResource.save(options);
+            // EcoreFS begin: the cascade publishes IPFS resources with saveIPFS()
+            // targetResource.save(options);
+            publish(targetResource, options);
+            // EcoreFS end
         } else {
             // EcoreFS begin
             // The saved-set check alone can leave an outdated reference when two
@@ -62,7 +66,10 @@ public class IPFSModelPersister {
     private static void cascadeSaveInDependencyOrder(Resource changedResource, Map<?, ?> options) throws IOException {
         ResourceSet resourceSet = changedResource.getResourceSet();
         if (resourceSet == null) {
-            changedResource.save(options);
+            // EcoreFS begin: the cascade publishes IPFS resources with saveIPFS()
+            // changedResource.save(options);
+            publish(changedResource, options);
+            // EcoreFS end
             return;
         }
         // Location attributes, such as BPMN import locations, count like references.
@@ -70,6 +77,30 @@ public class IPFSModelPersister {
         ResourceDependencyGraph graph = ResourceDependencyGraph.of(resourceSet,
                 IPFSResourceOptions.locationUpdaters(options));
         for (Resource resource : graph.planSaveOrder(changedResource)) {
+            // EcoreFS begin: the cascade publishes IPFS resources with saveIPFS()
+            // resource.save(options);
+            publish(resource, options);
+            // EcoreFS end
+        }
+    }
+    // EcoreFS end
+
+    // EcoreFS begin: the cascade publishes IPFS resources with saveIPFS()
+    /**
+     * Saves one resource of a cascade. An IPFS resource is published on the node
+     * through {@link IPFSResourceImpl#saveIPFS(Map)}, which gives the resource the
+     * URI of the new version. Any other resource, such as a local XMI file that
+     * refers to an IPFS resource, receives a normal save, which writes the current
+     * URIs of its targets into the file.
+     *
+     * @param resource the resource to save
+     * @param options  the save options of the cascade
+     * @throws IOException when the save fails
+     */
+    private static void publish(Resource resource, Map<?, ?> options) throws IOException {
+        if (resource instanceof IPFSResourceImpl) {
+            ((IPFSResourceImpl) resource).saveIPFS(options);
+        } else {
             resource.save(options);
         }
     }
@@ -87,8 +118,11 @@ public class IPFSModelPersister {
             return;
         }
         
-        // 1. IPFSResourceImpl.save() triggers the IPFS upload and dynamically mutates its own URI to the new CID
-        targetResource.save(options);
+        // 1. IPFSResourceImpl.saveIPFS() triggers the IPFS upload and dynamically mutates its own URI to the new CID
+        // EcoreFS begin: the cascade publishes IPFS resources with saveIPFS()
+        // targetResource.save(options);
+        publish(targetResource, options);
+        // EcoreFS end
         alreadySaved.add(targetResource);
         
         ResourceSet rs = targetResource.getResourceSet();

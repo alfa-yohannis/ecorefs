@@ -75,9 +75,9 @@ public class PerformanceBenchmarkTest {
 
             // --- IPFS SAVE BENCHMARK ---
             long startIpfsSave = System.currentTimeMillis();
-            Resource ipfsRes = ipfsResourceSet.createResource(URI.createURI("ipfs://pending"));
+            IPFSResourceImpl ipfsRes = (IPFSResourceImpl) ipfsResourceSet.createResource(URI.createURI("ipfs://pending"));
             ipfsRes.getContents().addAll(EcoreUtil.copyAll(loaderResource.getContents()));
-            ipfsRes.save(Collections.emptyMap());
+            ipfsRes.saveIPFS(Collections.emptyMap());
             long timeIpfsSave = System.currentTimeMillis() - startIpfsSave;
             URI finalIpfsUri = ipfsRes.getURI();
 

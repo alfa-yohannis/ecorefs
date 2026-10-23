@@ -106,8 +106,9 @@ public class ProxyResolutionTest {
      * @param nodeIdentifier the identifier of the node inside the resource
      * @return the new resource
      */
-    private Resource createResourceWithNode(ResourceSet resourceSet, String placeholderUri, String nodeIdentifier) {
-        Resource resource = resourceSet.createResource(URI.createURI(placeholderUri));
+    private IPFSResourceImpl createResourceWithNode(ResourceSet resourceSet, String placeholderUri,
+            String nodeIdentifier) {
+        IPFSResourceImpl resource = (IPFSResourceImpl) resourceSet.createResource(URI.createURI(placeholderUri));
         EObject node = proxyPackage.getEFactoryInstance().create(nodeClass);
         node.eSet(nodeClass.getEStructuralFeature("id"), nodeIdentifier);
         resource.getContents().add(node);
@@ -143,14 +144,14 @@ public class ProxyResolutionTest {
     @SuppressWarnings("unchecked")
     public void resolvesAProxyAcrossTwoResourcesOnIpfs() throws Exception {
         ResourceSet writerSet = createIpfsResourceSet();
-        Resource target = createResourceWithNode(writerSet, "ipfs://pendingProxyTarget", "proxy-target");
-        Resource referrer = createResourceWithNode(writerSet, "ipfs://pendingProxyReferrer", "proxy-referrer");
+        IPFSResourceImpl target = createResourceWithNode(writerSet, "ipfs://pendingProxyTarget", "proxy-target");
+        IPFSResourceImpl referrer = createResourceWithNode(writerSet, "ipfs://pendingProxyReferrer", "proxy-referrer");
         EObject targetNode = target.getContents().get(0);
         EObject referrerNode = referrer.getContents().get(0);
         ((List<EObject>) referrerNode.eGet(referencesFeature)).add(targetNode);
 
-        target.save(Collections.emptyMap());
-        referrer.save(Collections.emptyMap());
+        target.saveIPFS(Collections.emptyMap());
+        referrer.saveIPFS(Collections.emptyMap());
         System.out.println("[proxy] target " + target.getURI());
         System.out.println("[proxy] referrer " + referrer.getURI());
 

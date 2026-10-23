@@ -16,7 +16,7 @@ Each model went through seven paths, each with a fresh load of the file and a fr
 | Column prefix | Save | Load |
 |---|---|---|
 | `xmi_local` | plain XMI to a local file | XMI resource from the file |
-| `xmi_ipfs` | `IPFSResourceImpl` with default options, as the core plugin saves | `IPFSResourceImpl` by CID through `IPFSURIHandlerImpl` |
+| `xmi_ipfs` | `IPFSResourceImpl.saveIPFS` with default options, as the core plugin publishes | `IPFSResourceImpl` by CID through `IPFSURIHandlerImpl` |
 | `emd_local`, `emd_ipfs` | as above, with `XMLResource.OPTION_EXTENDED_META_DATA` | as above, with the same option |
 | `bpmn_local` | BPMN 2.0 XML through the BPMN resource of Eclipse to a local file | BPMN resource from the file |
 | `bpmn_ipfs` | the same BPMN 2.0 XML, added to the node as the modeler publishes a file | BPMN resource by CID through `IPFSURIHandlerImpl` |

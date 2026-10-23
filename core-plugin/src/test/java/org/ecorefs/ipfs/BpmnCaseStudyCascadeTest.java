@@ -1,6 +1,7 @@
 package org.ecorefs.ipfs;
 
 import io.ipfs.api.IPFS;
+import io.ipfs.api.NamedStreamable;
 import org.eclipse.bpmn2.Bpmn2Package;
 import org.eclipse.bpmn2.Collaboration;
 import org.eclipse.bpmn2.Definitions;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -47,6 +49,10 @@ public class BpmnCaseStudyCascadeTest {
 
     /** Directory with the three models of the case study. */
     private static final String CASE_STUDY_DIRECTORY = "/data2/projects/ecorefs/examples/case-study/";
+
+    /** The three files of the case study, each a published version of its model. */
+    private static final String[] CASE_STUDY_FILES = { "payment-process.bpmn", "order-process.bpmn",
+            "collaboration.bpmn" };
 
     /** Updater that writes the URIs of the imported models into the BPMN import locations. */
     private static final LocationAttributeUpdater BPMN_IMPORTS = new NamespaceImportLocations(
@@ -84,6 +90,43 @@ public class BpmnCaseStudyCascadeTest {
         resourceSet.getResourceFactoryRegistry().getProtocolToFactoryMap().put("ipfs", factory);
         resourceSet.getURIConverter().getURIHandlers().add(0, new IPFSURIHandlerImpl(ipfs));
         return resourceSet;
+    }
+
+    /**
+     * Maps the published version of every case study file to the local file. The
+     * files import each other by CID, and each local file holds exactly the bytes
+     * of its published version, so the CID that the node computes for the file,
+     * without storing it, names the file. With the map, the imports resolve to the
+     * local files, and the test reads no model from the node.
+     *
+     * @param resourceSet the resource set of the test
+     * @throws IOException when the node cannot compute a CID
+     */
+    private void mapPublishedVersionsToLocalFiles(ResourceSet resourceSet) throws IOException {
+        for (String fileName : CASE_STUDY_FILES) {
+            File file = new File(CASE_STUDY_DIRECTORY + fileName);
+            String cid = ipfs.add(new NamedStreamable.FileWrapper(file), false, true).get(0).hash.toBase58();
+            resourceSet.getURIConverter().getURIMap().put(URI.createURI("ipfs://" + cid),
+                    URI.createFileURI(file.getAbsolutePath()));
+        }
+    }
+
+    /**
+     * Tells whether every import of a model names the published version of one
+     * of the local files.
+     *
+     * @param resourceSet the resource set with the map of published versions
+     * @param definitions the definitions of the model
+     * @return true when the URI map knows every import location
+     */
+    private boolean importsPublishedVersions(ResourceSet resourceSet, Definitions definitions) {
+        for (Import modelImport : definitions.getImports()) {
+            URI location = URI.createURI(modelImport.getLocation());
+            if (!resourceSet.getURIConverter().getURIMap().containsKey(location)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -189,8 +232,8 @@ public class BpmnCaseStudyCascadeTest {
      * @param loaded         the resource loaded from the file
      * @return the new IPFS resource
      */
-    private Resource createIpfsResource(ResourceSet resourceSet, String placeholderUri, Resource loaded) {
-        Resource ipfsResource = resourceSet.createResource(URI.createURI(placeholderUri));
+    private IPFSResourceImpl createIpfsResource(ResourceSet resourceSet, String placeholderUri, Resource loaded) {
+        IPFSResourceImpl ipfsResource = (IPFSResourceImpl) resourceSet.createResource(URI.createURI(placeholderUri));
         ipfsResource.getContents().addAll(loaded.getContents());
         return ipfsResource;
     }
@@ -225,6 +268,7 @@ public class BpmnCaseStudyCascadeTest {
     @Test
     public void cascadesTheThreeModelsOfTheCaseStudy() throws Exception {
         ResourceSet resourceSet = createResourceSet();
+        mapPublishedVersionsToLocalFiles(resourceSet);
         Resource paymentFile = loadCaseStudyModel(resourceSet, "payment-process.bpmn");
         Resource orderFile = loadCaseStudyModel(resourceSet, "order-process.bpmn");
         Resource collaborationFile = loadCaseStudyModel(resourceSet, "collaboration.bpmn");
@@ -238,23 +282,27 @@ public class BpmnCaseStudyCascadeTest {
         assertNotNull(orderProcess, "The order process has to load");
         assertNotNull(collaboration, "The collaboration has to load");
 
-        // The files refer to each other through BPMN imports, so the loaded
+        // The files refer to each other through BPMN imports by CID, so the loaded
         // references already lead to the processes of the other files.
         assertTrue(importsNamespace(findDefinitions(orderFile), findDefinitions(paymentFile).getTargetNamespace()),
                 "The order process has to import payment-process.bpmn");
+        assertTrue(importsPublishedVersions(resourceSet, findDefinitions(orderFile)),
+                "The order process has to import the published version of payment-process.bpmn");
+        assertTrue(importsPublishedVersions(resourceSet, findDefinitions(collaborationFile)),
+                "The collaboration has to import the published versions of the two process files");
         assertSame(orderProcess, findParticipant(collaboration, "Participant_Seller").getProcessRef(),
                 "The seller has to refer to the order process of order-process.bpmn");
         assertSame(paymentProcess, findParticipant(collaboration, "Participant_PaymentProvider").getProcessRef(),
                 "The payment provider has to refer to the payment process of payment-process.bpmn");
 
-        Resource payment = createIpfsResource(resourceSet, "ipfs://pending-payment", paymentFile);
-        Resource order = createIpfsResource(resourceSet, "ipfs://pending-order", orderFile);
-        Resource collaborationResource =
+        IPFSResourceImpl payment = createIpfsResource(resourceSet, "ipfs://pending-payment", paymentFile);
+        IPFSResourceImpl order = createIpfsResource(resourceSet, "ipfs://pending-order", orderFile);
+        IPFSResourceImpl collaborationResource =
                 createIpfsResource(resourceSet, "ipfs://pending-collaboration", collaborationFile);
 
-        payment.save(SAVE_OPTIONS);
-        order.save(SAVE_OPTIONS);
-        collaborationResource.save(SAVE_OPTIONS);
+        payment.saveIPFS(SAVE_OPTIONS);
+        order.saveIPFS(SAVE_OPTIONS);
+        collaborationResource.saveIPFS(SAVE_OPTIONS);
         System.out.println("[case study] before the change");
         System.out.println("[case study]   payment-process.bpmn " + payment.getURI());
         System.out.println("[case study]   order-process.bpmn " + order.getURI());
@@ -262,7 +310,7 @@ public class BpmnCaseStudyCascadeTest {
 
         paymentProcess.setName("Payment Process, second version");
         long start = System.nanoTime();
-        IPFSModelPersister.cascadeSave(payment, SAVE_OPTIONS);
+        payment.saveIPFSCascaded(SAVE_OPTIONS);
         double elapsedMilliseconds = (System.nanoTime() - start) / 1_000_000.0;
 
         System.out.printf("[case study] after the cascade save, %.2f ms%n", elapsedMilliseconds);

@@ -86,7 +86,10 @@ public final class IPFSModelPublishTool {
         Resource target = targetResourceSet.createResource(URI.createURI("ipfs://merged-model"));
         target.getContents().addAll(EcoreUtil.copyAll(source.getContents()));
         log("saving single resource via core-plugin in " + mode + " mode");
-        target.save(saveOptions(mode));
+        // EcoreFS begin: saveIPFS() publishes to IPFS, while save() is the normal EMF save
+        // target.save(saveOptions(mode));
+        publishToIpfs(target, saveOptions(mode));
+        // EcoreFS end
 
         return new PublishResult(target.getURI().toString(), resolveUriToCid(target.getURI(), ipfs));
     }
@@ -134,7 +137,10 @@ public final class IPFSModelPublishTool {
         int saved = 0;
         for (Map.Entry<Resource, Resource> entry : sourceToTarget.entrySet()) {
             Resource target = entry.getValue();
-            target.save(saveOptions(mode));
+            // EcoreFS begin: saveIPFS() publishes to IPFS, while save() is the normal EMF save
+            // target.save(saveOptions(mode));
+            publishToIpfs(target, saveOptions(mode));
+            // EcoreFS end
             publishedResources.add(new PublishedResource(
                     sourceToRelativePath.get(entry.getKey()),
                     target.getURI().toString(),
@@ -274,6 +280,25 @@ public final class IPFSModelPublishTool {
                 .put("xmi", new XMIResourceFactoryImpl());
         return resourceSet;
     }
+
+    // EcoreFS begin: saveIPFS() publishes to IPFS, while save() is the normal EMF save
+    /**
+     * Publishes a resource of the IPFS resource set on the node. The resource set
+     * creates an {@link IPFSResourceImpl} for every {@code ipfs} and {@code ipns} URI,
+     * so any other resource points to a wrong configuration.
+     *
+     * @param target  the resource to publish
+     * @param options the save options with the reference mode
+     * @throws IOException when the publication fails
+     */
+    private static void publishToIpfs(Resource target, Map<?, ?> options) throws IOException {
+        if (!(target instanceof IPFSResourceImpl)) {
+            throw new IOException("Expected an IPFSResourceImpl for " + target.getURI() + ", got "
+                    + target.getClass().getName());
+        }
+        ((IPFSResourceImpl) target).saveIPFS(options);
+    }
+    // EcoreFS end
 
     private static ResourceSet newIpfsResourceSet(IPFS ipfs) {
         ResourceSet resourceSet = newFileResourceSet();

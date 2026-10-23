@@ -8,14 +8,7 @@
     id="Definitions_OrderFulfillment"
     targetNamespace="http://ecorefs.org/examples/bpmn/order-fulfillment">
 
-  <!--
-    Process.supports is a real BPMN2 non-containment EReference (Process -> Process).
-    In EMF XMI it serializes as a child element using href, so EMF will automatically
-    download the referenced resource from IPFS and resolve the fragment.
-  -->
   <bpmn2:process id="OrderFulfillmentProcess" name="Order Fulfillment Process" isExecutable="false">
-
-    <bpmn2:supports href="ipfs://QmVgQCkKWWbmMP7DqjWK6rTEMabcr6iUXGbJHQNvAFdnv9#//LoanApplicationProcess"/>
 
     <bpmn2:startEvent id="StartEvent_1" name="Order Placed">
       <bpmn2:outgoing>Flow_1</bpmn2:outgoing>

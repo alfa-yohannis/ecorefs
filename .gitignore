@@ -114,3 +114,6 @@ papers/01-JSS/paper/main.pdf
 
 # Maven repository of the baseline harness (eval/baselines/run.sh)
 .m2-eval/
+
+# Output of examples/run-bpmn-ipfs-example.sh
+examples/out/

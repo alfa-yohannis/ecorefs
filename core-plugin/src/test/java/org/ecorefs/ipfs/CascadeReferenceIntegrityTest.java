@@ -111,8 +111,9 @@ public class CascadeReferenceIntegrityTest {
      * @param nodeIdentifier the identifier of the node inside the resource
      * @return the new resource
      */
-    private Resource createResourceWithNode(ResourceSet resourceSet, String placeholderUri, String nodeIdentifier) {
-        Resource resource = resourceSet.createResource(URI.createURI(placeholderUri));
+    private IPFSResourceImpl createResourceWithNode(ResourceSet resourceSet, String placeholderUri,
+            String nodeIdentifier) {
+        IPFSResourceImpl resource = (IPFSResourceImpl) resourceSet.createResource(URI.createURI(placeholderUri));
         EObject node = cascadePackage.getEFactoryInstance().create(nodeClass);
         node.eSet(nodeClass.getEStructuralFeature("id"), nodeIdentifier);
         resource.getContents().add(node);
@@ -175,15 +176,15 @@ public class CascadeReferenceIntegrityTest {
     @Test
     public void rewritesTheReferenceOfATwoResourceChain() throws Exception {
         ResourceSet resourceSet = createIpfsResourceSet();
-        Resource target = createResourceWithNode(resourceSet, "ipfs://pendingTarget", "target");
-        Resource referrer = createResourceWithNode(resourceSet, "ipfs://pendingReferrer", "referrer");
+        IPFSResourceImpl target = createResourceWithNode(resourceSet, "ipfs://pendingTarget", "target");
+        IPFSResourceImpl referrer = createResourceWithNode(resourceSet, "ipfs://pendingReferrer", "referrer");
         addReference(referrer, target);
 
-        target.save(Collections.emptyMap());
-        referrer.save(Collections.emptyMap());
+        target.saveIPFS(Collections.emptyMap());
+        referrer.saveIPFS(Collections.emptyMap());
 
         changeNodeIdentifier(target, "target-version-2");
-        IPFSModelPersister.cascadeSave(target, Collections.emptyMap());
+        target.saveIPFSCascaded(Collections.emptyMap());
 
         String storedReferrer = readStoredContent(referrer);
         System.out.println("[two resources] target " + target.getURI());
@@ -202,19 +203,19 @@ public class CascadeReferenceIntegrityTest {
     @Test
     public void rewritesEveryPathOfADiamond() throws Exception {
         ResourceSet resourceSet = createIpfsResourceSet();
-        Resource payment = createResourceWithNode(resourceSet, "ipfs://pendingPayment", "payment");
-        Resource order = createResourceWithNode(resourceSet, "ipfs://pendingOrder", "order");
-        Resource collaboration = createResourceWithNode(resourceSet, "ipfs://pendingCollaboration", "collaboration");
+        IPFSResourceImpl payment = createResourceWithNode(resourceSet, "ipfs://pendingPayment", "payment");
+        IPFSResourceImpl order = createResourceWithNode(resourceSet, "ipfs://pendingOrder", "order");
+        IPFSResourceImpl collaboration = createResourceWithNode(resourceSet, "ipfs://pendingCollaboration", "collaboration");
         addReference(order, payment);
         addReference(collaboration, order);
         addReference(collaboration, payment);
 
-        payment.save(Collections.emptyMap());
-        order.save(Collections.emptyMap());
-        collaboration.save(Collections.emptyMap());
+        payment.saveIPFS(Collections.emptyMap());
+        order.saveIPFS(Collections.emptyMap());
+        collaboration.saveIPFS(Collections.emptyMap());
 
         changeNodeIdentifier(payment, "payment-version-2");
-        IPFSModelPersister.cascadeSave(payment, Collections.emptyMap());
+        payment.saveIPFSCascaded(Collections.emptyMap());
 
         String storedCollaboration = readStoredContent(collaboration);
         System.out.println("[diamond] payment " + payment.getURI());
@@ -235,22 +236,22 @@ public class CascadeReferenceIntegrityTest {
     @Test
     public void rewritesEveryReferenceOfALongerChain() throws Exception {
         ResourceSet resourceSet = createIpfsResourceSet();
-        Resource fourth = createResourceWithNode(resourceSet, "ipfs://pendingFourth", "fourth");
-        Resource third = createResourceWithNode(resourceSet, "ipfs://pendingThird", "third");
-        Resource second = createResourceWithNode(resourceSet, "ipfs://pendingSecond", "second");
-        Resource first = createResourceWithNode(resourceSet, "ipfs://pendingFirst", "first");
+        IPFSResourceImpl fourth = createResourceWithNode(resourceSet, "ipfs://pendingFourth", "fourth");
+        IPFSResourceImpl third = createResourceWithNode(resourceSet, "ipfs://pendingThird", "third");
+        IPFSResourceImpl second = createResourceWithNode(resourceSet, "ipfs://pendingSecond", "second");
+        IPFSResourceImpl first = createResourceWithNode(resourceSet, "ipfs://pendingFirst", "first");
         addReference(third, fourth);
         addReference(second, third);
         addReference(first, second);
 
-        fourth.save(Collections.emptyMap());
-        third.save(Collections.emptyMap());
-        second.save(Collections.emptyMap());
-        first.save(Collections.emptyMap());
+        fourth.saveIPFS(Collections.emptyMap());
+        third.saveIPFS(Collections.emptyMap());
+        second.saveIPFS(Collections.emptyMap());
+        first.saveIPFS(Collections.emptyMap());
 
         changeNodeIdentifier(fourth, "fourth-version-2");
         long start = System.nanoTime();
-        IPFSModelPersister.cascadeSave(fourth, Collections.emptyMap());
+        fourth.saveIPFSCascaded(Collections.emptyMap());
         double elapsedMilliseconds = (System.nanoTime() - start) / 1_000_000.0;
 
         String storedThird = readStoredContent(third);
@@ -282,17 +283,17 @@ public class CascadeReferenceIntegrityTest {
     @Test
     public void leavesOneDirectionOfACycleOutdated() throws Exception {
         ResourceSet resourceSet = createIpfsResourceSet();
-        Resource first = createResourceWithNode(resourceSet, "ipfs://pendingCycleFirst", "first");
-        Resource second = createResourceWithNode(resourceSet, "ipfs://pendingCycleSecond", "second");
+        IPFSResourceImpl first = createResourceWithNode(resourceSet, "ipfs://pendingCycleFirst", "first");
+        IPFSResourceImpl second = createResourceWithNode(resourceSet, "ipfs://pendingCycleSecond", "second");
         addReference(first, second);
         addReference(second, first);
 
-        first.save(Collections.emptyMap());
-        second.save(Collections.emptyMap());
+        first.saveIPFS(Collections.emptyMap());
+        second.saveIPFS(Collections.emptyMap());
         String previousSecondUri = second.getURI().toString();
 
         changeNodeIdentifier(second, "second-version-2");
-        IPFSModelPersister.cascadeSave(second, Collections.emptyMap());
+        second.saveIPFSCascaded(Collections.emptyMap());
 
         String storedFirst = readStoredContent(first);
         String storedSecond = readStoredContent(second);

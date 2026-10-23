@@ -146,11 +146,21 @@ public class IPFSURIHandlerImpl extends URIHandlerImpl {
     public OutputStream createOutputStream(URI uri, Map<?, ?> options) throws IOException {
         String scheme = uri.scheme();
         if ("http".equals(scheme) || "https".equals(scheme)) {
+            // EcoreFS begin: saveIPFS() publishes to IPFS, while save() is the normal EMF save
+            // throw new UnsupportedOperationException(
+            //         "HTTP/HTTPS URIs are read-only in this handler. Use IPFSResourceImpl.save() to persist models.");
             throw new UnsupportedOperationException(
-                    "HTTP/HTTPS URIs are read-only in this handler. Use IPFSResourceImpl.save() to persist models.");
+                    "HTTP/HTTPS URIs are read-only in this handler. Use IPFSResourceImpl.saveIPFS() to publish models,"
+                            + " or set a file URI for a normal save.");
+            // EcoreFS end
         }
+        // EcoreFS begin: saveIPFS() publishes to IPFS, while save() is the normal EMF save
+        // throw new UnsupportedOperationException(
+        //         "IPFS is content-addressed. Output streams are handled natively via IPFSResourceImpl.save(), "
+        //                 + "generating a new CID, rather than piping to an existing URI.");
         throw new UnsupportedOperationException(
-                "IPFS is content-addressed. Output streams are handled natively via IPFSResourceImpl.save(), "
-                        + "generating a new CID, rather than piping to an existing URI.");
+                "IPFS is content-addressed, so content under " + uri + " cannot be overwritten. Use "
+                        + "IPFSResourceImpl.saveIPFS() to publish a new version, or set a file URI for a normal save.");
+        // EcoreFS end
     }
 }

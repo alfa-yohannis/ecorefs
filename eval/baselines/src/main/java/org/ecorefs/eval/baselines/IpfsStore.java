@@ -2,6 +2,7 @@ package org.ecorefs.eval.baselines;
 
 import io.ipfs.api.IPFS;
 import org.ecorefs.ipfs.IPFSResourceFactoryImpl;
+import org.ecorefs.ipfs.IPFSResourceImpl;
 import org.ecorefs.ipfs.IPFSURIHandlerImpl;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -75,11 +76,11 @@ public final class IpfsStore implements ModelStore {
      */
     @Override
     public void measure(Collection<EObject> content, int iteration, PhaseTimes times) throws Exception {
-        Resource target = createResourceSet().createResource(URI.createURI("ipfs://pending"));
+        IPFSResourceImpl target = (IPFSResourceImpl) createResourceSet().createResource(URI.createURI("ipfs://pending"));
         target.getContents().addAll(content);
 
         long start = System.nanoTime();
-        target.save(Collections.emptyMap());
+        target.saveIPFS(Collections.emptyMap());
         times.recordSince("save", start);
         times.recordSince("write", start);
 

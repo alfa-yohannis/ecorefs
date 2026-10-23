@@ -11,33 +11,22 @@
     targetNamespace="http://ecorefs.org/case-study/collaboration">
 
   <!--
-    Top-level Collaboration linking participants to their processes.
+    The collaboration links two participants to processes in other files. The
+    imports below name the published versions of those files by CID:
 
-    Participant.processRef is a non-containment EReference (Participant -> Process).
-    Each processRef points to a Process defined in a separate BPMN resource
-    on IPFS, forming the outermost layer of the dependency chain:
+        collaboration.bpmn  ──import──>  order-process.bpmn  ──import──>  payment-process.bpmn
+                └────────────────────────import────────────────────────────────┘
 
-        collaboration.bpmn  ──processRef──>  order-process.bpmn  ──import──>  payment-process.bpmn
-            ipfs://QmC                           ipfs://QmB                       ipfs://QmA
-
-    CASCADE SCENARIO:
-    1. Payment team modifies payment-process.bpmn
-       -> re-saved to IPFS -> new CID: QmA'
-    2. cascadeSave detects order-process.bpmn imports QmA
-       -> rewrites the import location to QmA' -> re-saved -> new CID: QmB'
-    3. cascadeSave detects collaboration.bpmn references QmB
-       -> rewrites processRef to QmB' -> re-saved -> new CID: QmC'
-
-    Three hops, fully automatic. Every intermediate resource gets a
-    new CID that reflects the updated dependency.
+    A new version of the payment process receives a new CID. saveIPFSCascaded()
+    then publishes the order process with the new import location and the
+    collaboration after it, so every import names the current CID again.
   -->
   <!-- The imports make the prefixes "order" and "payment" stand for the two
-       process files, so each participant names its process in another file.
-       Saved to IPFS, each processRef carries the CID of that file instead. -->
+       process files, so each participant names its process in another file. -->
   <bpmn2:import importType="http://www.omg.org/spec/BPMN/20100524/MODEL"
-      location="order-process.bpmn" namespace="http://ecorefs.org/case-study/order-process"/>
+      location="ipfs://QmRUrbPL9EVJtnD4RbCheANmQjEpMzcEsE5t8bgvW8utij" namespace="http://ecorefs.org/case-study/order-process"/>
   <bpmn2:import importType="http://www.omg.org/spec/BPMN/20100524/MODEL"
-      location="payment-process.bpmn" namespace="http://ecorefs.org/case-study/payment-process"/>
+      location="ipfs://QmSuDF8o9WhaJG2axWcQpWtkJurEuy6JbaKAAsp753agt5" namespace="http://ecorefs.org/case-study/payment-process"/>
 
   <bpmn2:collaboration id="Collaboration_ECommerce" name="E-Commerce Collaboration">
 
