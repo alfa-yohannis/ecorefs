@@ -1,0 +1,56 @@
+{
+  "resources": 6934,
+  "compilation_units": 6930,
+  "resource_edges": 92184,
+  "serialized_cross_resource_hrefs": 2393902,
+  "strongly_connected_components": 1,
+  "largest_component_size": 6934,
+  "resources_outside_largest_component": 0,
+  "unit_to_unit_edges_within_component": 50689,
+  "unit_to_unit_edges_across_components": 0,
+  "manifest_dependency_edges": {
+    "shared-resource": 92
+  },
+  "changes": [
+    {
+      "change": "compilation unit that no other compilation unit references",
+      "resource": "compilation-units/eclipse.jdt.ui/org.eclipse.jdt.ui.tests.refactoring/resources/BinaryReferencesWorkspace/Source/src/source/Color.xmi",
+      "referencing_resources": 1,
+      "affected_resources": 6934,
+      "in_largest_cycle": true,
+      "layered_new_objects": 9
+    },
+    {
+      "change": "compilation unit with the most referencing resources",
+      "resource": "compilation-units/eclipse.jdt.ui/org.eclipse.jdt.ui/ui/org/eclipse/jdt/internal/ui/JavaPlugin.xmi",
+      "referencing_resources": 604,
+      "affected_resources": 6934,
+      "in_largest_cycle": true,
+      "layered_new_objects": 10
+    },
+    {
+      "change": "root model",
+      "resource": "all-repos-merged.root.xmi",
+      "referencing_resources": 6932,
+      "affected_resources": 6934,
+      "in_largest_cycle": true,
+      "layered_new_objects": ""
+    },
+    {
+      "change": "shared resource aux/orphan-types.xmi",
+      "resource": "aux/orphan-types.xmi",
+      "referencing_resources": 6505,
+      "affected_resources": 6934,
+      "in_largest_cycle": true,
+      "layered_new_objects": ""
+    },
+    {
+      "change": "shared resource aux/unassigned-package-types.xmi",
+      "resource": "aux/unassigned-package-types.xmi",
+      "referencing_resources": 5360,
+      "affected_resources": 6934,
+      "in_largest_cycle": true,
+      "layered_new_objects": ""
+    }
+  ]
+}
