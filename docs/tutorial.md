@@ -180,7 +180,7 @@ The **Problems** view (**Window > Show View > Problems**) then lists many Java w
    ![The Validation dialog listing org.apache.xml.resolver with a missing osgi.ee constraint](images/ide-validation-dialog.png)
 3. A second Eclipse window opens, with a **BPMN2 IPFS** menu in its menu bar. Its workspace is the folder `runtime-EclipseApplication` next to the workspace of your IDE.
 
-![The second Eclipse window with an empty workspace and the BPMN2 IPFS menu](images/modeler-ipfs-menu.png)
+![The second Eclipse window with an empty workspace and the BPMN2 IPFS menu, which offers Open Model, Open Project and Publish Project before a model is open](images/modeler-ipfs-menu.png)
 
 Parts 3 and 4 happen in the second window.
 
@@ -197,7 +197,7 @@ Parts 3 and 4 happen in the second window.
 
    ![The diagram types Process, Collaboration and Choreography, with Process selected](images/modeler-diagram-type.png)
 
-4. With `example-01` selected, the wizard suggests the location `/example-01` and the file name `process_1.bpmn`. Keep both and click **Finish**.
+4. With `example-01` selected, the wizard suggests the location `/example-01` and the file name `process_1.bpmn`. Keep both. The wizard also proposes the target namespace `http://org.eclipse.bpmn2/default/process`, and it proposes the same namespace for every new process. Imports, **Open Model** and the cascade of Part 5 tell models apart by their namespace, so give each model its own, for example `http://example.org/example-01/process_1`. Then click **Finish**.
 
    ![The file page with location /example-01 and file name process_1.bpmn](images/modeler-diagram-file.png)
 
@@ -221,9 +221,9 @@ Keep the default URL and `CID` mode. A node at another address can be set for th
 ### Publish the model
 
 1. Click into the diagram editor of `process_1.bpmn`.
-2. Choose **BPMN2 IPFS > Publish Current BPMN2 Model to IPFS**. The menu lists this command, and the variant with cascade that Part 5 uses, only while a BPMN editor is active.
+2. Choose **BPMN2 IPFS > Publish Model**. The menu lists **Open Imported Model**, **Publish Model** and **Publish Model with Cascade**, which Part 5 uses, only while a BPMN editor is active.
 
-   ![The BPMN2 IPFS menu with the diagram editor active](images/modeler-ipfs-menu-editor.png)
+   ![The BPMN2 IPFS menu with the diagram editor active: four model commands, a separator and the two project commands](images/modeler-ipfs-menu-editor.png)
 
 The modeler saves the model first if it has unsaved changes and uploads the `.bpmn` file to Kubo. The dialog **Model Published to IPFS** lists the CID, the `ipfs://` URI, the `/ipfs/` path and the gateway address. **Copy All** copies them. The layout of the diagram is part of the `.bpmn` file (BPMN DI), so the published file carries it.
 
@@ -233,7 +233,7 @@ Find the model in Kubo as in Part 1: paste the CID into the web interface, or op
 
 ### Publish a whole project
 
-**BPMN2 IPFS > Publish BPMN2 Project to IPFS** saves open editors and publishes every `.bpmn` and `.bpmn2` file of the selected project or folder by CID. After that, it publishes a JSON manifest that maps each relative path to its CID and names the root model. The result dialog shows the CID of the manifest, followed by the files it lists.
+**BPMN2 IPFS > Publish Project** saves open editors and publishes every `.bpmn` and `.bpmn2` file of the selected project or folder by CID. It publishes them as one set: when a model of the folder imports another one by CID, the import gets the CID that this publication gives the other model, so the files go out in dependency order, as in the cascade of Part 5. After that, it publishes a JSON manifest that maps each relative path to its CID and names the root model. The result dialog shows the CID of the manifest, followed by the files it lists.
 
 ![The dialog BPMN2 Project Published to IPFS with the manifest CID and the file process_1.bpmn](images/modeler-publish-project.png)
 
@@ -252,7 +252,7 @@ The IPNS record also reaches node 2 through the DHT of the private network, so n
 ### Open one model
 
 1. Select the project or folder that should receive the model, for example `example-01`.
-2. Choose **BPMN2 IPFS > Open BPMN2 Model from IPFS** and enter a reference. The dialog accepts a CID (`Qm...` or `bafy...`), `/ipfs/<cid>`, `ipfs://<cid>`, an IPNS name (`k51...`), `/ipns/<name>` or `ipns://<name>`. The example below uses the CID of the payment model from Part 1.
+2. Choose **BPMN2 IPFS > Open Model** and enter a reference. The dialog accepts a CID (`Qm...` or `bafy...`), `/ipfs/<cid>`, `ipfs://<cid>`, an IPNS name (`k51...`), `/ipns/<name>` or `ipns://<name>`. The example below uses the CID of the payment model from Part 1.
 
    ![The dialog Open BPMN2 Model from IPFS with the CID of the payment model](images/modeler-open-model.png)
 
@@ -276,7 +276,7 @@ Enter `ipns://<name>` with the name from the IPNS step of Part 3. After each new
 
 ### Open a whole project
 
-**BPMN2 IPFS > Open BPMN2 Project from IPFS** takes the CID of a project manifest, restores all listed files into a new folder under the selected project and opens the root model. The files keep the paths they had when the project was published.
+**BPMN2 IPFS > Open Project** takes the CID of a project manifest, restores all listed files into a new folder under the selected project and opens the root model. The files keep the paths they had when the project was published.
 
 When nothing is selected and no BPMN editor is open, for example in an empty Project Explorer, the modeler creates a new project named after the published one, with `-1`, `-2` and so on added if that name is taken. It restores the files into that project, gives the project the BPMN2 nature so models are validated on save, and selects the root model in the Project Explorer. The screenshots below use a new, empty workspace and the manifest CID from Part 3.
 
@@ -286,7 +286,7 @@ When nothing is selected and no BPMN editor is open, for example in an empty Pro
 
 ## Part 5. References between models: the cascade
 
-A model can refer to an element of another model. On IPFS, such a reference names the target model by its CID, for example `href="ipfs://QmTLbq…#PaymentProcess"`. Every change to a model gives it a new CID, so the models that refer to it keep pointing to the old version until they are saved again. Each of those saves gives the referring model a new CID too, and the change travels up the chain of references. This is the cascade. In the modeler, **BPMN2 IPFS > Publish Current BPMN2 Model to IPFS with Cascade** performs it for BPMN files. In the ecorefs core plug-in, `IPFSResourceImpl.saveIPFSCascaded` performs it for EMF resources.
+A model can refer to an element of another model. On IPFS, such a reference names the target model by its CID, for example `href="ipfs://QmTLbq…#PaymentProcess"`. Every change to a model gives it a new CID, so the models that refer to it keep pointing to the old version until they are saved again. Each of those saves gives the referring model a new CID too, and the change travels up the chain of references. This is the cascade. In the modeler, **BPMN2 IPFS > Publish Model with Cascade** performs it for BPMN files. In the ecorefs core plug-in, `IPFSResourceImpl.saveIPFSCascaded` performs it for EMF resources.
 
 This part needs node 1 of Part 1 and the modeler of Part 2. The section on the core plug-in also needs a JDK 11 or newer and Maven. The commands run from the root of the ecorefs repository.
 
@@ -324,7 +324,7 @@ done
 ### Open the case study in the modeler
 
 1. Create a project for the case study: **File > New > Project > General > Project**, named `case-study`.
-2. Select `case-study`, choose **BPMN2 IPFS > Open BPMN2 Model from IPFS**, enter the CID of the collaboration, `QmeKugsytfzkk1JZr8SUv7pFoGWPRpox3sE5eJK6ieZZUc`, and click **OK**.
+2. Select `case-study`, choose **BPMN2 IPFS > Open Model**, enter the CID of the collaboration, `QmeKugsytfzkk1JZr8SUv7pFoGWPRpox3sE5eJK6ieZZUc`, and click **OK**.
 
 As in Part 4, the modeler stores the collaboration in the folder of its namespace, `ecorefs.org/case-study/collaboration/collaboration.bpmn`. The editor reads the two imports and loads the order process and the payment process from IPFS, by the CIDs in their locations. It draws both processes inside the pools Seller and Payment Provider, with the two message flows between them, although neither process is in the project. The screenshots of this part use the zoom 75% of the toolbar and a minimized **Tasks** view.
 
@@ -336,7 +336,11 @@ The modeler therefore loads from two places. The file in the editor is a working
 
 To change the payment process, download it first and edit the working copy:
 
-1. Choose **BPMN2 IPFS > Open BPMN2 Model from IPFS** and enter the location of the payment import, `ipfs://QmSuDF8o9WhaJG2axWcQpWtkJurEuy6JbaKAAsp753agt5`. The model goes to `ecorefs.org/case-study/payment-process/payment-process.bpmn`. It has no diagram layout, so click **OK** in **Missing Diagram Elements**, as in Part 4.
+1. With the collaboration in the active editor, choose **BPMN2 IPFS > Open Imported Model**. The dialog lists the imports of the collaboration that load from IPFS, each with its namespace and its location. Select `payment-process` and click **OK**.
+
+   ![The dialog Open Imported Model from IPFS with the order process and the payment process, and the payment process selected](images/modeler-open-imported-model.png)
+
+   The model goes to `ecorefs.org/case-study/payment-process/payment-process.bpmn`, as with **Open Model**. It has no diagram layout, so click **OK** in **Missing Diagram Elements**, as in Part 4.
 2. Rename the task Validate Card Details to Check Card Details: select it, press F2, type the name and click outside the box.
 3. Save with Ctrl+S. On the first save in a plain project, the modeler offers to add the BPMN2 nature. Click **Yes**.
 
@@ -346,7 +350,7 @@ Save writes the working copy only. The collaboration still imports the payment p
 
 ![The collaboration after the save: the pool Payment Provider still shows Validate Card Details](images/modeler-cascade-collaboration-before.png)
 
-To carry the change to the collaboration, click into the editor of the payment process and choose **BPMN2 IPFS > Publish Current BPMN2 Model to IPFS with Cascade**. The command saves the open models of the project and then looks for the models that import the payment process by CID: in the BPMN files of the project, and in the versions that those files pin on IPFS. An import refers to the payment process when it names the namespace of the payment process. Before it publishes anything, the command lists the models that will get a new version:
+To carry the change to the collaboration, click into the editor of the payment process and choose **BPMN2 IPFS > Publish Model with Cascade**. The command saves the open models of the project and then looks for the models that import the payment process by CID: in the BPMN files of the project, and in the versions that those files pin on IPFS. An import refers to the payment process when it names the namespace of the payment process. Before it publishes anything, the command lists the models that will get a new version:
 
 ![The confirmation lists the order process, which exists only on IPFS, and the collaboration](images/modeler-cascade-confirm.png)
 
@@ -470,7 +474,7 @@ The third version of the payment process gets the CID `Qmcjxb3ct1NaLvPTLt1hqBnQw
 location="ipfs://QmTLbqPgHxUmS82rDLDCKgrncmkdHi9J6nQu38KT8AE3PJ"
 ```
 
-**Publish Current BPMN2 Model to IPFS** in the modeler behaves the same way: it uploads one model and rewrites no imports in other models. The command with cascade of this part does.
+**Publish Model** in the modeler behaves the same way: it uploads one model and rewrites no imports in other models. **Publish Model with Cascade** does.
 
 #### The cascade grows with the graph
 
