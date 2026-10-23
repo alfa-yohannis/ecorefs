@@ -4,6 +4,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -127,7 +128,12 @@ public final class ResourceDependencyGraph {
      */
     private static void collectReferencesOfResource(Resource resource, Map<Resource, Set<Resource>> dependencies,
             Map<Resource, Set<Resource>> dependents) {
-        Iterator<EObject> contents = resource.getAllContents();
+        // EcoreFS begin: walk only the objects that the resource stores itself
+        // Iterator<EObject> contents = resource.getAllContents();
+        // getAllContents also walks into children that another resource stores, and would credit
+        // their references to this resource. The proper contents stop at such children.
+        Iterator<EObject> contents = EcoreUtil.getAllProperContents(resource, true);
+        // EcoreFS end: walk only the objects that the resource stores itself
         while (contents.hasNext()) {
             collectReferencesOfObject(resource, contents.next(), dependencies, dependents);
         }
@@ -135,9 +141,10 @@ public final class ResourceDependencyGraph {
 
     /**
      * Adds every reference of one object into another resource to the graph.
-     * Containment references and derived features are skipped, because a
-     * containment reference stays inside one resource and a derived feature
-     * carries no stored reference.
+     * A containment reference counts when the child lives in another resource,
+     * because the container then stores the URI of the child like any other
+     * reference. Container references and derived features are skipped,
+     * because they carry no stored reference.
      *
      * @param resource     the resource that holds the object
      * @param object       the object with the references
@@ -147,8 +154,11 @@ public final class ResourceDependencyGraph {
     private static void collectReferencesOfObject(Resource resource, EObject object,
             Map<Resource, Set<Resource>> dependencies, Map<Resource, Set<Resource>> dependents) {
         for (EReference reference : object.eClass().getEAllReferences()) {
-            if (reference.isContainment() || reference.isContainer() || reference.isDerived()
-                    || reference.isVolatile()) {
+            // EcoreFS begin: a child stored in another resource is a reference to that resource
+            // if (reference.isContainment() || reference.isContainer() || reference.isDerived()
+            //         || reference.isVolatile()) {
+            if (reference.isContainer() || reference.isDerived() || reference.isVolatile()) {
+            // EcoreFS end: a child stored in another resource is a reference to that resource
                 continue;
             }
             Object value = object.eGet(reference, true);
@@ -198,6 +208,21 @@ public final class ResourceDependencyGraph {
         }
         targets.add(to);
     }
+
+    // EcoreFS begin: the edges of a resource can be read, for tests and diagnostics
+    /**
+     * Returns the resources that a resource references, through stored
+     * references, children stored in other resources or location attributes.
+     *
+     * @param resource a resource of the resource set
+     * @return the referenced resources, empty when the resource references none
+     */
+    public Set<Resource> getReferencedResources(Resource resource) {
+        Set<Resource> referencedResources = dependencies.get(resource);
+        return referencedResources == null ? Collections.<Resource>emptySet()
+                : Collections.unmodifiableSet(referencedResources);
+    }
+    // EcoreFS end: the edges of a resource can be read, for tests and diagnostics
 
     /**
      * Plans the order of a cascade save after a change to one resource. The list

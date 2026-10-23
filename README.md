@@ -146,9 +146,9 @@ Open work for the JSS manuscript in `papers/01-JSS/paper/main.tex` (full revisio
 The first five items come from a review of the current draft. The draft reads as a solid tool and case study paper, and these five items address what a reviewer would raise first.
 
 - [ ] Measure against a remote IPFS node. Every number in the paper comes from one local Kubo node on one laptop, so a paper about decentralized persistence never measures the decentralized part. Two setups are needed. A Kubo node on a rented machine, reached through an SSH tunnel on port 5001, gives the cost of the network round trip per `add` and `cat`. A second node on another network, which has never seen the content, gives the cost of a fetch through the distributed hash table, plus the publish and resolve times of an IPNS name. Two Kubo nodes in a private network on one host (`docker/kubo`) are a starting point, although they add no network delay of their own.
-- [ ] Compare against CDO, NeoEMF and a Git-based store on the same models. The paper argues properties against the alternatives without measuring any of them.
-- [ ] Evaluate the cascade save on a large dependency graph. The partitioned MoDisco model has 6,933 resources in 26 components with 92 dependency edges, while the merged file holds no cross-resource references at all. Change one element in a compilation-unit resource, call `cascadeSave`, and record the number of re-saved resources and the time, for a leaf that nothing references, for a resource inside a component that others depend on, and for a shared resource in `aux`. Watch the cross-reference scan, because `EcoreUtil.CrossReferencer.find` walks the whole resource set and a traversal of that model already takes 380 s. A variant that reads the dependencies from the component manifests would be the comparison.
-- [ ] State which challenges are specific to EMF and which apply to other modeling frameworks. The generalizability sub-question of RQ1 is open, and an answer raises the conceptual contribution beyond one framework.
+- [x] Compare against CDO, NeoEMF and a Git-based store on the same models. `eval/baselines` measures a Git repository (commit, push and clone through `git daemon`), an sshfs share and NeoEMF 2.0.0 with MapDB on the benchmark models, and `tab:baselines` reports the run. CDO was not measured, because it needs a server and a database; the paper compares it by its properties.
+- [x] Evaluate the cascade save on a large dependency graph. Done in `eval/results/modisco-cascade`: the serialized references of the partitioned MoDisco model form one strongly connected component with all 6,934 resources, so a change affects every resource and no cascade reaches a consistent snapshot. The paper reports this in RQ2. The analysis also found two gaps of the dependency scan with cross-resource containment, which `ResourceDependencyGraph` now closes (`CrossResourceContainmentTest`). The original plan follows. The partitioned MoDisco model has 6,933 resources in 26 components with 92 dependency edges, while the merged file holds no cross-resource references at all. Change one element in a compilation-unit resource, call `cascadeSave`, and record the number of re-saved resources and the time, for a leaf that nothing references, for a resource inside a component that others depend on, and for a shared resource in `aux`. Watch the cross-reference scan, because `EcoreUtil.CrossReferencer.find` walks the whole resource set and a traversal of that model already takes 380 s. A variant that reads the dependencies from the component manifests would be the comparison.
+- [x] State which challenges are specific to EMF and which apply to other modeling frameworks. RQ1 is narrowed to EMF, because no reliable source describes how MPS or Sirius Web store references, and the RQ1 answer separates the challenge of the serialization, which is specific to EMF and XMI, from the determinism of the saved bytes, which concerns content addressing in general. The original question follows. The generalizability sub-question of RQ1 is open, and an answer raises the conceptual contribution beyond one framework.
 - [ ] Evaluate the tool support with a realistic editing workflow or with users. The two Eclipse tools are described but never tried by anyone outside the project.
 
 - [x] Repeat the XMI load benchmark with a fresh `ResourceSet`. Every load now runs in a fresh resource set, the copy of the model sits outside the measured region, and each iteration stamps the copy, so every iteration stores new content.
@@ -163,11 +163,11 @@ The first five items come from a review of the current draft. The draft reads as
 - [x] Run two local Kubo nodes in a private network with Docker Compose (`docker/kubo`), so the tests and the tutorial never reach the public IPFS network. This item is not in the manuscript.
 - [x] Write a tutorial with screenshots for Kubo, the modeler and the cascade (`docs/tutorial.md`). This item is not in the manuscript.
 - [x] Write a guide that installs eclipse-mcp into the IDE, activates it in the modeler and connects Claude Code (`docs/eclipse-mcp.md`). This item is not in the manuscript.
-- [ ] Build the modeler with Tycho. The BPMN2 update site in the build file is no longer available, and `releases/2022-06` carries the same bundles.
+- [x] Build the modeler with Tycho. `mvn -B -P platform-2022-06 clean verify` builds all 18 modules and the update site, after four repository addresses in `parent/pom.xml` moved to sites that still exist.
 - [x] Let the modeler fork open an IPFS project when the Project Explorer is empty, by creating a workspace project for it, and name downloaded models after their content instead of their CID. This item is not in the manuscript.
 - [x] Resolve relative BPMN import locations in the modeler fork against the importing file. `ImportUtil` read them from the working directory of Eclipse, so the collaboration of the case study failed with "Cannot load Resource". This item is not in the manuscript.
 - [x] Add **Publish Model with Cascade** to the BPMN2 IPFS menu of the modeler fork. It publishes a model and gives every model that imports it by CID a new version. **Open Model** stores a model in the folder of its target namespace, **Open Imported Model** downloads a model that the current model imports, and **Publish Project** publishes the models of a folder as one consistent set. The menu labels are short now, with a separator before the project commands. Part 5 of the tutorial shows the workflow on the case study. This item is not in the manuscript.
-- [ ] Report the output of `BpmnIpfsExample` and of the modeler self-tests against a running Kubo node. The modeler self-tests pass against Kubo 0.40.1 with `tests/ipfs-ui/run-ipfs-ui-tests.sh --integration`, so the run of `BpmnIpfsExample` and the report in the manuscript remain.
+- [x] Report the output of `BpmnIpfsExample` and of the modeler self-tests against a running Kubo node. The modeler self-tests pass against Kubo 0.40.1 with `tests/ipfs-ui/run-ipfs-ui-tests.sh --integration`, `bash examples/run-bpmn-ipfs-example.sh` runs the example with real CIDs, and the manuscript reports the round trip of 11,486 real BPMN models instead of the example.
 - [x] Attach the MoDisco test reports in `eval/results/modisco-case-study`, together with the byte-level check results and the measured load and traversal times.
 - [ ] Archive the MoDisco dataset (1.04 GiB) and the published CIDs under a DOI for the data availability statement.
 - [ ] Refactor the IPFS Java code to the project rules: object-oriented structure, no nested functions, intelligible names, an effective comment on every class and method, and `// EcoreFS begin` and `// EcoreFS end` markers around additions to existing files. This item is not in the manuscript.
@@ -215,13 +215,18 @@ Some metamodels keep the location of another model in a plain attribute, such as
 | Path | Purpose |
 | --- | --- |
 | `eval/custom_generator` (`ecorefs.generator.ModelGenerator`) | Generates EMF component trees with 100, 1k, 10k, 100k and 500k objects for latency tests |
-| `core-plugin/src/test/java/org/ecorefs/ipfs/FastPerformanceBenchmarkTest.java` | RQ3 benchmark: XMI file saves and loads against IPFS for 100 to 10,000 elements, with 3 warm-up and 10 measured iterations |
+| `core-plugin/src/test/java/org/ecorefs/ipfs/FastPerformanceBenchmarkTest.java` | RQ3 benchmark: XMI file saves and loads against IPFS for 100 to 500,000 elements, with 3 warm-up and 30 measured iterations |
 | `core-plugin/src/test/java/org/ecorefs/ipfs/MultiFileCascadeTest.java` | RQ2 test: builds two resources A and B at runtime, with A referring to B, runs `saveIPFSCascaded()` on B and records the latency |
 | `eval/modisco_jdt_reverse/` | MoDisco models of Eclipse JDT, partitioning and IPFS publication (see its [README](eval/modisco_jdt_reverse/README.md)) |
 
 Results:
 
-- `eval/results/comprehensive_benchmark_results.md`: summary of the benchmark runs (mean, median and standard deviation)
+- `eval/results/benchmark_summary.md`: the RQ3 benchmark with the Wilcoxon tests, effect sizes, bootstrap intervals and the practicality threshold, written by `eval/analyse_benchmark.py`
+- `eval/results/bpmn-rq1` and `eval/results/bpmn-rq2`: the round trip of 11,486 real BPMN models and the cascades on real structures
+- `eval/results/baselines`: the comparison with Git, an sshfs share and NeoEMF
+- `eval/results/multinode`: fetches and IPNS times across several Kubo nodes with emulated network delays
+- `eval/results/modisco-case-study` and `eval/results/modisco-cascade`: the MoDisco models of Eclipse JDT and the analysis of their reference graph
+- `eval/results/comprehensive_benchmark_results.md`: summary of the earlier benchmark runs (mean, median and standard deviation)
 - `eval/results/fast_test_metrics.csv` and `eval/results/cascade_metrics.csv`: raw timings, written locally and ignored by git
 
 ## Running the tests
@@ -236,7 +241,7 @@ sh docker/kubo/peer-nodes.sh                     # once, after the first start
 
 The core plugin compiles for Java 11 (`maven.compiler.source` is 11) and uses `java-ipfs-http-client` v1.4.3 from JitPack. Run Maven with JDK 11 or newer, for example 21 or 25. Java 8 does not work.
 
-The tests create their metamodels at runtime with `EcoreFactory` (for example `factory.createEPackage()`), so no generated model classes or `.genmodel` files are needed. Cross-resource tests use non-containment references.
+The tests create their metamodels at runtime with `EcoreFactory` (for example `factory.createEPackage()`), so no generated model classes or `.genmodel` files are needed. Most cross-resource tests use non-containment references; `CrossResourceContainmentTest` covers a child that another resource stores.
 
 ## Comparison with other persistence approaches
 
@@ -287,7 +292,7 @@ The same content added with the same IPFS settings produces the same CID, indepe
 | Cascade cost | In CID mode, a change to a leaf resource causes saves along the whole dependency chain |
 | Circular references | With references in both directions, one direction always points to an outdated CID. Content addressing makes the behavior unavoidable. |
 
-CDO and NeoEMF remain the better choice for performance and queries. The IPFS approach offers different properties of the storage design: decentralization, integrity checks, fixed versions and reproducibility. The comparison rests on these design properties, and no benchmark against CDO or NeoEMF has been run.
+CDO and NeoEMF remain the better choice for queries and partial loading. The IPFS approach offers different properties of the storage design: decentralization, integrity checks, fixed versions and reproducibility. `eval/baselines` measures NeoEMF with MapDB, a Git repository and an sshfs share on the benchmark models (results in `eval/results/baselines`); CDO was not measured.
 
 ## Related repositories
 
