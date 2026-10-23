@@ -90,6 +90,8 @@
 
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}
 
 %% Drafting aid: remove every \todo before submission
 \newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
@@ -155,16 +157,7 @@ Figure~\ref{fig:settings} contrasts the two settings for a model that is split i
 
 Content addressing has two consequences for models. First, a reference to a CID pins the exact version of the referenced model, in the way that a lock file records the exact dependency tree of a project~\cite{npmpackagelock} and Nix derives unique component paths from cryptographic hashes~\cite{dolstra2004nix}. Second, every save of a model creates a new CID, so references to the model need a deliberate update, and tools need support for the update. Dependency updates are a known source of problems in software ecosystems~\cite{cox2019dependencies,decan2019ecosystems}. A CID is also a cryptographic hash, so a reader can check that fetched content matches the requested identifier wherever the content is stored. However, the properties have costs. Content stays available only while at least one node stores the content, and each resource is loaded as a whole, without the on-demand loading of database-backed persistence~\cite{pagan2015repository,daniel2017neoemf}.
 
-The properties open several uses in model-driven engineering:
-\begin{itemize}
-\item Model versioning and reproducible evaluation. Every save produces a fixed snapshot under a new identifier, so a version history needs only a record of identifiers, and a paper or an audit can name the exact model behind a result~\cite{koegel2010emfstore,lamb2022reproducible}.
-\item Traceability. A trace link that carries a CID names the exact version of the target, so the link still points at the reviewed version after the target evolves.
-\item Preservation and less dependence on a central server. A published model stays readable while at least one node stores the content, and any node with a copy can serve the model~\cite{dicosmo2017heritage,kelly2016wayback}.
-\item Deduplication and incremental publication. Identical content always receives the same CID, so an unchanged component keeps the CID of the previous publication (Section~\ref{sec:rq2-partitioned}).
-\item Collaboration across organizations. Partners exchange models without agreed paths and without a shared namespace~\cite{dirocco2015repositories,franzago2018collaborative}.
-\item Simple caching and offline reading. A cached copy never goes stale and serves the model without a network connection, because content under a CID cannot change.
-\end{itemize}
-The paper covers the persistence layer, the references between resources and the cost of both, while the uses above follow from the properties and stay outside the evaluation.
+The properties suggest several uses in MDE outside the scope of the evaluation. Every save produces a fixed snapshot, so a version history needs only a record of identifiers, and a paper or an audit can name the exact model behind a result~\cite{koegel2010emfstore,lamb2022reproducible}. A trace link with a CID still names the reviewed version after the target evolves. A published model stays readable while at least one node stores a copy, and any node with a copy can serve the model~\cite{dicosmo2017heritage,kelly2016wayback}. Identical content always receives the same CID, so an unchanged component keeps the CID of the previous publication (Section~\ref{sec:rq2-partitioned}). Partners can also exchange models without agreed paths and without a shared namespace~\cite{dirocco2015repositories,franzago2018collaborative}. Finally, a cached copy never goes stale, so the copy serves the model offline. The paper covers the persistence layer, the references between resources and the cost of both.
 
 Content-addressed persistence also brings challenges, and the paper addresses four. First, a resource has no identifier before the first save, and every later save changes the identifier, so the persistence layer needs a lifecycle that the resource model of EMF does not expect (Section~\ref{sec:rq1}). Second, a reference by CID becomes outdated as soon as the target changes, so an upgrade needs a cascade of saves along the referencing resources (Section~\ref{sec:rq2}). Third, a load fetches a whole resource, so a large model needs a split into many resources together with a publication structure that keeps the parts connected (Section~\ref{sec:rq2-partitioned}). Fourth, the layer has to fit the existing EMF ecosystem, so file resources and IPFS resources share one resource set, and the editors keep the standard save and load actions (Sections~\ref{sec:rq1-differences} and~\ref{sec:tool}). Finally, partial loading inside a single resource stays open, and Section~\ref{sec:limitations} lists the remaining limits.
 
@@ -270,13 +263,7 @@ In IPNS mode, the third step differs. The resource derives a key name from the r
 
 \subsection{Loading a model}\label{sec:rq1-load}
 
-\texttt{IPFSURIHandlerImpl} reads models for the resource set, as shown in Figure~\ref{fig:load}. For an \texttt{ipfs://} URI, the handler removes the fragment and fetches the content with the Kubo \texttt{cat} command. For an \texttt{ipns://} URI, the handler first resolves the name to a CID. The handler also reads plain \texttt{http://} and \texttt{https://} URIs. Yet output streams for all four schemes are rejected. A model is written only through \texttt{IPFSResourceImpl.save}, because content under an existing CID cannot change.
-
-\begin{figure}[tbp]
-\centering
-\includegraphics[width=.8\columnwidth]{load.pdf}
-\caption{UML sequence diagram of loading a resource from IPFS. The URI converter of the resource set selects \texttt{IPFSURIHandlerImpl} for \texttt{ipfs://} and \texttt{ipns://} URIs. An IPNS name costs one extra lookup.}\label{fig:load}
-\end{figure}
+\texttt{IPFSURIHandlerImpl} reads models for the resource set. For an \texttt{ipfs://} URI, the handler removes the fragment and fetches the content with the Kubo \texttt{cat} command. For an \texttt{ipns://} URI, the handler first resolves the name to a CID. The handler also reads plain \texttt{http://} and \texttt{https://} URIs. Yet output streams for all four schemes are rejected. A model is written only through \texttt{IPFSResourceImpl.save}, because content under an existing CID cannot change.
 
 \subsection{Differences from location-based persistence}\label{sec:rq1-differences}
 
@@ -285,7 +272,7 @@ The implementation shows four points where content addressing departs from the a
 \item A new resource needs a URI before the first save, but the CID exists only after the save. The tests and examples use placeholder URIs such as \texttt{ipfs://pending}.
 \item Every save in CID mode assigns a new URI to the resource. Code with a stored copy of the old URI still refers to the old version.
 \item An output stream for an existing CID has no meaning. The save operation therefore writes a temporary file and adds the file to IPFS without the output streams of the URI converter.
-\item File resources and IPFS resources can use one resource set configuration, because the IPFS handler accepts only IPFS and HTTP URIs. The BPMN example program loads local \texttt{.bpmn} files and IPFS resources with the same configuration.
+\item File resources and IPFS resources can use one resource set configuration, because the IPFS handler accepts only IPFS and HTTP URIs. The test of the BPMN case study (Section~\ref{sec:evaluation-rq2}) loads local \texttt{.bpmn} files and saves IPFS resources in the same resource set.
 \end{enumerate}
 
 Figure~\ref{fig:lifecycle} summarizes the resulting lifecycle as a UML state machine. In CID mode, the URI of a resource follows the content. In IPNS mode, the URI stays stable, and the IPNS name follows the content.
@@ -359,7 +346,7 @@ In CID mode, a change to one resource requires new saves of every resource with 
 \end{algorithmic}
 \end{algorithm}
 
-The procedure starts with the cross-references of the resource set, collected by the EMF cross referencer. From the cross-references, the procedure builds a dependency graph of the resources and collects every resource that reaches the changed resource. After that, the procedure orders the collected resources, so a resource comes after every collected resource that the resource references. The saves then follow that order. During serialization, EMF writes the current URI of the target into each reference. The rewritten references therefore point to the new CID without any text replacement. The procedure resembles a Git commit, where a changed file leads to new tree objects up to the root~\cite{chacon2014progit}.
+The procedure starts with the cross-references of the resource set. A walk over every object collects the non-containment references into other resources, and optional updaters of location attributes add the resources that such attributes name, for example the files that a BPMN model imports. From the cross-references, the procedure builds a dependency graph of the resources and collects every resource that reaches the changed resource. After that, the procedure orders the collected resources, so a resource comes after every collected resource that the resource references. The saves then follow that order. During serialization, EMF writes the current URI of the target into each reference. The rewritten references therefore point to the new CID without any text replacement. The procedure resembles a Git commit, where a changed file leads to new tree objects up to the root~\cite{chacon2014progit}.
 
 The order matters as soon as two reference paths reach the changed resource. In the case study of Section~\ref{sec:evaluation-rq2}, \texttt{collaboration.bpmn} refers to the order process and to the payment process, while the order process imports the payment process. A save of the collaboration before the order process would leave the collaboration with the old CID of the order process. The dependency order saves the payment process first, the order process second and the collaboration last. An earlier version of the cascade saved a resource as soon as a reference to a saved resource appeared, and the order of the saves came from a hash set, so the outcome depended on the iteration order. Figure~\ref{fig:cascade} shows the expected result for the BPMN case study of Section~\ref{sec:evaluation-rq2}. A change to \texttt{payment-process.bpmn} gives a new CID to all three resources, and every reference points to the new CID of the target.
 
@@ -381,7 +368,49 @@ The order matters as soon as two reference paths reach the changed resource. In 
 
 In IPNS mode, \texttt{cascadeSave} saves only the changed resource. References by IPNS name resolve to the newly published CID, so the referencing resources need no new save.
 
-Cycles need care. Resource A may refer to resource B while B refers to A. In such a cycle, one direction always refers to an outdated CID, because no order of saves satisfies both directions. A new save of A would change the CID of A again, so the cycle cannot settle. \texttt{IPFSModelPublishTool} therefore checks a partitioned model for cycles before a publication in CID mode. The tool stops with an error when the resource graph contains a cycle.
+Cycles need care. Resource A may refer to resource B while B refers to A. In such a cycle, one direction always refers to an outdated CID (Proposition~\ref{prop:cycle} in Section~\ref{sec:rq2-properties}). A test with two resources that refer to each other shows the effect: after the cascade save, one direction still names the previous CID of the other resource. \texttt{IPFSModelPublishTool} therefore checks a partitioned model for cycles before a publication in CID mode. The tool stops with an error when the resource graph contains a cycle.
+
+\subsection{Properties of the cascade save}\label{sec:rq2-properties}
+
+A small formal model states the guarantees of Algorithm~\ref{alg:cascade}. A resource set holds a finite set $R$ of resources. A snapshot $\sigma$ assigns a content $\sigma(r)$, a byte string, to every resource $r \in R$. The CID of $r$ in $\sigma$ is $\mathit{cid}_\sigma(r) = h(\sigma(r))$, where $h$ is the hash function of IPFS, by default the Secure Hash Algorithm with 256-bit values (SHA-256). The reference graph $G = (R, E)$ has an edge $(r, q)$ when $r \neq q$ and an object of $r$ refers to an object of $q$, or when a location attribute of $r$ names $q$. In CID mode, the content $\sigma(r)$ records one CID $\rho_\sigma(r, q)$ for every edge $(r, q)$.
+
+\begin{definition}\label{def:consistent}
+A snapshot $\sigma$ is consistent when $\rho_\sigma(r, q) = \mathit{cid}_\sigma(q)$ holds for every edge $(r, q) \in E$.
+\end{definition}
+
+A save of $r$ replaces $\sigma(r)$ with a new content. The new content records the current CID of every target of $r$, and the save gives $r$ the CID of the new content. The model assumes that different contents receive different CIDs. A save therefore changes the CID of $r$ whenever the save changes the content of $r$.
+
+\begin{definition}\label{def:affected}
+For a change to a resource $t$, the set $A(t)$ of affected resources holds $t$ and every resource with a path to $t$ in $G$.
+\end{definition}
+
+\begin{proposition}\label{prop:affected}
+Let $\sigma$ be consistent, and let a change give $t$ a new CID. A resource $r \neq t$ needs a new save for a consistent snapshot if and only if $r \in A(t)$.
+\end{proposition}
+
+\begin{proof}
+Let $r \notin A(t)$, and let $(r, q) \in E$. Then $q \notin A(t)$ as well, because a path from $q$ to $t$ would extend to a path from $r$ to $t$. Saves of the resources in $A(t)$ therefore leave $q$ unchanged, and the CID that $r$ records for $q$ stays current. Conversely, let $r \in A(t)$ with a path $r = r_0, r_1, \ldots, r_k = t$. The resource $r_{k-1}$ records the old CID of $t$, so $r_{k-1}$ needs a new save. The save changes the recorded CID and hence the content and the CID of $r_{k-1}$. The same argument then holds for $r_{k-2}$ and continues along the path up to $r_0 = r$.
+\end{proof}
+
+\begin{proposition}\label{prop:order}
+Let the subgraph of $G$ on $A(t)$ be acyclic. One save of every resource in $A(t)$, each after the saves of the resources in $A(t)$ that the resource references, yields a consistent snapshot. Every other order with one save per resource leaves an outdated CID.
+\end{proposition}
+
+\begin{proof}
+Consider the save of $r \in A(t)$, and let $(r, q) \in E$. Either $q \notin A(t)$, and $q$ keeps the same content, or $q$ was saved before $r$ and is not saved again. In both cases, the CID that $r$ records for $q$ stays current until the end. The resource $r$ is not saved again either, so every later save records the final CID of $r$. Together with Proposition~\ref{prop:affected}, every edge ends with a current CID. Conversely, if $r$ is saved before some $q \in A(t)$ with $(r, q) \in E$, the content of $r$ records the CID of $q$ from before the save of $q$. The save of $q$ then changes the CID of $q$, and the edge $(r, q)$ keeps the outdated CID.
+\end{proof}
+
+Algorithm~\ref{alg:cascade} builds such an order by a depth-first search, because \textsc{Append} adds a resource only after every collected resource that the resource references. For an acyclic subgraph, the algorithm therefore saves every affected resource exactly once, and by Proposition~\ref{prop:affected} the algorithm saves no resource without need.
+
+\begin{proposition}\label{prop:cycle}
+Let the subgraph of $G$ on $A(t)$ contain a cycle, and let $h$ behave like a random function with $b$-bit values. Then a sequence of $n$ saves in CID mode ends in a snapshot that is consistent on the cycle with probability at most $n^2/2^b$.
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+Let the cycle be $r_1, r_2, \ldots, r_k, r_1$, and let the cycle become consistent for the first time after a save of $r_1$ with content $c$. The predecessor $r_k$ then records the CID $h(c)$, and $r_k$ wrote the record before the save of $r_1$. If $h$ has never received $c$ before, $h(c)$ is a fresh random value, and the value matches the record with probability $2^{-b}$. If $c$ appeared earlier, the records around the cycle lead backwards in time. Without a collision of $h$, every resource of the cycle held the same content at an earlier time, so $r_1$ held $c$ before the first appearance of $c$, which is impossible. A union bound over the $n$ saves and over the collisions among $n$ values gives the bound.
+\end{proof}
+
+With $b = 256$, the bound stays negligible for any realistic number of saves, so a cascade over a cycle in CID mode leaves at least one outdated CID in practice. In IPNS mode, a reference records a name that does not change with the content, so cycles cause no outdated references.
 
 \subsection{Publishing partitioned models}\label{sec:rq2-partitioned}
 
@@ -393,36 +422,23 @@ Large models are often split into many resources. The MoDisco case study (Sectio
 \item One IPNS name points to the current project version manifest. A local file records the IPNS name and the CID of the current manifest.
 \end{enumerate}
 
-Figure~\ref{fig:layers} shows the layers. The layers combine three strategies from Table~\ref{tab:strategies}: directories, a manifest and IPNS indirection. Listing~\ref{lst:manifests} shows the three documents of the case study. The head record holds the IPNS name and the CID of the current manifest. The project version manifest holds the CID of the root model, the CIDs of the shared resources and one entry per component. The component manifest lists the resources of one component together with the dependencies of the component.
+Figure~\ref{fig:layers} shows the layers. The layers combine three strategies from Table~\ref{tab:strategies}: directories, a manifest and IPNS indirection. Listing~\ref{lst:manifests} shows the project version manifest of the case study. The manifest holds the CID of the root model, the CIDs of the shared resources and one entry per component. A head record holds the IPNS name and the CID of the current manifest. Each component manifest lists the resources of one component together with the dependencies of the component.
 
-
-\begin{lstlisting}[language=Java,float=*,caption={The three documents of the publication layers, taken from the MoDisco case study. Content identifiers and one resource path are shortened.},label={lst:manifests}]
-// project-head.json: the mutable head of the project
-{ "ipns": "ipns://k51qzi5uqu5dhr...cazg3yro",
-  "currentManifestCid": "QmWekVvHnjWnn4...1L5dM",
-  "currentManifestPath": "project-version-manifest.json" }
-
-// project-version-manifest.json: one immutable version of the project
-{ "rootModel": { "path": "all-repos-merged.root.xmi",
-                 "cid": "Qmbu2ygFf6afX...Bbrmjr" },
-  "sharedResources": [
-    { "kind": "aux", "path": "aux/orphan-types.xmi",
-      "cid": "QmZQRTvAUPGhb...hvrRdr" } ],
-  "components": [
-    { "componentId": "eclipse.jdt.core/org.eclipse.jdt.core",
-      "resourceCount": 1066,
-      "componentRootCid": "QmWimKegjsRD9...pLy3Ms",
-      "componentManifestCid": "QmaJtyLNYBEN...SL7SS",
-      "dependencyCount": 3 } ] }
-
-// component-manifest.json: one component of that version
-{ "componentId": "eclipse.jdt.core/org.eclipse.jdt.core",
-  "resourceCount": 1066,
-  "resources": [ "compilation-units/.../CompletionEngine.xmi" ],
-  "dependencies": [],
-  "sharedResourceDependencies": [
-    { "path": "aux/orphan-types.xmi",
-      "crossReferenceCount": 45748 } ] }
+\begin{lstlisting}[language=Java,float=tbp,caption={The project version manifest of the MoDisco case study, with one of 26 components. Content identifiers are shortened.},label={lst:manifests}]
+{ "rootModel": {
+    "path": "all-repos-merged.root.xmi",
+    "cid": "Qmbu2y...Bbrmjr" },
+  "sharedResources": [ {
+    "kind": "aux",
+    "path": "aux/orphan-types.xmi",
+    "cid": "QmZQRT...hvrRdr" } ],
+  "components": [ {
+    "componentId":
+      "eclipse.jdt.core/org.eclipse.jdt.core",
+    "resourceCount": 1066,
+    "componentRootCid": "QmWimK...pLy3Ms",
+    "componentManifestCid": "QmaJty...SL7SS",
+    "dependencyCount": 3 } ] }
 \end{lstlisting}
 
 \begin{figure}[tbp]
@@ -433,33 +449,17 @@ Figure~\ref{fig:layers} shows the layers. The layers combine three strategies fr
 
 \section{Tool support}\label{sec:tool}
 
+Two Eclipse tools bring the persistence layer to a user interface. The repositories document the commands in detail.
+
 \subsection{Eclipse BPMN2 Modeler}\label{sec:tool-modeler}
 
-The Eclipse BPMN2 Modeler is a graphical tool for creating and editing BPMN diagrams~\cite{bpmn2modeler,omg2010bpmn}. The modeler builds the diagram editors with Graphiti~\cite{graphiti}. IPFS support was added to version 1.5.4 of the modeler, and the modified plug-ins target Java~17. A menu named BPMN2 IPFS offers four commands (Table~\ref{tab:commands}).
+The Eclipse BPMN2 Modeler is a graphical tool for creating and editing BPMN diagrams~\cite{bpmn2modeler,omg2010bpmn}, built with Graphiti~\cite{graphiti}. IPFS support was added to version 1.5.4 of the modeler, and the modified plug-ins target Java~17. A menu named BPMN2 IPFS publishes the current model or every model of a project, by CID or under an IPNS name. The same menu opens a model or a whole project from a CID, an IPFS path or an IPNS reference. A project publication adds a manifest in JavaScript Object Notation (JSON). The manifest maps each relative path to a CID and names the root model. Opening the project restores the files into a new folder, or into a new project when nothing is selected. Each project stores the Uniform Resource Locator (URL) of the Kubo API, a default load reference, the publish mode and a default IPNS key name. The modeler core also registers an IPFS URI handler, so references with \texttt{ipfs://} inside BPMN files load through Kubo.
 
-\begin{table*}[t]
-\caption{IPFS commands in the Eclipse BPMN2 Modeler}\label{tab:commands}
-\begin{tabular}{@{}p{0.27\textwidth}p{0.70\textwidth}@{}}
-\toprule
-Command & Behavior \\
-\midrule
-Open BPMN2 Model from IPFS & Accepts a CID, an \texttt{/ipfs/} path, an \texttt{ipfs://} URI or an IPNS reference. Fetches the BPMN file through Kubo, stores the file in the workspace and opens the file in the BPMN2 editor. \\
-Publish Current BPMN2 Model to IPFS & Saves the editor if needed and uploads the \texttt{.bpmn} file. Shows the CID, or publishes the CID under the configured IPNS name. \\
-Publish BPMN2 Project to IPFS & Publishes every \texttt{.bpmn} and \texttt{.bpmn2} file of the project by CID. Publishes a manifest with the root model and the CID of each relative path, optionally under an IPNS name. \\
-Open BPMN2 Project from IPFS & Downloads a project manifest, restores the listed files into a new workspace folder and opens the root model. \\
-\bottomrule
-\end{tabular}
-\end{table*}
-
-The project manifest is a JavaScript Object Notation (JSON) file. Each project stores four settings on the BPMN2 property page. The settings are the Uniform Resource Locator (URL) of the Kubo API, a default load reference, the publish mode (CID or IPNS) and a default IPNS key name. The modeler core also registers an IPFS URI handler in the modeler resource set. References with \texttt{ipfs://} inside BPMN files then load through Kubo.
-
-The integration publishes the BPMN model file, and the Graphiti \texttt{.diagram} file stays local. Moreover, IPNS publishing needs a key name that already exists in the local Kubo node. Without an active workspace folder, a model opened from IPFS is stored in a temporary file.
+The modeler keeps the layout of a diagram inside the BPMN file as BPMN Diagram Interchange data, so a published model carries the layout. A CID does not record the name of the published file, so the modeler names a downloaded model after the model, for example after the name of the process. IPNS publishing needs a key name that already exists in the local Kubo node.
 
 \subsection{Generated BPMN2 tree editor}\label{sec:tool-editor}
 
-The BPMN~2.0 metamodel of Eclipse includes a tree editor generated by EMF. The generated editor received a similar URI handler. The handler reads \texttt{ipfs://} and \texttt{ipns://} URIs through Kubo and rejects writes. The Kubo API URL comes from a system property, an environment variable or the default address \texttt{http://127.0.0.1:5001}.
-
-The metamodel repository with the handler builds with Maven and Tycho against Eclipse 2022-06 on Java~17. The structural self-tests of the modeler extension pass. \todo{Build the modeler with Tycho. The BPMN2 update site in the build file of the modeler is no longer available.}
+The BPMN~2.0 metamodel of Eclipse includes a tree editor generated by EMF. The editor received a similar URI handler. The handler reads \texttt{ipfs://} and \texttt{ipns://} URIs through Kubo and rejects writes. The Kubo API URL comes from a system property, an environment variable or the default address \texttt{http://127.0.0.1:5001}. The metamodel repository with the handler builds with Maven and Tycho against Eclipse 2022-06 on Java~17. The modeler builds in the same way with Tycho~2.7.5: the build produces all 18 modules, among them the core and user interface plug-ins with the IPFS commands, together with an update site for installation in Eclipse. The build file of the modeler needed new repository addresses, because the original update sites of the BPMN2 metamodel, of the Graphiti milestones, of the Web Tools and of the Orbit libraries no longer exist.
 
 \section{Evaluation}\label{sec:evaluation}
 
@@ -473,7 +473,7 @@ The measurements ran on a laptop with an Intel Core i7-1165G7 processor (four co
 
 An example program (\texttt{BpmnIpfsExample}) exercises the persistence layer with two BPMN models. The program saves both models to IPFS and loads the first model again by CID. The program then resolves an element of the first model through a URI fragment. The second model refers to the process of the first model with an \texttt{ipfs://} URI and a fragment.
 
-The self-tests of the BPMN2 Modeler extension check reference parsing, command registration, bundle metadata and the documentation. An optional mode of the self-tests publishes a BPMN file to Kubo and downloads the file again. \todo{Report the output of the example program and of the self-tests with a running Kubo node.}
+The self-tests of the BPMN2 Modeler extension check reference parsing, the names given to downloaded models, command registration, bundle metadata and the documentation. An optional mode of the self-tests publishes a BPMN file to Kubo and downloads the file again. With a local Kubo~0.40.1 node, the self-tests and the round trip passed. \todo{Replace the example program with the round trip over the real BPMN models.}
 
 Large models need a stronger check than an example program. The case study of Section~\ref{sec:evaluation-modisco} therefore compares local resources with copies fetched from IPFS. EMF Compare reported no differences for eight components with 1,639 resources and 240.61~MiB of XMI, and a repeat run of the same selection gave the same result (Table~\ref{tab:compare})~\cite{emfcompare}. In addition, byte-level checks cover the merged model, the project version manifest and the partitioned root model. A traversal test counted 4,282,694 elements in the merged model and the same number in the partitioned resource set. Overall, the checks support the claim that a save to IPFS and a later load return the same model at the scale of the case study.
 
@@ -534,6 +534,10 @@ Elements & Size (MB) & XMI load (ms) & IPFS load (ms) \\
 A save through IPFS took 20 to 22~ms longer than a save to an XMI file for models up to 10,000 elements. The difference therefore stays almost constant while the model grows, which points to a fixed cost per call to the local Kubo node. In relative terms, a save through IPFS took about 31 times the XMI time at 100 elements, 22 times at 1,000 elements and 8.1 times at 10,000 elements. For the two largest models, the difference grows to 46~ms and 112~ms, while the ratio falls to 2.5 and 1.4. Loading from IPFS took 1.1 to 1.4 times the time of loading the XMI file.
 
 A Wilcoxon signed-rank test compares the thirty paired iterations of each model size, because both paths run inside the same iteration on the same content. Every save series gives $p < 0.001$. The load series give $p < 0.001$ from 10,000 elements upward and $p = 0.0002$ at 1,000 elements. At 100 elements the load through IPFS cannot be told apart from the load of a local file ($p = 0.33$), where both stay near two milliseconds. The standard deviation stays below 13\% of the mean for models of 10,000 elements and more, with one exception: the XMI save at 100,000 elements reaches 24\%. The two smallest models vary more in relative terms, because the times lie close to one millisecond. The full distribution of every measurement is in the result file of the repository.
+
+The matched-pairs rank-biserial correlation serves as the effect size of each test. The correlation is 1.00 for every save series, because the save through IPFS took longer in every pair. For loads, the correlation grows from 0.21 at 100 elements over 0.73 at 1,000 elements to 0.98 at 10,000 elements, and the correlation reaches 1.00 for the two largest models. Paired bootstrap intervals with 10,000 resamples put the added save time between 19.55 and 22.11~ms at 100 elements and between 99.76 and 123.66~ms at 500,000 elements, both at a confidence level of 95\%.
+
+The project calls the IPFS path impractical for a model size where the path takes more than five times as long as the local path. By the criterion, saves through IPFS exceed the threshold for models below about 25,000 elements, interpolated on logarithmic axes between 10,000 and 100,000 elements. In the same range, however, the added time stays near 21~ms, so the ratio overstates the cost for small models. Loads stay below the threshold at every measured size.
 
 The benchmark covers models up to 500,000 elements and a local Kubo node. Network latency between IPFS nodes stays outside the measurement, and a shared network file system as a further baseline stays open.
 
@@ -603,7 +607,7 @@ For RQ3, a save through a local Kubo node added 20 to 22~ms per model for models
 
 \subsection{Limitations}\label{sec:limitations}
 
-The approach loads each resource as a whole. Database-backed persistence can load parts of a model on demand~\cite{pagan2011morsa,daniel2017neoemf}, but the IPFS layer cannot. The approach also offers no query support comparable to Object Constraint Language (OCL) queries inside a database~\cite{omg2014ocl,daniel2016mogwai}. Furthermore, IPNS resolution needs an extra lookup and can take longer than direct CID access. A node that takes part in the public network also announces every new block to the distributed hash table, which adds work to each save. In the runs of this paper, the fixed cost per save was about 21~ms with an offline node and about 29~ms with a node in the public network. The announcement carries no model data, because another node receives a copy only after a request for the CID. In CID mode, a change to a leaf resource causes saves along the whole dependency chain. Cyclic references always leave one outdated CID. Published models stay available only while at least one node stores the content.
+The approach loads each resource as a whole. Database-backed persistence can load parts of a model on demand~\cite{pagan2011morsa,daniel2017neoemf}, but the IPFS layer cannot. The approach also offers no query support comparable to Object Constraint Language (OCL) queries inside a database~\cite{omg2014ocl,daniel2016mogwai}. Furthermore, IPNS resolution needs an extra lookup and can take longer than direct CID access. A node that takes part in the public network also announces every new block to the distributed hash table, which adds work to each save. In the runs of this paper, the fixed cost per save was about 21~ms with an offline node and about 29~ms with a node in the public network. The announcement carries no model data, because another node receives a copy only after a request for the CID. In CID mode, a change to a leaf resource causes saves along the whole dependency chain. Cyclic references always leave one outdated CID. Published models stay available only while at least one node stores the content. Finally, an evaluation in a production IPFS environment would need storage, bandwidth and the operation of several nodes over a long period, and the cost goes beyond the means of the current project.
 
 \subsection{Threats to validity}\label{sec:threats}
 
@@ -649,7 +653,7 @@ Future work follows the open parts of the same three questions. For RQ1, the cha
 \section*{CRediT authorship contribution statement}
 
 %% Role names follow the CRediT taxonomy verbatim.
-\textbf{Alfa Yohannis:} Conceptualization, Methodology, Software, Validation, Investigation, Writing -- original draft, Writing -- review \& editing. \todo{Confirm the roles. The earlier statement read: defined the research design, implemented the artifact, ran the evaluation and wrote the manuscript.}
+\textbf{Alfa Yohannis:} Conceptualization, Methodology, Software, Validation, Formal analysis, Investigation, Data curation, Writing -- original draft, Writing -- review \& editing, Visualization.
 
 \section*{Declaration of competing interest}
 
@@ -663,16 +667,11 @@ This research did not receive any specific grant from funding agencies in the pu
 \section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
 
 %% Wording of the JSS guide, filled in with the earlier statement of the method section
-During the preparation of this work the author used Claude Code to prototype the software, to generate the code for the MoDisco Java models, to analyse the measurement data, to draw the charts and to collect related work. The author defined the research design, the way the system should work and the prompts, and the author also wrote code by hand. After using this tool, the author reviewed and edited the content as needed and takes full responsibility for the content of the published article. \todo{State whether an AI tool also helped draft or edit the text, and if so, add it to the statement.}
+During the preparation of this work the author used Claude Code to prototype the software, to generate the code for the MoDisco Java models, to analyse the measurement data, to draw the charts, to collect related work, and to draft and edit the text of the manuscript. The author defined the research design, the way the system should work and the prompts, and the author also wrote code by hand. After using this tool, the author reviewed and edited the content as needed and takes full responsibility for the content of the published article.
 
 \section*{Data availability}
 
 The benchmark summaries are in the \texttt{eval/results} folder of the ecorefs repository. The implementation is available at \url{https://github.com/alfa-yohannis/ecorefs}, the BPMN2 Modeler integration at \url{https://github.com/alfa-yohannis/org.eclipse.bpmn2-modeler-1.5.4-ecorefs}, and the BPMN~2.0 metamodel changes at \url{https://github.com/alfa-yohannis/org.eclipse.bpmn2-ecorefs}. \todo{JSS applies Elsevier's research data Option C: deposit the MoDisco dataset (1.04~GiB), the published CIDs and the scripts with a digital object identifier (DOI), then cite and link the dataset here and in the reference list.}
-
-\section*{Acknowledgements}
-
-%% Elsevier wants this section directly before the reference list.
-The author looks for funding for an evaluation in a production IPFS environment. Such an evaluation needs storage, bandwidth and the operation of several nodes over a long period, so the cost goes beyond the means of the current project.
 
 \bibliographystyle{elsarticle-num}
 \bibliography{references}

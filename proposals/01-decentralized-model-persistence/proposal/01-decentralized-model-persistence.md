@@ -6,7 +6,7 @@ Research proposal for a study of content-addressed storage in model-driven engin
 | --- | --- |
 | Applicant | Alfa Yohannis, Department of Informatics, Pradita University, Kabupaten Tangerang, Banten, Indonesia |
 | Duration | 6 months |
-| Target venue | [Software and Systems Modeling (SoSyM)](https://link.springer.com/journal/10270), with an earlier conference paper on two of the research questions |
+| Target venue | [Journal of Systems and Software (JSS)](https://www.sciencedirect.com/journal/journal-of-systems-and-software), with an earlier conference paper on two of the research questions |
 | Prepared | September 2026 |
 
 ## 1. Summary
@@ -31,7 +31,7 @@ Second, reverse engineering produces models of a code base. A later analysis sho
 
 Third, organizations exchange models across a boundary. A path inside one organization has no meaning inside another organization, so the parties need agreed names or a shared server.
 
-The figure `papers/01-SoSym/paper/figures/development-settings.pdf` contrasts a local development setting for a model that is split into fragments with the decentralized setting that the study targets. In the local setting, every party reads and writes one shared location, and each reference names a path. In the decentralized setting, every fragment becomes an immutable block, each reference names the CID of the target, and a mutable IPNS name marks the current version.
+The figure `papers/01-JSS/paper/figures/development-settings.pdf` contrasts a local development setting for a model that is split into fragments with the decentralized setting that the study targets. In the local setting, every party reads and writes one shared location, and each reference names a path. In the decentralized setting, every fragment becomes an immutable block, each reference names the CID of the target, and a mutable IPNS name marks the current version.
 
 A reference that names a version would remove the ambiguity in all three settings. Content addressing offers such a reference, yet the model persistence frameworks of MDE assume a stable address with changing content. The assumption runs through the resource, the factory, the URI handler and the serialization of references, so the transfer is not a configuration change.
 
@@ -145,4 +145,4 @@ The amounts are estimates at an exchange rate of IDR 17,000 per USD, and the fig
 14. Steinberg, D., Budinsky, F., Paternostro, M., Merks, E.: EMF, Eclipse Modeling Framework, 2nd edition. Addison-Wesley (2008).
 15. Trautwein, D., Raman, A., Tyson, G., et al.: Design and evaluation of IPFS, a storage layer for the decentralized web. ACM SIGCOMM 2022, 739 to 752. https://doi.org/10.1145/3544216.3544232
 
-The full reference list of the study, with one verified web address per entry, is in `papers/01-SoSym/literature-review.md`.
+The full reference list of the study, with one verified web address per entry, is in `papers/01-JSS/literature-review.md`.
