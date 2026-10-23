@@ -111,3 +111,6 @@ papers/01-JSS/paper/main.pdf
 *.nav
 *.snm
 *.vrb
+
+# Maven repository of the baseline harness (eval/baselines/run.sh)
+.m2-eval/

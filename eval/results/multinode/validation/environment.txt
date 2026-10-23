@@ -1,0 +1,26 @@
+run: 20261023-095500 (quick)
+started: 2026-10-23T09:55:02+07:00
+topologies: peered dht
+profiles: none wan50
+harness options: --warmup 1 --iterations 3 --bpmn-files 3 --sizes 100,1000
+heap: 2g
+host: Linux 6.8.0-90-generic x86_64 GNU/Linux
+cpu: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, 8 logical CPUs
+memory: 15Gi
+docker: 29.9.2, compose 5.6.1
+kubo: ipfs version 0.40.1
+java: openjdk version "17.0.20.1" 2026-08-18
+ecorefs commit: 00df453c449a484409295eba0b1731260407cc72
+bpmn sample: f799250d9b1b32549e3347709c08bef65d1d52715ec014a603a5cb8330e8bfbb
+jars:
+  3326d9daab801846680a9a466b2581a8485f5482b9c0e7d91937caf79d160444  ./ecorefs-ipfs-core-1.0-SNAPSHOT.jar
+  4241c14a7727c34feea6507ec801318a3d4a90f070e4525681079fb94ee4c593  ./gson-2.10.1.jar
+  e5bc3b6deef0839ad120c854a6f2ae10ecb5a27aa97383834dee9b8b459c3785  ./java-cid-v1.3.7.jar
+  34ac63daa65854b42400531ffb8131a43b1745922cde83032ba79f75e6732fd9  ./java-ipfs-http-client-v1.4.3.jar
+  9944cb0083c1f3a2ffca2b5c7c1c67d746f8dc5e2e9b8781083146b7d936e6c7  ./java-multiaddr-v1.4.12.jar
+  0d7bc5ac1d173c29a1b16a50fe770986d12fca2f72a769822229ff04d07e5020  ./java-multibase-v1.1.1.jar
+  0ebd9fd4b17a698507da6bb1105d6170dedeb21b0e81dea5579d2ab06957e5b1  ./java-multihash-v1.3.4.jar
+  abc51ca024099c74b5979fe7c921163bdc637acbca382e2725e0c92a5d4187fd  ./org.eclipse.emf.common-2.21.0.jar
+  0bcb664f65410a937ac463eb9b5cbc65aadb32efbd92528962eee08864827ad4  ./org.eclipse.emf.ecore-2.23.0.jar
+  d8da1146cd83675f5d5417fdd91fc89f2af4b43e4a30110661326994dc71176d  ./org.eclipse.emf.ecore.xmi-2.16.0.jar
+finished: 2026-10-23T09:59:28+07:00

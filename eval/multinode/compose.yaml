@@ -1,0 +1,90 @@
+# Four Kubo nodes in a private IPFS network for the multi-node experiment of the
+# JSS paper. The network is separate from docker/kubo: it has its own swarm key,
+# its own Docker network and its own volumes, and it never reaches the global
+# IPFS network (LIBP2P_FORCE_PNET refuses to start without the key).
+#
+#   sh eval/multinode/new-swarm-key.sh     # once
+#   bash eval/multinode/run.sh --quick     # validation, see README.md
+#
+# Roles in the experiment:
+#   mn-a  publisher, DHT server: saves models, publishes IPNS records  API 127.0.0.1:5201
+#   mn-b  fetcher, DHT client: raw content and IPNS names              API 127.0.0.1:5202
+#   mn-c  fetcher, DHT client: loads through the EMF resource          API 127.0.0.1:5203
+#   mn-h  hub, DHT server: the only peer of each node in the dht topology  API 127.0.0.1:5204
+name: ecorefs-multinode
+
+x-kubo-node: &kubo-node
+  image: ipfs/kubo:v0.40.1
+  restart: "no"
+  networks:
+    - multinode
+
+# The publisher and the hub serve the DHT and store its provider and IPNS
+# records. The fetchers are DHT clients, as an editor behind a home router would
+# be, so a lookup on a fetcher has to ask another node.
+x-dht-server: &dht-server
+  LIBP2P_FORCE_PNET: "1"
+  ECOREFS_ROUTING_TYPE: dhtserver
+
+x-dht-client: &dht-client
+  LIBP2P_FORCE_PNET: "1"
+  ECOREFS_ROUTING_TYPE: dhtclient
+
+services:
+  mn-a:
+    <<: *kubo-node
+    container_name: ecorefs-mn-a
+    environment: *dht-server
+    ports:
+      - "127.0.0.1:5201:5001"
+    volumes:
+      - mn-a-data:/data/ipfs
+      - ./swarm.key:/run/ecorefs/swarm.key:ro
+      - ./init:/container-init.d:ro
+
+  mn-b:
+    <<: *kubo-node
+    container_name: ecorefs-mn-b
+    environment: *dht-client
+    ports:
+      - "127.0.0.1:5202:5001"
+    volumes:
+      - mn-b-data:/data/ipfs
+      - ./swarm.key:/run/ecorefs/swarm.key:ro
+      - ./init:/container-init.d:ro
+
+  mn-c:
+    <<: *kubo-node
+    container_name: ecorefs-mn-c
+    environment: *dht-client
+    ports:
+      - "127.0.0.1:5203:5001"
+    volumes:
+      - mn-c-data:/data/ipfs
+      - ./swarm.key:/run/ecorefs/swarm.key:ro
+      - ./init:/container-init.d:ro
+
+  mn-h:
+    <<: *kubo-node
+    container_name: ecorefs-mn-h
+    environment: *dht-server
+    ports:
+      - "127.0.0.1:5204:5001"
+    volumes:
+      - mn-h-data:/data/ipfs
+      - ./swarm.key:/run/ecorefs/swarm.key:ro
+      - ./init:/container-init.d:ro
+
+volumes:
+  mn-a-data:
+    name: ecorefs-mn-a-data
+  mn-b-data:
+    name: ecorefs-mn-b-data
+  mn-c-data:
+    name: ecorefs-mn-c-data
+  mn-h-data:
+    name: ecorefs-mn-h-data
+
+networks:
+  multinode:
+    name: ecorefs-multinode

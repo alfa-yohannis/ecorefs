@@ -1,0 +1,137 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- Baselines for the RQ3 benchmark of the paper: the same generated models
+       saved to a Git repository, to a network share and to a NeoEMF database,
+       next to the local XMI path and the IPFS path. Build with
+       -Dmaven.repo.local=/data2/projects/ecorefs/.m2-eval (see run.sh). -->
+  <groupId>org.ecorefs.eval</groupId>
+  <artifactId>ecorefs-baselines</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <neoemf.version>2.0.0</neoemf.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
+
+  <!-- NeoEMF 2.0.0 keeps transient objects in Chronicle Map 3.17.1, whose core
+       library calls FileChannelImpl.unmap0, a JDK method removed in Java 14.
+       The Chronicle release train 2.23 keeps the Chronicle Map API that NeoEMF
+       uses and runs on Java 17. -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>net.openhft</groupId>
+        <artifactId>chronicle-bom</artifactId>
+        <version>2.23.123</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- The BOM names the early-access build 3.23ea1, whose POM needs an
+           unpublished snapshot; 3.23.3 is the release of the same train. -->
+      <dependency>
+        <groupId>net.openhft</groupId>
+        <artifactId>affinity</artifactId>
+        <version>3.23.3</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <!-- The persistence layer of the paper, with the EMF versions of the benchmark -->
+    <dependency>
+      <groupId>org.ecorefs</groupId>
+      <artifactId>ecorefs-ipfs-core</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.ecore</artifactId>
+      <version>2.23.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+      <version>2.16.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.emf</groupId>
+      <artifactId>org.eclipse.emf.common</artifactId>
+      <version>2.21.0</version>
+    </dependency>
+
+    <!-- NeoEMF with the embedded MapDB back end -->
+    <!-- The JDK 8 tools.jar that an older Chronicle library declares does not exist
+         on Java 17 and is not needed at run time. Chronicle Core 2.23 reports
+         usage to Google Analytics when chronicle-analytics is on the class path;
+         without the library it falls back to a muted implementation, and run.sh
+         also sets chronicle.analytics.disable. -->
+    <dependency>
+      <groupId>fr.inria.atlanmod.neoemf</groupId>
+      <artifactId>neoemf-core</artifactId>
+      <version>${neoemf.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.sun.java</groupId>
+          <artifactId>tools</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>net.openhft</groupId>
+          <artifactId>chronicle-analytics</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>fr.inria.atlanmod.neoemf</groupId>
+      <artifactId>neoemf-data-mapdb</artifactId>
+      <version>${neoemf.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.sun.java</groupId>
+          <artifactId>tools</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>net.openhft</groupId>
+          <artifactId>chronicle-analytics</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.6.1</version>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/lib</outputDirectory>
+              <includeScope>runtime</includeScope>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

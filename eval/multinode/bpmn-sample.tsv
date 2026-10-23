@@ -1,0 +1,37 @@
+# BPMN files of the multi-node run, written by select_bpmn_sample.py.
+# Collections: omg-miwg-test-suite, jbpm-tests, flowable-tests, camunda7-tests (7779 files).
+# The first 3 files are warm-up files next to the median size; the other 30
+# sit at evenly spaced size quantiles. Columns: path below eval/datasets/bpmn, bytes.
+camunda7-tests/engine/src/test/resources/org/camunda/bpm/engine/test/bpmn/event/escalation/EscalationEventSubprocessTest.testCatchEscalationEventInsideSubprocess.bpmn20.xml	1851
+jbpm-tests/jbpm-bpmn2/src/test/resources/memory/BPMN2-RuleTaskWithInsertProcessInstance.bpmn2	1852
+camunda7-tests/engine/src/test/resources/org/camunda/bpm/engine/test/bpmn/event/compensate/CompensateEventTest.testCompensationEventSubprocessWithoutBoundaryEvents.bpmn20.xml	1853
+camunda7-tests/model-api/bpmn-model/src/test/resources/org/camunda/bpm/model/bpmn/DefinitionsTest.shouldImportEmptyDefinitions.bpmn	167
+flowable-tests/modules/flowable5-test/src/test/resources/org/activiti/standalone/testing/MockSupportWithActivitiRuleTest.testMockedServiceTaskAnnotation.bpmn20.xml	552
+flowable-tests/modules/flowable5-test/src/test/resources/org/activiti/standalone/event/invalidEventListenerExpression.bpmn20.xml	603
+camunda7-tests/engine/src/test/resources/org/camunda/bpm/engine/test/bpmn/parse/BpmnParseTest.testNoCamundaInTargetThrowsError.bpmn20.xml	658
+flowable-tests/modules/flowable-engine/src/test/resources/org/flowable/engine/test/bpmn/servicetask/TriggerableJavaDelegateServiceTaskTest.testFutureJavaDelegateNotLeaving.bpmn20.xml	726
+camunda7-tests/engine/src/test/resources/org/camunda/bpm/engine/test/api/mock/MocksTest.testMockAvailabilityInScriptTask.bpmn20.xml	796
+flowable-tests/tooling/archetypes/flowable-archetype-unittest/src/main/resources/archetype-resources/src/test/resources/my-process.bpmn20.xml	861
+camunda7-tests/engine/src/test/resources/org/camunda/bpm/engine/test/bpmn/servicetask/RepeatingServiceTaskTest.testMultipleInvocationsInSameTransation.bpmn20.xml	925
+camunda7-tests/engine/src/test/resources/org/camunda/bpm/engine/test/api/runtime/RuntimeServiceTest.testTransitionInstanceActivityNamePropertyAfterTask.bpmn20.xml	1001
+jbpm-tests/jbpm-test-coverage/src/test/resources/org/jbpm/test/functional/subprocess/AdHocSubProcess-autocomplete.bpmn	1076
+camunda7-tests/engine/src/test/resources/org/camunda/bpm/engine/test/bpmn/async/AsyncAfterTest.testAsyncAfterAndBeforeIntermediateCatchEvent.bpmn20.xml	1170
+camunda7-tests/engine/src/test/resources/org/camunda/bpm/engine/test/bpmn/event/timer/BoundaryTimerNonInterruptingEventTest.testMultipleOutgoingSequenceFlows.bpmn20.xml	1292
+camunda7-tests/engine-spring/core/src/test/resources/org/camunda/bpm/engine/spring/test/autodeployment/customName/a/autodeploy.a.bpmn20.xml	1426
+flowable-tests/modules/flowable5-test/src/test/resources/org/activiti/engine/test/db/process-without-di.bpmn20.xml	1576
+omg-miwg-test-suite/IBM Process Designer 8.0.1/A.1.0-export.bpmn	1757
+camunda7-tests/engine/src/test/resources/org/camunda/bpm/engine/test/bpmn/event/signal/SignalEventTest.testSignalBoundaryOnSubProcess.bpmn20.xml	1967
+camunda7-tests/engine/src/test/resources/org/camunda/bpm/engine/test/bpmn/event/escalation/EscalationEventTest.testBoundaryEventWithEscalationCode.bpmn20.xml	2200
+jbpm-tests/jbpm-services/jbpm-executor/src/test/resources/BPMN2-UserTaskWithSLA.bpmn2	2548
+jbpm-tests/jbpm-services/jbpm-kie-services/src/test/resources/repo/processes/general/callactivity.bpmn	2848
+jbpm-tests/jbpm-examples/src/main/resources/junit/designer/BPMN2-IntermediateThrowEventNone.bpmn2	3352
+jbpm-tests/jbpm-bpmn2/src/test/resources/BPMN2-IntermediateCatchEventMessageWithTransformation.bpmn2	4168
+flowable-tests/modules/flowable5-test/src/test/resources/org/activiti/engine/test/bpmn/event/end/TerminateEndEventTest.testTerminateInCallActivityConcurrent.bpmn	5092
+jbpm-tests/jbpm-bpmn2/src/test/resources/BPMN2-ExclusiveSplitDefault.bpmn2	6133
+flowable-tests/modules/flowable-engine/src/test/resources/org/flowable/engine/test/bpmn/event/signal/SignalEventTest.testSignalThrowAndCatchInSameTransaction.bpmn20.xml	7459
+omg-miwg-test-suite/ModelFoundry 1.1.1/A.2.0-roundtrip.bpmn	9890
+omg-miwg-test-suite/bpmn.io (Camunda Modeler) 18.31.0/A.2.0-rountrip.bpmn	12711
+omg-miwg-test-suite/Modelio 3.5/C.1.1-roundtrip.bpmn	16918
+omg-miwg-test-suite/SAP Signavio Process Manager 19.9.0/C.3.0-export.bpmn	27072
+omg-miwg-test-suite/OMNITRACKER BPMN 13.1/B.2.0-roundtrip.bpmn	57221
+omg-miwg-test-suite/ADONIS 17.0/B.2.0-export.bpmn	906947

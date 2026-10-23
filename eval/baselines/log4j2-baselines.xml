@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Logging of NeoEMF and Chronicle during the benchmark. The configuration in
+     the NeoEMF jar logs every save and load at INFO level to the console, which
+     would fall inside the measured region, so only warnings are kept here. -->
+<Configuration status="WARN" shutdownHook="disable">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_ERR">
+            <PatternLayout pattern="%-5level %d{ABSOLUTE} %c{1} - %msg%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="WARN">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

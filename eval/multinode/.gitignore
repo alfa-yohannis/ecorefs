@@ -1,0 +1,4 @@
+# The swarm key admits a node to the private network; it never goes into git.
+swarm.key
+# Compiled classes of the harness
+build/
