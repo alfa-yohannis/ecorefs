@@ -47,11 +47,19 @@ import java.util.List;
  */
 public class FastPerformanceBenchmarkTest {
 
+    // EcoreFS begin: resolve the folders against the repository root, wherever it is checked out
+    // /** Directory with the generated models of the benchmark. */
+    // private static final String SOURCE_DIRECTORY = "/data2/projects/ecorefs/eval/custom_generator/output/";
+    //
+    // /** File that receives one row per measured iteration. */
+    // private static final String RESULT_FILE = "/data2/projects/ecorefs/eval/results/benchmark_metrics.csv";
+
     /** Directory with the generated models of the benchmark. */
-    private static final String SOURCE_DIRECTORY = "/data2/projects/ecorefs/eval/custom_generator/output/";
+    private static final String SOURCE_DIRECTORY = RepositoryPaths.resolve("eval/custom_generator/output") + "/";
 
     /** File that receives one row per measured iteration. */
-    private static final String RESULT_FILE = "/data2/projects/ecorefs/eval/results/benchmark_metrics.csv";
+    private static final String RESULT_FILE = RepositoryPaths.resolve("eval/results/benchmark_metrics.csv").toString();
+    // EcoreFS end
 
     /** Multiaddress of the local Kubo node. */
     private static final String IPFS_ADDRESS = "/ip4/127.0.0.1/tcp/5001";

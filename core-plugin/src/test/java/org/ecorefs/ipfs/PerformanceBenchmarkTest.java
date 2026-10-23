@@ -42,7 +42,10 @@ public class PerformanceBenchmarkTest {
     @Test
     public void runOverheadBenchmark() throws Exception {
         int[] scales = { 100, 1000, 10000, 100000, 500000 };
-        String sourceDir = "/data2/projects/ecorefs/eval/custom_generator/output/";
+        // EcoreFS begin: resolve the folder against the repository root, wherever it is checked out
+        // String sourceDir = "/data2/projects/ecorefs/eval/custom_generator/output/";
+        String sourceDir = RepositoryPaths.resolve("eval/custom_generator/output") + "/";
+        // EcoreFS end
 
         System.out.println("==========================================================================");
         System.out.println("ElementCount\tNativeSave(ms)\tIpfsSave(ms)\tNativeLoad(ms)\tIpfsLoad(ms)");

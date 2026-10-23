@@ -142,6 +142,7 @@ echo "Running $mode, results in $results/$label.csv"
     -cp "$here/target/ecorefs-baselines-1.0-SNAPSHOT.jar:$here/target/lib/*" \
     org.ecorefs.eval.baselines.BaselineBenchmark \
     "${defaults[@]}" --label "$label" --work "$work" --results "$results" \
+    --models "$repository/eval/custom_generator/output" \
     --ipfs "/ip4/127.0.0.1/tcp/$api_port" "$@" 2>&1 | tee "$results/$label.log"
 
 clean_up

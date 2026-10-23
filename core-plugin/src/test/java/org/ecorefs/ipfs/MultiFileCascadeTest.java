@@ -17,7 +17,9 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.PrintWriter;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+// EcoreFS begin: RepositoryPaths resolves the folders now
+// import java.nio.file.Paths;
+// EcoreFS end
 import java.util.Collections;
 import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
@@ -96,8 +98,12 @@ public class MultiFileCascadeTest {
         int measuredIterations = 10;
         long[] cascadeSaves = new long[measuredIterations];
 
-        Files.createDirectories(Paths.get("/data2/projects/ecorefs/eval/results"));
-        File csvFile = new File("/data2/projects/ecorefs/eval/results/cascade_metrics.csv");
+        // EcoreFS begin: resolve the folder against the repository root, wherever it is checked out
+        // Files.createDirectories(Paths.get("/data2/projects/ecorefs/eval/results"));
+        // File csvFile = new File("/data2/projects/ecorefs/eval/results/cascade_metrics.csv");
+        Files.createDirectories(RepositoryPaths.resolve("eval/results"));
+        File csvFile = RepositoryPaths.resolve("eval/results/cascade_metrics.csv").toFile();
+        // EcoreFS end
         try (PrintWriter writer = new PrintWriter(csvFile)) {
             writer.println("Iteration,IpfsCascadeSave(ms)");
 

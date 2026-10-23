@@ -47,8 +47,13 @@ public class BpmnCaseStudyCascadeTest {
     /** Multiaddress of the local Kubo node. */
     private static final String IPFS_ADDRESS = "/ip4/127.0.0.1/tcp/5001";
 
+    // EcoreFS begin: resolve the folder against the repository root, wherever it is checked out
+    // /** Directory with the three models of the case study. */
+    // private static final String CASE_STUDY_DIRECTORY = "/data2/projects/ecorefs/examples/case-study/";
+
     /** Directory with the three models of the case study. */
-    private static final String CASE_STUDY_DIRECTORY = "/data2/projects/ecorefs/examples/case-study/";
+    private static final String CASE_STUDY_DIRECTORY = RepositoryPaths.resolve("examples/case-study") + "/";
+    // EcoreFS end
 
     /** The three files of the case study, each a published version of its model. */
     private static final String[] CASE_STUDY_FILES = { "payment-process.bpmn", "order-process.bpmn",
