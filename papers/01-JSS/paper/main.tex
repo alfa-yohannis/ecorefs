@@ -222,7 +222,7 @@ The ecorefs core plugin adds IPFS persistence to EMF. The plugin is a Java libra
 
 \subsection{Architecture}\label{sec:rq1-architecture}
 
-Figure~\ref{fig:architecture} shows the three extension points of the plugin as a Unified Modeling Language (UML) class diagram. \texttt{IPFSResourceImpl} extends the XMI resource of EMF, and \texttt{IPFSResourceFactoryImpl} creates the IPFS resources. \texttt{IPFSURIHandlerImpl} extends the default URI handler of EMF. Every extension point talks to one local Kubo node. The enumeration \texttt{ReferenceMode} selects references by CID or by IPNS name. Finally, a fourth class, \texttt{IPFSModelPersister}, provides the cascade save of Section~\ref{sec:rq2-cascade}.
+Figure~\ref{fig:architecture} shows the three extension points of the plugin as a Unified Modeling Language (UML) class diagram. \texttt{IPFSResourceImpl} extends the XMI resource of EMF, and \texttt{IPFSResourceFactoryImpl} creates the IPFS resources. The resource keeps the normal save of EMF and adds \texttt{saveIPFS}, which publishes the resource on IPFS, and \texttt{saveIPFSCascaded}, which also publishes every resource that refers to the published one. \texttt{IPFSURIHandlerImpl} extends the default URI handler of EMF. Every extension point talks to one local Kubo node. The enumeration \texttt{ReferenceMode} selects references by CID or by IPNS name. Finally, a fourth class, \texttt{IPFSModelPersister}, provides the cascade save behind \texttt{saveIPFSCascaded} (Section~\ref{sec:rq2-cascade}).
 
 Listing~\ref{lst:setup} shows the configuration of a resource set. The factory is registered for the \texttt{ipfs} and \texttt{ipns} schemes. The URI handler is added at the front of the handler list, so the handler receives IPFS URIs before the default handlers.
 
@@ -249,27 +249,27 @@ resourceSet.getURIConverter()
 
 \subsection{Saving a model}\label{sec:rq1-save}
 
-Figure~\ref{fig:save} shows the save interaction as a UML sequence diagram. Saving an \texttt{IPFSResourceImpl} takes three steps. First, the resource writes the XMI serialization to a temporary file. The temporary file avoids keeping a large serialized model in memory. Second, the file is added to the local Kubo node, and Kubo returns the CID. Third, the resource URI is replaced with \texttt{ipfs://} followed by the CID.
+\texttt{IPFSResourceImpl} separates two saves. The inherited \texttt{save} is the normal EMF save, which writes the XMI to the location of the resource URI, for example a local working copy. \texttt{saveIPFS} publishes the content on IPFS instead. Figure~\ref{fig:save} shows the publication as a UML sequence diagram. A call of \texttt{saveIPFS} takes three steps. First, the resource writes the XMI serialization to a temporary file. The temporary file avoids keeping a large serialized model in memory. Second, the file is added to the local Kubo node, and Kubo returns the CID. Third, the resource URI is replaced with \texttt{ipfs://} followed by the CID.
 
-In IPNS mode, the third step differs. The resource derives a key name from the resource URI. An Ed25519 key is created when no key with the name exists. The new CID is then published under the key, and the resource URI becomes \texttt{ipns://} followed by the key identifier. The key name is kept after the first save, so later saves publish under the same name.
+In IPNS mode, the third step differs. The resource derives a key name from the resource URI. An Ed25519 key is created when no key with the name exists. The new CID is then published under the key, and the resource URI becomes \texttt{ipns://} followed by the key identifier. The key name is kept after the first publication, so later publications use the same name.
 
 \begin{figure}[tbp]
 \centering
 \includegraphics[width=.7\columnwidth]{save.pdf}
-\caption{UML sequence diagram of saving a resource to IPFS. The reference mode of the resource selects the alternative. In CID mode, the new CID becomes the resource URI. In IPNS mode, the resource URI stays an IPNS name.}\label{fig:save}
+\caption{UML sequence diagram of \texttt{saveIPFS}, which publishes a resource on IPFS. The reference mode of the resource selects the alternative. In CID mode, the new CID becomes the resource URI. In IPNS mode, the resource URI stays an IPNS name.}\label{fig:save}
 \end{figure}
 
 \subsection{Loading a model}\label{sec:rq1-load}
 
-\texttt{IPFSURIHandlerImpl} reads models for the resource set. For an \texttt{ipfs://} URI, the handler removes the fragment and fetches the content with the Kubo \texttt{cat} command. For an \texttt{ipns://} URI, the handler first resolves the name to a CID. The handler also reads plain \texttt{http://} and \texttt{https://} URIs. Yet output streams for all four schemes are rejected. A model is written only through \texttt{IPFSResourceImpl.save}, because content under an existing CID cannot change.
+\texttt{IPFSURIHandlerImpl} reads models for the resource set. For an \texttt{ipfs://} URI, the handler removes the fragment and fetches the content with the Kubo \texttt{cat} command. For an \texttt{ipns://} URI, the handler first resolves the name to a CID. The handler also reads plain \texttt{http://} and \texttt{https://} URIs. Yet output streams for all four schemes are rejected. A model reaches IPFS only through \texttt{saveIPFS}, because content under an existing CID cannot change, and a normal save to an \texttt{ipfs://} URI fails with a message that names \texttt{saveIPFS}.
 
 \subsection{Differences from location-based persistence}\label{sec:rq1-differences}
 
 The implementation shows five points where content addressing departs from the assumptions of the EMF resource model:
 \begin{enumerate}
-\item A new resource needs a URI before the first save, but the CID exists only after the save. The tests and examples use placeholder URIs such as \texttt{ipfs://pending}.
-\item Every save in CID mode assigns a new URI to the resource. Code with a stored copy of the old URI still refers to the old version.
-\item An output stream for an existing CID has no meaning. The save operation therefore writes a temporary file and adds the file to IPFS without the output streams of the URI converter.
+\item A new resource needs a URI before the first publication, but the CID exists only after the publication. The tests and examples use placeholder URIs such as \texttt{ipfs://pending}.
+\item Every publication in CID mode assigns a new URI to the resource. Code with a stored copy of the old URI still refers to the old version.
+\item An output stream for an existing CID has no meaning. The resource therefore keeps the normal save of EMF for locations that accept writes, while \texttt{saveIPFS} writes a temporary file and adds the file to IPFS without the output streams of the URI converter.
 \item File resources and IPFS resources can use one resource set configuration, because the IPFS handler accepts only IPFS and HTTP URIs. The test of the BPMN case study (Section~\ref{sec:evaluation-rq2}) loads local \texttt{.bpmn} files and saves IPFS resources in the same resource set.
 \item A CID depends on every byte of the serialization. A location-based save may write different bytes for the same model without consequence. Under content addressing, by contrast, the same model then receives a new CID. The BPMN resource of Eclipse, for example, writes a random identifier for every element without one (Section~\ref{sec:evaluation-rq1}).
 \end{enumerate}
@@ -279,7 +279,7 @@ Figure~\ref{fig:lifecycle} summarizes the resulting lifecycle as a UML state mac
 \begin{figure}[tbp]
 \centering
 \includegraphics[width=.9\columnwidth]{lifecycle.pdf}
-\caption{UML state machine of the URI of an \texttt{IPFSResourceImpl}. Each state shows the URI and the effect of a later save after a change. In CID mode, the URI follows the content. In IPNS mode, the URI stays the same, and the IPNS name points to the new CID. Earlier CIDs stay readable while an IPFS node stores the content.}\label{fig:lifecycle}
+\caption{UML state machine of the URI of an \texttt{IPFSResourceImpl}. Each state shows the URI and the effect of a later publication after a change. Before the first publication, the normal save writes a local file. In CID mode, the URI follows the content. In IPNS mode, the URI stays the same, and the IPNS name points to the new CID. Earlier CIDs stay readable while an IPFS node stores the content.}\label{fig:lifecycle}
 \end{figure}
 
 \section{Cross-resource references}\label{sec:rq2}
@@ -290,7 +290,7 @@ A reference to a resource on IPFS contains the CID of the target resource, for e
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=\columnwidth]{version-pinning.pdf}
+\includegraphics[width=.82\columnwidth]{version-pinning.pdf}
 \caption{References under location-based and content-addressed persistence. (a) A file path resolves to the current content at the path. (b) A CID reference resolves to the version with the given CID.}\label{fig:pinning}
 \end{figure}
 
@@ -316,9 +316,9 @@ Manifest or registry & A document maps logical names to CIDs & Flexible & The ma
 
 \subsection{Cascade save}\label{sec:rq2-cascade}
 
-In CID mode, a change to one resource requires new saves of every resource with a reference to the changed resource. \texttt{IPFSModelPersister.cascadeSave} automates the saves (Algorithm~\ref{alg:cascade}).
+In CID mode, a change to one resource requires new saves of every resource with a reference to the changed resource. \texttt{saveIPFSCascaded} automates the publications (Algorithm~\ref{alg:cascade}).
 
-\begin{algorithm}
+\begin{algorithm}[tb]
 \caption{Cascade save in CID mode}\label{alg:cascade}
 \begin{algorithmic}[1]
 \Procedure{CascadeSave}{$r$}
@@ -365,7 +365,7 @@ The order matters as soon as two reference paths reach the changed resource. In 
 \caption{UML object diagram of the three BPMN resources of the case study. (a) Each resource refers to the CIDs of the resources below. (b) A change to \texttt{payment-process.bpmn} and a complete cascade save give every resource a new CID. The CIDs come from the run of Section~\ref{sec:evaluation-rq2} and are shortened.}\label{fig:cascade}
 \end{figure}
 
-In IPNS mode, \texttt{cascadeSave} saves only the changed resource. References by IPNS name resolve to the newly published CID, so the referencing resources need no new save.
+In IPNS mode, \texttt{saveIPFSCascaded} publishes only the changed resource. References by IPNS name resolve to the newly published CID, so the referencing resources need no new save.
 
 Cycles need care. Resource A may refer to resource B while B refers to A. In such a cycle, one direction always refers to an outdated CID (Proposition~\ref{prop:cycle} in Section~\ref{sec:rq2-properties}). A test with two resources that refer to each other shows the effect: after the cascade save, one direction still names the previous CID of the other resource. \texttt{IPFSModelPublishTool} therefore checks a partitioned model for cycles before a publication in CID mode. The tool stops with an error when the resource graph contains a cycle.
 
@@ -442,7 +442,7 @@ Figure~\ref{fig:layers} shows the layers. The layers combine three strategies fr
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=\columnwidth]{publication-layers.pdf}
+\includegraphics[width=.81\columnwidth]{publication-layers.pdf}
 \caption{Publication layers of a partitioned model. One mutable IPNS name points to an immutable project version manifest. The manifest lists the CIDs of the root model, the shared resources and the component directories.}\label{fig:layers}
 \end{figure} A new publication after a change to one component gives the changed component a new root CID. The other components keep the same root CIDs, because the content of the other components is unchanged. The new project version manifest is then published under the same IPNS name.
 
@@ -452,9 +452,9 @@ Two Eclipse tools bring the persistence layer to a user interface. The repositor
 
 \subsection{Eclipse BPMN2 Modeler}\label{sec:tool-modeler}
 
-The Eclipse BPMN2 Modeler is a graphical tool for creating and editing BPMN diagrams~\cite{bpmn2modeler,omg2010bpmn}, built with Graphiti~\cite{graphiti}. IPFS support was added to version 1.5.4 of the modeler, and the modified plug-ins target Java~17. A menu named BPMN2 IPFS publishes the current model or every model of a project, by CID or under an IPNS name. The same menu opens a model or a whole project from a CID, an IPFS path or an IPNS reference. A project publication adds a manifest in JavaScript Object Notation (JSON). The manifest maps each relative path to a CID and names the root model. Opening the project restores the files into a new folder, or into a new project when nothing is selected. Each project stores the Uniform Resource Locator (URL) of the Kubo API, a default load reference, the publish mode and a default IPNS key name. The modeler core also registers an IPFS URI handler, so references with \texttt{ipfs://} inside BPMN files load through Kubo.
+The Eclipse BPMN2 Modeler is a graphical tool for creating and editing BPMN diagrams~\cite{bpmn2modeler,omg2010bpmn}, built with Graphiti~\cite{graphiti}. IPFS support was added to version 1.5.4 of the modeler, and the modified plug-ins target Java~17. A menu named BPMN2 IPFS publishes the current model or every model of a project, by CID or under an IPNS name. The same menu opens a model or a whole project from a CID, an IPFS path or an IPNS reference. A third publish command performs the cascade of Section~\ref{sec:rq2-cascade} on BPMN imports. The command publishes the current model and then, in dependency order, a new version of every model that imports the current model by CID. The search covers the files of the project and the versions that these files pin on IPFS, and the new versions differ from the old ones only in the locations of their imports. A project publication adds a manifest in JavaScript Object Notation (JSON). The manifest maps each relative path to a CID and names the root model. Opening the project restores the files into a new folder, or into a new project when nothing is selected. Each project stores the Uniform Resource Locator (URL) of the Kubo API, a default load reference, the publish mode and a default IPNS key name. The modeler core also registers an IPFS URI handler, so references with \texttt{ipfs://} inside BPMN files load through Kubo.
 
-The modeler keeps the layout of a diagram inside the BPMN file as BPMN Diagram Interchange data, so a published model carries the layout. A CID does not record the name of the published file, so the modeler names a downloaded model after the model, for example after the name of the process. IPNS publishing needs a key name that already exists in the local Kubo node.
+The modeler keeps the layout of a diagram inside the BPMN file as BPMN Diagram Interchange data, so a published model carries the layout. A downloaded model goes to a folder named after its target namespace, so every version of a model lands in the same file of a project. A CID does not record the name of the published file, so a model without a namespace is named after its content, for example after the name of the process. IPNS publishing needs a key name that already exists in the local Kubo node.
 
 \subsection{Generated BPMN2 tree editor}\label{sec:tool-editor}
 
@@ -474,7 +474,7 @@ The measurements ran on a laptop with an Intel Core i7-1165G7 processor (four co
 
 The self-tests of the BPMN2 Modeler extension check reference parsing, the names given to downloaded models, command registration, bundle metadata and the documentation. An optional mode of the self-tests publishes a BPMN file to Kubo and downloads the file again. With a local Kubo~0.40.1 node, the self-tests and the round trip passed.
 
-A round trip of the 11,486 real BPMN models of Section~\ref{sec:evaluation-setup} tests the persistence layer beyond the tests. Every model went through seven persistence paths, each with a fresh load of the file and a fresh resource set for the save and for the load. Two paths store plain XMI, the format of \texttt{IPFSResourceImpl}: once in a local file and once through \texttt{IPFSResourceImpl} on the node. Two paths do the same with the EMF option for extended metadata, which lets XMI write the XML namespaces of the vendor extensions. Two further paths store BPMN~2.0 XML through the BPMN resource of Eclipse, again locally and on the node, where the second path adds the file to the node as the modeler publishes a file. The seventh path numbers every element without an identifier in document order before the BPMN save. After each load, a structural comparison checks the class, the set state and the value of every stored feature, including the entries of feature maps. A second save of a fresh load then shows whether the same model receives the same identifier. Table~\ref{tab:rq1-roundtrip} summarizes the results.
+A round trip of the 11,486 real BPMN models of Section~\ref{sec:evaluation-setup} tests the persistence layer beyond the tests. Every model went through seven persistence paths, each with a fresh load of the file and a fresh resource set for the save and for the load. Two paths store plain XMI, the format of \texttt{IPFSResourceImpl}: once in a local file and once through \texttt{saveIPFS} on the node. Two paths do the same with the EMF option for extended metadata, which lets XMI write the XML namespaces of the vendor extensions. Two further paths store BPMN~2.0 XML through the BPMN resource of Eclipse, again locally and on the node, where the second path adds the file to the node as the modeler publishes a file. The seventh path numbers every element without an identifier in document order before the BPMN save. After each load, a structural comparison checks the class, the set state and the value of every stored feature, including the entries of feature maps. A second save of a fresh load then shows whether the same model receives the same identifier. Table~\ref{tab:rq1-roundtrip} summarizes the results.
 
 \begin{table}[t]
 \caption{Round trip of 11,486 real BPMN models. Saved counts the successful saves, equal the loaded models that equal the saved model, and same CID the models whose second save gave the same CID, or the same digest on the local path. The local path and the IPFS path of a serialization gave the same outcome for every model, so each row covers both paths.}\label{tab:rq1-roundtrip}

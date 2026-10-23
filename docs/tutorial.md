@@ -6,9 +6,9 @@ This tutorial covers five tasks:
 2. Run the Eclipse BPMN2 Modeler with the ecorefs IPFS plug-ins.
 3. Create a BPMN model and save it to Kubo.
 4. Load a model from Kubo.
-5. Follow a change through references between models: the cascade, what it gets right and where it fails.
+5. Follow a change through references between models with the cascade, in the modeler and in the core plug-in, and see what it gets right and where it fails.
 
-The setup was used on 2026-10-22 with Ubuntu 24.04 (X11 desktop), OpenJDK 17.0.20.1, Eclipse 4.24 (2022-06), Docker with Compose, and Kubo 0.40.1.
+The setup was used on 2026-10-22 and 2026-10-23 with Ubuntu 24.04 (X11 desktop), OpenJDK 17.0.20.1, Eclipse 4.24 (2022-06), Docker with Compose, and Kubo 0.40.1.
 
 ## Contents
 
@@ -33,10 +33,13 @@ The setup was used on 2026-10-22 with Ubuntu 24.04 (X11 desktop), OpenJDK 17.0.2
   - [Open a whole project](#open-a-whole-project)
 - [Part 5. References between models: the cascade](#part-5-references-between-models-the-cascade)
   - [The case study](#the-case-study)
-  - [Run the cascade save](#run-the-cascade-save)
+  - [Open the case study in the modeler](#open-the-case-study-in-the-modeler)
+  - [Edit a model and publish it with cascade](#edit-a-model-and-publish-it-with-cascade)
+  - [When the cascade stops](#when-the-cascade-stops)
+  - [Run the cascade in the core plug-in](#run-the-cascade-in-the-core-plug-in)
   - [What works](#what-works)
   - [What goes wrong](#what-goes-wrong)
-    - [A plain save leaves stale references](#a-plain-save-leaves-stale-references)
+    - [A single publication leaves stale references](#a-single-publication-leaves-stale-references)
     - [The cascade grows with the graph](#the-cascade-grows-with-the-graph)
     - [Cycles cannot be fixed](#cycles-cannot-be-fixed)
     - [IPNS names avoid the cascade but give up the fixed version](#ipns-names-avoid-the-cascade-but-give-up-the-fixed-version)
@@ -218,7 +221,7 @@ Keep the default URL and `CID` mode. A node at another address can be set for th
 ### Publish the model
 
 1. Click into the diagram editor of `process_1.bpmn`.
-2. Choose **BPMN2 IPFS > Publish Current BPMN2 Model to IPFS**. The menu lists this command only while a BPMN editor is active.
+2. Choose **BPMN2 IPFS > Publish Current BPMN2 Model to IPFS**. The menu lists this command, and the variant with cascade that Part 5 uses, only while a BPMN editor is active.
 
    ![The BPMN2 IPFS menu with the diagram editor active](images/modeler-ipfs-menu-editor.png)
 
@@ -253,17 +256,19 @@ The IPNS record also reaches node 2 through the DHT of the private network, so n
 
    ![The dialog Open BPMN2 Model from IPFS with the CID of the payment model](images/modeler-open-model.png)
 
-The modeler fetches the BPMN file through Kubo, writes it into the selected folder or the active project and opens it in the BPMN2 editor. A model that was added to node 2 opens the same way, because node 1 fetches it from node 2. A temporary file is used only when no workspace location is active.
+The modeler fetches the BPMN file through Kubo and opens it in the BPMN2 editor. A model that was added to node 2 opens the same way, because node 1 fetches it from node 2.
 
-A CID does not record the name a file was published under, so the modeler names the file after the model. It takes the name of the definitions, of the collaboration or of the first process, or else the id of that process. A process left at `Default Process` with an id such as `Process_1` gets one of those placeholders, and the CID is used only when the model has no names at all. A reference that ends in a file name, such as `/ipfs/<cid>/order.bpmn`, keeps that name. When the name is taken, the modeler appends `-1`, `-2` and so on.
+The file goes into the project of the selected folder, in a folder named after the target namespace of the model. The payment model declares `targetNamespace="http://ecorefs.org/case-study/payment-process"`, so it lands at `ecorefs.org/case-study/payment-process/payment-process.bpmn`. A BPMN import names the model it imports by this namespace, and every version of a model keeps it, so every download of the payment model lands in the same file. When that file already holds the same bytes, the modeler just opens it. When it holds another version, for example one with changes that were never published, the modeler asks whether to replace the file or to open it as it is. A replaced file keeps its old contents in the local history (**Compare With > Local History**).
+
+A model without a target namespace goes into the selected folder instead. A CID does not record the name a file was published under, so the modeler then names the file after the model. It takes the name of the definitions, of the collaboration or of the first process, or else the id of that process. A process left at `Default Process` with an id such as `Process_1` gets one of those placeholders, and the CID is used only when the model has no names at all. A reference that ends in a file name, such as `/ipfs/<cid>/order.bpmn`, keeps that name. When the name is taken, the modeler appends `-1`, `-2` and so on. A temporary file is used only when no workspace location is active.
 
 The payment model has no diagram layout, so the editor first offers to create diagram elements for its process. Keep the selection and click **OK**.
 
 ![The dialog Missing Diagram Elements with the process Payment Process selected](images/modeler-missing-diagram-elements.png)
 
-The model then opens as `Payment Process.bpmn`, named after its process:
+The model then opens from its namespace folder:
 
-![The payment model opened as Payment Process.bpmn next to process_1.bpmn](images/modeler-open-model-result.png)
+![The payment model opened from example-01/ecorefs.org/case-study/payment-process/payment-process.bpmn, next to process_1.bpmn](images/modeler-open-model-result.png)
 
 ### Open the latest version by name
 
@@ -281,24 +286,24 @@ When nothing is selected and no BPMN editor is open, for example in an empty Pro
 
 ## Part 5. References between models: the cascade
 
-A model can refer to an element of another model. On IPFS, such a reference names the target model by its CID, for example `href="ipfs://QmTLbq…#PaymentProcess"`. Every change to a model gives it a new CID, so the models that refer to it keep pointing to the old version until they are saved again. Each of those saves gives the referring model a new CID too, and the change travels up the chain of references. This is the cascade. `IPFSModelPersister.cascadeSave` of the ecorefs core plug-in performs the saves.
+A model can refer to an element of another model. On IPFS, such a reference names the target model by its CID, for example `href="ipfs://QmTLbq…#PaymentProcess"`. Every change to a model gives it a new CID, so the models that refer to it keep pointing to the old version until they are saved again. Each of those saves gives the referring model a new CID too, and the change travels up the chain of references. This is the cascade. In the modeler, **BPMN2 IPFS > Publish Current BPMN2 Model to IPFS with Cascade** performs it for BPMN files. In the ecorefs core plug-in, `IPFSResourceImpl.saveIPFSCascaded` performs it for EMF resources.
 
-This part needs node 1 of Part 1, a JDK 11 or newer and Maven. The commands run from the root of the ecorefs repository. The core plug-in stores models as XMI, so the files on IPFS are the XMI form of the BPMN models.
+This part needs node 1 of Part 1 and the modeler of Part 2. The section on the core plug-in also needs a JDK 11 or newer and Maven. The commands run from the root of the ecorefs repository.
 
 ### The case study
 
 The folder `examples/case-study` holds three BPMN models. `payment-process.bpmn` stands alone, and `order-process.bpmn` imports the payment process. After Reserve Item, the order process sends a payment request in the send task Request Payment and waits in the message event Payment Confirmed before Package and Ship. In `collaboration.bpmn`, the participant Seller runs the order process and the participant Payment Provider runs the payment process. Two message flows connect the two processes: Payment request goes from Request Payment to Validate Card Details, and Payment confirmation goes from Issue Receipt back to Payment Confirmed. Two reference paths therefore lead from the collaboration to the payment process.
 
-The files refer to each other through BPMN imports. An import binds a namespace to a file, and an `xmlns` prefix for that namespace lets a reference name an element of the file. The collaboration starts like this:
+The files refer to each other through BPMN imports. An import binds a namespace to the published version of a file, named by its CID, and an `xmlns` prefix for that namespace lets a reference name an element of the file. The collaboration starts like this:
 
 ```xml
 <bpmn2:definitions ...
     xmlns:order="http://ecorefs.org/case-study/order-process"
     xmlns:payment="http://ecorefs.org/case-study/payment-process" ...>
   <bpmn2:import importType="http://www.omg.org/spec/BPMN/20100524/MODEL"
-      location="order-process.bpmn" namespace="http://ecorefs.org/case-study/order-process"/>
+      location="ipfs://QmRUrbPL9EVJtnD4RbCheANmQjEpMzcEsE5t8bgvW8utij" namespace="http://ecorefs.org/case-study/order-process"/>
   <bpmn2:import importType="http://www.omg.org/spec/BPMN/20100524/MODEL"
-      location="payment-process.bpmn" namespace="http://ecorefs.org/case-study/payment-process"/>
+      location="ipfs://QmSuDF8o9WhaJG2axWcQpWtkJurEuy6JbaKAAsp753agt5" namespace="http://ecorefs.org/case-study/payment-process"/>
   <bpmn2:collaboration id="Collaboration_ECommerce" name="E-Commerce Collaboration">
     <bpmn2:participant id="Participant_Seller" name="Seller" processRef="order:OrderFulfillmentProcess"/>
     <bpmn2:participant id="Participant_PaymentProvider" name="Payment Provider" processRef="payment:PaymentProcess"/>
@@ -306,33 +311,111 @@ The files refer to each other through BPMN imports. An import binds a namespace 
         sourceRef="order:Task_RequestPayment" targetRef="payment:Task_ValidateCard"/>
 ```
 
-The diagram part of the collaboration uses the same prefixes. A shape with `bpmnElement="order:Task_ReserveItem"` draws a task of `order-process.bpmn` inside the Seller pool. Each process therefore stays defined in its own file, and the collaboration holds only the participants, the message flows and the layout. `order-process.bpmn` imports `payment-process.bpmn` in the same way, but none of its elements refers into that file: the import itself is the link between the two processes. Once the models are saved to IPFS, each of these references names its target by CID instead of a prefix.
+The diagram part of the collaboration uses the same prefixes. A shape with `bpmnElement="order:Task_ReserveItem"` draws a task of `order-process.bpmn` inside the Seller pool. Each process therefore stays defined in its own file, and the collaboration holds only the participants, the message flows and the layout. `order-process.bpmn` imports `payment-process.bpmn` in the same way, but none of its elements refers into that file: the import itself is the link between the two processes. When the core plug-in stores the models as XMI, each of these references names its target by CID instead of a prefix.
 
-The import locations follow the references. EMF treats a location as plain text, so the save needs an updater for BPMN imports in its options:
+The files in `examples/case-study` are published versions themselves. The payment process was published first, then the order process with the CID of the payment process in its import, and the collaboration last with both CIDs. A file read from IPFS can therefore find its imports on IPFS too. Node 1 has to hold the three files before the modeler opens them, and adding them gives the CIDs in the imports, because the CID follows from the bytes:
+
+```bash
+for model in payment-process order-process collaboration; do
+  curl -s -X POST -F "file=@examples/case-study/$model.bpmn" http://127.0.0.1:5001/api/v0/add
+done
+```
+
+### Open the case study in the modeler
+
+1. Create a project for the case study: **File > New > Project > General > Project**, named `case-study`.
+2. Select `case-study`, choose **BPMN2 IPFS > Open BPMN2 Model from IPFS**, enter the CID of the collaboration, `QmeKugsytfzkk1JZr8SUv7pFoGWPRpox3sE5eJK6ieZZUc`, and click **OK**.
+
+As in Part 4, the modeler stores the collaboration in the folder of its namespace, `ecorefs.org/case-study/collaboration/collaboration.bpmn`. The editor reads the two imports and loads the order process and the payment process from IPFS, by the CIDs in their locations. It draws both processes inside the pools Seller and Payment Provider, with the two message flows between them, although neither process is in the project. The screenshots of this part use the zoom 75% of the toolbar and a minimized **Tasks** view.
+
+![The collaboration opened from IPFS into ecorefs.org/case-study/collaboration, with the two processes loaded by CID](images/modeler-cascade-open-collaboration.png)
+
+The modeler therefore loads from two places. The file in the editor is a working copy in the workspace. An import with an `ipfs://` location always loads the version it names from IPFS, even when the workspace holds a working copy of that model. An import with a relative location, such as `payment-process.bpmn`, loads the file next to the importing file instead.
+
+### Edit a model and publish it with cascade
+
+To change the payment process, download it first and edit the working copy:
+
+1. Choose **BPMN2 IPFS > Open BPMN2 Model from IPFS** and enter the location of the payment import, `ipfs://QmSuDF8o9WhaJG2axWcQpWtkJurEuy6JbaKAAsp753agt5`. The model goes to `ecorefs.org/case-study/payment-process/payment-process.bpmn`. It has no diagram layout, so click **OK** in **Missing Diagram Elements**, as in Part 4.
+2. Rename the task Validate Card Details to Check Card Details: select it, press F2, type the name and click outside the box.
+3. Save with Ctrl+S. On the first save in a plain project, the modeler offers to add the BPMN2 nature. Click **Yes**.
+
+![The payment process after the rename, with the namespace folders of both models in the Project Explorer](images/modeler-cascade-edit-payment.png)
+
+Save writes the working copy only. The collaboration still imports the payment process by its old CID, so its editor still shows Validate Card Details:
+
+![The collaboration after the save: the pool Payment Provider still shows Validate Card Details](images/modeler-cascade-collaboration-before.png)
+
+To carry the change to the collaboration, click into the editor of the payment process and choose **BPMN2 IPFS > Publish Current BPMN2 Model to IPFS with Cascade**. The command saves the open models of the project and then looks for the models that import the payment process by CID: in the BPMN files of the project, and in the versions that those files pin on IPFS. An import refers to the payment process when it names the namespace of the payment process. Before it publishes anything, the command lists the models that will get a new version:
+
+![The confirmation lists the order process, which exists only on IPFS, and the collaboration](images/modeler-cascade-confirm.png)
+
+The order process is on the list although the project holds no copy of it. The collaboration pins it by CID, and that version of the order process imports the payment process by CID in turn. Without a new version of the order process, the collaboration would load two versions of the payment process: the new one through its own import, and the old one through the order process.
+
+Click **OK**. The command publishes the payment process first, then the order process and the collaboration last, so every new version names the new CIDs of the models it imports. A new version differs from the old one only in the `location` of its imports. The working copy of the collaboration gets the new locations written into its file, and its comments and layout stay as they were. The order process has no working copy, so the command publishes its new version from the pinned bytes. The dialog lists every publication with its new CID and the import locations that changed:
+
+![The result: the payment process, the order process and the collaboration with their new CIDs, and every changed import location with its old and new CID](images/modeler-cascade-result.png)
+
+The editor of a rewritten file is closed before the change and opened again afterwards, because the editor keeps the model it loaded and would write the old locations back on its next save. The reopened collaboration loads the new versions and shows Check Card Details:
+
+![The collaboration after the cascade: the pool Payment Provider shows Check Card Details](images/modeler-cascade-collaboration-after.png)
+
+A comparison of the working copy with the published file in the repository shows the two changed locations and nothing else:
+
+```bash
+diff examples/case-study/collaboration.bpmn <workspace>/case-study/ecorefs.org/case-study/collaboration/collaboration.bpmn
+```
+
+```
+27c27
+<       location="ipfs://QmRUrbPL9EVJtnD4RbCheANmQjEpMzcEsE5t8bgvW8utij" namespace="http://ecorefs.org/case-study/order-process"/>
+---
+>       location="ipfs://bafkreigy3or7dqpzfess5mdgfi4hvcdhh4klzucpciny6lz554curzx6ya" namespace="http://ecorefs.org/case-study/order-process"/>
+29c29
+<       location="ipfs://QmSuDF8o9WhaJG2axWcQpWtkJurEuy6JbaKAAsp753agt5" namespace="http://ecorefs.org/case-study/payment-process"/>
+---
+>       location="ipfs://bafkreid7ocpyrf2p726tuyo6lvfmvefnnip6ghmwfja4l2xkie7rhl7gpq" namespace="http://ecorefs.org/case-study/payment-process"/>
+```
+
+The new CIDs start with `bafk`, because the modeler adds files as CIDv1, while the files in `examples/case-study` were added as CIDv0 and start with `Qm`. Both forms work in import locations. The same edit gives the same CIDs on every run, because a CID follows from the bytes.
+
+### When the cascade stops
+
+The command checks the whole cascade before it publishes or writes anything. It stops, and changes nothing, in three cases:
+
+- Two files of the project declare the namespace of the published model. The imports of that namespace could mean either file.
+- An affected import pins a version that differs from the working copy of that model in the project. After the cascade above, open the old order process, `QmRUrbPL9EVJtnD4RbCheANmQjEpMzcEsE5t8bgvW8utij`, which puts a working copy of it into `ecorefs.org/case-study/order-process`, and publish the payment process with cascade again. The collaboration now pins the new order process, the working copy holds the old one, and the command cannot tell which of the two should carry the change:
+
+  ![The cascade stops because the collaboration pins another version of the order process than the working copy](images/modeler-cascade-refused.png)
+
+  Publish the working copy first, or delete it if it is not needed.
+- Models import each other by CID. No version of either can contain the new CID of the other, as [Cycles cannot be fixed](#cycles-cannot-be-fixed) explains.
+
+The cascade reaches the models of the project and the versions they pin. IPFS cannot list the other models that import a CID, so a model outside the project keeps its old imports until its owner runs the cascade.
+
+### Run the cascade in the core plug-in
+
+The core plug-in stores models as XMI, so the files that it puts on IPFS are the XMI form of the BPMN models. Its cascade rewrites the references, and the import locations have to follow them. EMF treats a location as plain text, so the publication needs an updater for BPMN imports in its options:
 
 ```java
 Map<String, Object> options = Map.of(IPFSResourceOptions.LOCATION_UPDATERS, List.of(
         new NamespaceImportLocations(Bpmn2Package.Literals.IMPORT__NAMESPACE,
                 Bpmn2Package.Literals.IMPORT__LOCATION,
                 Bpmn2Package.Literals.DEFINITIONS__TARGET_NAMESPACE)));
-IPFSModelPersister.cascadeSave(payment, options);
+payment.saveIPFSCascaded(options);
 ```
 
-Before each save, the updater finds the model that declares the namespace of an import and writes its URI into the location: `location="ipfs://<CID>"` in CID mode and `location="ipns://<name>"` in IPNS mode. The cascade also follows imports like references, so a new version of the payment process reaches the order process through its import alone. The files in `examples/case-study` keep their file names, because a CID exists only after a save. The copies that the run below stores on IPFS are in [`examples/case-study/ipfs`](../examples/case-study/ipfs), where every import location names a CID.
+Before each publication, the updater finds the model that declares the namespace of an import and writes its URI into the location: `location="ipfs://<CID>"` in CID mode and `location="ipns://<name>"` in IPNS mode. The cascade also follows imports like references, so a new version of the payment process reaches the order process through its import alone.
+
+The test below maps the CIDs in the imports of `examples/case-study` to the local files, so it reads the models from the repository. The copies that it stores on IPFS are in [`examples/case-study/ipfs`](../examples/case-study/ipfs), in the XMI of the core plug-in.
 
 ![The three models before the change: each refers to the CIDs of the models below it](images/cascade-before.png)
-
-To look at the models, copy the three files into one project of the modeler, for example `case-study`, and open them. The two process files carry no diagram layout, so their editors first offer to create the diagram elements. The collaboration draws both processes inside the pools Seller and Payment Provider, with the two message flows between them. To see the three editors at once, drag an editor tab to the lower edge of the editor area, and Eclipse splits the area.
-
-![The case-study project in the modeler: the payment process and the order process at the top, and below them the collaboration, which draws both processes in the pools Seller and Payment Provider](images/eclipse-case-study-models.png)
-
-### Run the cascade save
 
 ```bash
 mvn -q -f core-plugin/pom.xml test -Dtest=BpmnCaseStudyCascadeTest
 ```
 
-The test loads the three files, saves them to node 1 with the options above, changes the name of the payment process and calls `cascadeSave` on it. It prints the CIDs before and after the change:
+The test loads the three files, publishes them to node 1 with `saveIPFS` and the options above, changes the name of the payment process and calls `saveIPFSCascaded` on it. It prints the CIDs before and after the change:
 
 ```
 [case study] before the change
@@ -368,9 +451,9 @@ One change gave all three models a new CID. The cascade saves in dependency orde
 
 ### What goes wrong
 
-#### A plain save leaves stale references
+#### A single publication leaves stale references
 
-`resource.save()` saves one resource. The models that refer to it keep the old CID until someone runs the cascade. The commands below play such a save: they take the payment process, change its name, add it again and look at the order process.
+`resource.saveIPFS()` publishes one resource. The models that refer to it keep the old CID until someone runs the cascade with `saveIPFSCascaded()`. A plain `resource.save()` is the normal EMF save and writes to the location of the resource URI, so it fails for an `ipfs://` URI, whose content cannot change. The commands below play such a save: they take the payment process, change its name, add it again and look at the order process.
 
 ```bash
 PAYMENT=QmTLbqPgHxUmS82rDLDCKgrncmkdHi9J6nQu38KT8AE3PJ
@@ -387,7 +470,7 @@ The third version of the payment process gets the CID `Qmcjxb3ct1NaLvPTLt1hqBnQw
 location="ipfs://QmTLbqPgHxUmS82rDLDCKgrncmkdHi9J6nQu38KT8AE3PJ"
 ```
 
-The BPMN2 Modeler of Parts 3 and 4 behaves the same way. Its publish commands upload the models you choose and rewrite no references in other models.
+**Publish Current BPMN2 Model to IPFS** in the modeler behaves the same way: it uploads one model and rewrites no imports in other models. The command with cascade of this part does.
 
 #### The cascade grows with the graph
 
@@ -442,7 +525,7 @@ docker exec ecorefs-kubo-2 ipfs name resolve --nocache <name>
 
 `<name>` is the `k51…` name that the publish command prints. Node 2 first resolves the name to the second version and, after the new publication, to the third, without any new save of the referring models. However, a model that refers to `ipns://<name>#PaymentProcess` no longer pins the version it was saved with. An old copy of the order process now resolves to the newest payment process, so it no longer reproduces the earlier state. The name also works only while the node that holds its key keeps republishing the record.
 
-| | References by CID with `cascadeSave` | References by IPNS name |
+| | References by CID with `saveIPFSCascaded` | References by IPNS name |
 |---|---|---|
 | Referring models after a change | Need new saves, which the cascade performs | Stay unchanged |
 | Old versions | Stay reproducible | Resolve to the newest version |
@@ -461,6 +544,7 @@ The two modes match the two kinds of versions in Maven. A reference by CID behav
 - **Eclipse or Maven runs on the wrong Java.** Check `java -version`, `echo $JAVA_HOME` and the `-vm` lines in `eclipse.ini`. All three should point to Java 17.
 - **Publishing fails with "Connection refused".** Kubo is not running. Start it with `docker compose -f docker/kubo/compose.yaml start` and check the API with the `curl` command of Part 1.
 - **IPNS publishing asks for a key name.** Set **Default IPNS publish key name** in the project properties, and make sure the key exists: `docker exec ecorefs-kubo ipfs key list`.
+- **Publish with cascade reports that a working copy holds a different version.** An import pins a version of a model whose working copy in the project has other content, for example changes that were never published. Publish that working copy first, or delete it. [When the cascade stops](#when-the-cascade-stops) shows an example.
 - **Opening `collaboration.bpmn` reports "Cannot load Resource" for `payment-process.bpmn`.** Older builds of the modeler fork look for an imported file in the working directory of Eclipse instead of the folder of the importing file. Pull the modeler repository, which resolves import locations against the importing file, let Eclipse rebuild it, and start the runtime again.
 
 ## Next steps

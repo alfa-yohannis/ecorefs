@@ -2,6 +2,17 @@
 % Standalone TikZ source; build.sh compiles the file to publication-layers.pdf.
 % Sized for one column (at most 216pt wide), so the figure prints without scaling.
 \documentclass[tikz,border=2pt]{standalone}
+% All text is Times New Roman, as in the UML figures, and \texttt and \textsf
+% print in it too. fontspec loads the system font, so the file compiles with
+% LuaLaTeX. Math takes its digits from Times New Roman and its other symbols,
+% such as the minus sign, from TeX Gyre Termes Math.
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\setsansfont{Times New Roman}
+\setmonofont{Times New Roman}
+\usepackage{unicode-math}
+\setmathfont{TeX Gyre Termes Math}
+\setmathfont[range=up/num]{Times New Roman}
 \usetikzlibrary{arrows.meta,calc}
 
 \definecolor{ink}{HTML}{0B0B0B}

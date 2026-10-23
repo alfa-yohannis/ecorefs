@@ -16,7 +16,8 @@ class IPFSResourceFactoryImpl <<ecorefs>> {
   +createResource(uri)
 }
 class IPFSResourceImpl <<ecorefs>> {
-  +save(options)
+  +saveIPFS(options)
+  +saveIPFSCascaded(options)
 }
 class XMIResourceImpl <<EMF>>
 class URIHandlerImpl <<EMF>>

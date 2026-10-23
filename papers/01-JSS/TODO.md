@@ -121,7 +121,27 @@ The drivers are `eval/bpmn-rq1` and `eval/bpmn-rq2`, with shared classes in `eva
 ## 4. Manuscript items already flagged
 
 - [x] P1 S. Report the output of `BpmnIpfsExample` and of the modeler self-tests with a running Kubo node (`\todo` in `sec:evaluation-rq1`), or let the real-model round trip replace the example. The modeler self-tests pass with `--integration` against Kubo 0.40.1 (2026-10-22). Done on 2026-10-23: the round trip of the real models replaced the example program in `sec:evaluation-rq1`, and the `\todo` is gone.
-- [ ] P1 S. Fix `examples/BpmnIpfsExample.java`, which prints hard-coded CIDs and a `creditCheckRef` that does not exist, and loads `.bpmn` files with the XMI factory.
+- [x] P1 S. Fix `examples/BpmnIpfsExample.java`, which prints hard-coded CIDs and a `creditCheckRef` that does not exist, and loads `.bpmn` files with the XMI factory. Done on 2026-10-23:
+  - **Loading:** the example loads the two models with the BPMN resource of Eclipse.
+  - **Real reference:** the order model gains a collaboration whose bank participant runs the loan process, a reference across the two resources.
+  - **The three saves:** `save`, `saveIPFS` and `saveIPFSCascaded`, followed by a load by CID that resolves the reference. Every printed CID is real.
+  - **Input file:** `order-fulfillment.bpmn` lost an XMI-style `supports href` with a made-up CID, which BPMN XML cannot express.
+  - **Running:** `bash examples/run-bpmn-ipfs-example.sh` compiles and runs the example against the node on port 5001.
+- [x] P1 S. Separate the normal save from the publication on IPFS (the author's request on 2026-10-23). Done:
+  - **`save()`** of `IPFSResourceImpl` is the normal EMF save to the location of the URI.
+  - **`saveIPFS()`** publishes on IPFS and sets the URI to `ipfs://<CID>` (or `ipns://`) as before.
+  - **`saveIPFSCascaded()`** runs the cascade of `IPFSModelPersister`, which now publishes IPFS resources with `saveIPFS()`.
+  - **A normal save to an `ipfs://` URI** fails with a message that names `saveIPFS()`.
+  - **Callers moved:** the core tests, the publish tool, the evaluation drivers (bpmn-rq1, bpmn-rq2, baselines, multinode), the tutorial, the README, the paper text and four figures (architecture, save, lifecycle, version pinning).
+  - **New test:** `IPFSResourceSaveModesTest` checks both save modes without a node.
+  - **Checks:** the core tests pass, and reruns of the call graphs (538 changes), 200 split models and 30 round-trip models give the same outcomes as before.
+- [x] P1 S. Let the modeler carry a change through imports by CID (the author's request on 2026-10-23). Done in the modeler fork:
+  - **Publish with cascade:** a new command, **Publish Current BPMN2 Model to IPFS with Cascade**, publishes the current model and gives every model that imports it by CID a new version. It finds them among the BPMN files of the project and among the versions those files pin on IPFS. Only import locations change, and the editors of rewritten files are reopened.
+  - **Namespace folders:** **Open BPMN2 Model from IPFS** stores a model in the folder of its target namespace, for example `ecorefs.org/case-study/payment-process/payment-process.bpmn`, so each model has one working copy per project.
+  - **Refusals:** the cascade stops before it changes anything when two files declare the namespace of the published model, when a pinned version differs from the working copy of its model, or when models import each other.
+  - **Checks:** `IPFSImportCascadeSelfTest`, with an in-memory store and on Kubo, and a run of the case study in the modeler on a nested display.
+  - **Tutorial:** Parts 3 to 5 describe both commands, with two retaken and seven new screenshots.
+  - **Paper:** `sec:tool-modeler` now describes the command and the namespace folders, and the paper stays at 18 pages.
 - [ ] P1 S. Fix the dependency scan of the cascade (`ResourceDependencyGraph`), found by the MoDisco analysis. It has two gaps with cross-resource containment, which the MoDisco partition uses for `Model.compilationUnits`:
   - It skips containment references, although a containment proxy stores the URI of its target like any other reference.
   - `resource.getAllContents()` walks into children that live in other resources and credits their references to the container's resource.

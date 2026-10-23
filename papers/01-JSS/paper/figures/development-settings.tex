@@ -5,6 +5,17 @@
 % Standalone TikZ source. The colors match the other figures: grey for mutable
 % files, blue for immutable blocks and orange for a mutable name.
 \documentclass[tikz,border=2pt]{standalone}
+% All text is Times New Roman, as in the UML figures, and \texttt and \textsf
+% print in it too. fontspec loads the system font, so the file compiles with
+% LuaLaTeX. Math takes its digits from Times New Roman and its other symbols,
+% such as the minus sign, from TeX Gyre Termes Math.
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\setsansfont{Times New Roman}
+\setmonofont{Times New Roman}
+\usepackage{unicode-math}
+\setmathfont{TeX Gyre Termes Math}
+\setmathfont[range=up/num]{Times New Roman}
 \usetikzlibrary{arrows.meta,calc,shapes.geometric,shapes.symbols}
 
 \definecolor{ink}{HTML}{0B0B0B}

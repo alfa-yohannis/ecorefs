@@ -106,7 +106,7 @@ Metrics:
 
 | Metric | What it captures |
 | --- | --- |
-| Save latency (ms) | Time from `resource.save()` to the returned CID |
+| Save latency (ms) | Time from `resource.saveIPFS()` to the returned CID |
 | Load latency (ms) | Time from `resource.load()` with a CID to a fully resolved EObject tree |
 | Throughput | Models saved or loaded per second |
 | Scalability | Growth of latency with model size (number of EObjects, depth of the containment tree) |
@@ -166,6 +166,7 @@ The first five items come from a review of the current draft. The draft reads as
 - [ ] Build the modeler with Tycho. The BPMN2 update site in the build file is no longer available, and `releases/2022-06` carries the same bundles.
 - [x] Let the modeler fork open an IPFS project when the Project Explorer is empty, by creating a workspace project for it, and name downloaded models after their content instead of their CID. This item is not in the manuscript.
 - [x] Resolve relative BPMN import locations in the modeler fork against the importing file. `ImportUtil` read them from the working directory of Eclipse, so the collaboration of the case study failed with "Cannot load Resource". This item is not in the manuscript.
+- [x] Add **Publish Current BPMN2 Model to IPFS with Cascade** to the modeler fork. It publishes a model and gives every model that imports it by CID a new version, and **Open BPMN2 Model from IPFS** now stores a model in the folder of its target namespace. Part 5 of the tutorial shows both on the case study. This item is not in the manuscript.
 - [ ] Report the output of `BpmnIpfsExample` and of the modeler self-tests against a running Kubo node. The modeler self-tests pass against Kubo 0.40.1 with `tests/ipfs-ui/run-ipfs-ui-tests.sh --integration`, so the run of `BpmnIpfsExample` and the report in the manuscript remain.
 - [x] Attach the MoDisco test reports in `eval/results/modisco-case-study`, together with the byte-level check results and the measured load and traversal times.
 - [ ] Archive the MoDisco dataset (1.04 GiB) and the published CIDs under a DOI for the data availability statement.
@@ -182,10 +183,10 @@ The first five items come from a review of the current draft. The draft reads as
 
 | Class | Role |
 | --- | --- |
-| `IPFSResourceImpl` | Extends `XMIResourceImpl`. A save writes the XMI to a temporary file, adds the file to Kubo, and sets the resource URI to `ipfs://<CID>`. In IPNS mode, the save publishes the CID under an IPNS key and sets the URI to `ipns://<key id>`. |
+| `IPFSResourceImpl` | Extends `XMIResourceImpl`. `save()` is the normal EMF save to the location of the resource URI, for example a local file. `saveIPFS()` writes the XMI to a temporary file, adds the file to Kubo, and sets the resource URI to `ipfs://<CID>`; in IPNS mode it publishes the CID under an IPNS key and sets the URI to `ipns://<key id>`. `saveIPFSCascaded()` publishes the resource together with every resource that refers to it. |
 | `IPFSResourceFactoryImpl` | Creates `IPFSResourceImpl` instances for `ipfs://` URIs. |
 | `IPFSURIHandlerImpl` | Added to the URI converter of a `ResourceSet`. The handler reads `ipfs://`, `ipns://`, `http://` and `https://` URIs during `load()`. |
-| `IPFSModelPersister` | Provides `cascadeSave(Resource, Map)`, described below. |
+| `IPFSModelPersister` | Implements the cascade behind `saveIPFSCascaded()` as `cascadeSave(Resource, Map)`, described below. |
 | `ResourceDependencyGraph` | Builds the graph of the references between the resources of a `ResourceSet` and plans the save order of a cascade. |
 | `ReferenceMode`, `IPFSResourceOptions` | The save option `IPFSResourceOptions.REFERENCE_MODE` selects `ReferenceMode.CID` (default) or `ReferenceMode.IPNS`. The option `IPFSResourceOptions.LOCATION_UPDATERS` adds updaters of location attributes. |
 | `LocationAttributeUpdater`, `NamespaceImportLocations` | Keep an attribute that names another resource by its location, such as the location of a BPMN import, in step with the URI of that resource. |
@@ -194,15 +195,15 @@ Two command-line tools, `IPFSModelPublishTool` and `IPFSVersionManifestPublisher
 
 ### Cascade save and reference modes
 
-`resource.save()` saves one resource and gives the resource a new CID. Resources that still reference the old CID stay unchanged. `IPFSModelPersister.cascadeSave()` performs a deliberate upgrade, similar to a Git commit that updates every tree above a changed file:
+`resource.saveIPFS()` publishes one resource and gives the resource a new CID. Resources that still reference the old CID stay unchanged. `resource.saveIPFSCascaded()` performs a deliberate upgrade, similar to a Git commit that updates every tree above a changed file:
 
-1. Save the changed resource. The save assigns the new CID to the resource URI.
+1. Publish the changed resource with `saveIPFS()`, which assigns the new CID to the resource URI.
 2. Let `ResourceDependencyGraph` find every resource in the `ResourceSet` that reaches the saved resource through references.
-3. Save those resources in dependency order, so each resource is stored after the resources that it references. The rewritten `href`s point to the new CIDs, because EMF serializes a reference with the current URI of the target.
+3. Publish those resources in dependency order, so each resource is stored after the resources that it references. The rewritten `href`s point to the new CIDs, because EMF serializes a reference with the current URI of the target.
 
 In a cycle, the order puts one resource of the cycle first, so the cascade ends, but one direction of the cycle keeps an old CID (see [Circular references](#circular-references)).
 
-Some metamodels keep the location of another model in a plain attribute, such as the `location` of a BPMN import. EMF writes such an attribute as text, so a stored import would keep the file name. `NamespaceImportLocations`, passed in the save option `IPFSResourceOptions.LOCATION_UPDATERS`, writes the URI of the imported resource into the location before every save: `ipfs://<CID>` in CID mode and `ipns://<name>` in IPNS mode. The dependency graph then counts an import like a reference. `BpmnCaseStudyCascadeTest` uses the updater for the three BPMN files of the case study.
+Some metamodels keep the location of another model in a plain attribute, such as the `location` of a BPMN import. EMF writes such an attribute as text, so a stored import would keep the file name. `NamespaceImportLocations`, passed in the save option `IPFSResourceOptions.LOCATION_UPDATERS`, writes the URI of the imported resource into the location before every publication with `saveIPFS()`: `ipfs://<CID>` in CID mode and `ipns://<name>` in IPNS mode. A normal `save()` leaves the locations as they are. The dependency graph then counts an import like a reference. `BpmnCaseStudyCascadeTest` uses the updater for the three BPMN files of the case study.
 
 | Mode | Behavior | Trade-off |
 | --- | --- | --- |
@@ -215,7 +216,7 @@ Some metamodels keep the location of another model in a plain attribute, such as
 | --- | --- |
 | `eval/custom_generator` (`ecorefs.generator.ModelGenerator`) | Generates EMF component trees with 100, 1k, 10k, 100k and 500k objects for latency tests |
 | `core-plugin/src/test/java/org/ecorefs/ipfs/FastPerformanceBenchmarkTest.java` | RQ3 benchmark: XMI file saves and loads against IPFS for 100 to 10,000 elements, with 3 warm-up and 10 measured iterations |
-| `core-plugin/src/test/java/org/ecorefs/ipfs/MultiFileCascadeTest.java` | RQ2 test: builds two resources A and B at runtime, with A referring to B, runs `cascadeSave(B)` and records the latency |
+| `core-plugin/src/test/java/org/ecorefs/ipfs/MultiFileCascadeTest.java` | RQ2 test: builds two resources A and B at runtime, with A referring to B, runs `saveIPFSCascaded()` on B and records the latency |
 | `eval/modisco_jdt_reverse/` | MoDisco models of Eclipse JDT, partitioning and IPFS publication (see its [README](eval/modisco_jdt_reverse/README.md)) |
 
 Results:
@@ -274,7 +275,7 @@ The same content added with the same IPFS settings produces the same CID, indepe
 
 ### Circular references
 
-`cascadeSave` terminates on circular dependencies (A referring to B and B referring to A), because `ResourceDependencyGraph` breaks the cycle when it plans the save order. One direction of the cycle still keeps an outdated CID, and `CascadeReferenceIntegrityTest#leavesOneDirectionOfACycleOutdated` shows it. CDO and NeoEMF do not face the problem, because their references use mutable identifiers on the server.
+`saveIPFSCascaded` terminates on circular dependencies (A referring to B and B referring to A), because `ResourceDependencyGraph` breaks the cycle when it plans the save order. One direction of the cycle still keeps an outdated CID, and `CascadeReferenceIntegrityTest#leavesOneDirectionOfACycleOutdated` shows it. CDO and NeoEMF do not face the problem, because their references use mutable identifiers on the server.
 
 ### Limitations
 
@@ -292,8 +293,8 @@ CDO and NeoEMF remain the better choice for performance and queries. The IPFS ap
 
 The BPMN2 work lives in separate repositories:
 
-- [org.eclipse.bpmn2-modeler-1.5.4-ecorefs](https://github.com/alfa-yohannis/org.eclipse.bpmn2-modeler-1.5.4-ecorefs): Eclipse BPMN2 Modeler 1.5.4 with commands to open and publish BPMN models on IPFS
+- [org.eclipse.bpmn2-modeler-1.5.4-ecorefs](https://github.com/alfa-yohannis/org.eclipse.bpmn2-modeler-1.5.4-ecorefs): Eclipse BPMN2 Modeler 1.5.4 with commands to open and publish BPMN models on IPFS, including a publication with cascade
 - [org.eclipse.bpmn2-ecorefs](https://github.com/alfa-yohannis/org.eclipse.bpmn2-ecorefs): Eclipse BPMN 2.0 Metamodel with a generated tree editor that reads `ipfs://` and `ipns://` URIs
 - [eclipse-mcp](https://github.com/alfa-yohannis/eclipse-mcp): an Eclipse plug-in that lets an AI assistant such as Claude Code, or a script, drive the IDE and edit BPMN2 diagrams
 
-[docs/tutorial.md](docs/tutorial.md) walks through the first two: it starts a Kubo node, launches the modeler from an Eclipse IDE, and publishes and opens BPMN models on IPFS. [docs/eclipse-mcp.md](docs/eclipse-mcp.md) installs eclipse-mcp into the same IDE and activates it in the modeler.
+[docs/tutorial.md](docs/tutorial.md) walks through the first two: it starts a Kubo node, launches the modeler from an Eclipse IDE, publishes and opens BPMN models on IPFS, and carries a change through BPMN imports with the cascade. [docs/eclipse-mcp.md](docs/eclipse-mcp.md) installs eclipse-mcp into the same IDE and activates it in the modeler.

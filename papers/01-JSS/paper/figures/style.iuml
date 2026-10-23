@@ -1,6 +1,12 @@
 ' Shared look for the UML figures of the manuscript.
 ' Neutral ink on white, one light accent for ecorefs elements, no shadows.
-skinparam defaultFontName "DejaVu Sans"
+' All text is Times New Roman, like the TikZ figures and the Times body text of
+' the paper. The letter in the circle of a class or an enum ignores
+' defaultFontName, so it names the font again. PlantUML sizes every box with
+' the font that Java finds and silently falls back to a sans font, so build.sh
+' checks that Java finds Times New Roman before it draws anything.
+skinparam defaultFontName "Times New Roman"
+skinparam CircledCharacterFontName "Times New Roman"
 skinparam defaultFontSize 12
 skinparam shadowing false
 skinparam roundCorner 6

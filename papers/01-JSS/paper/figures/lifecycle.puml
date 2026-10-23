@@ -1,21 +1,22 @@
 @startuml lifecycle
-' UML state machine: the URI of an IPFSResourceImpl across saves.
+' UML state machine: the URI of an IPFSResourceImpl across publications.
 ' Internal transitions (event / effect) inside the states keep the diagram one column wide.
 !include style.iuml
 hide empty description
 skinparam defaultFontSize 11
 
-state "Unsaved" as Unsaved
-Unsaved : URI = ipfs://pending
+state "Unpublished" as Unsaved
+Unsaved : URI = local file or ipfs://pending
+Unsaved : save() / writes the local file
 state "Stored by CID" as Stored
 Stored : URI = ipfs://<CID>
-Stored : save() / new CID, new URI
+Stored : saveIPFS() / new CID, new URI
 state "Published by IPNS name" as Published
 Published : URI = ipns://<key id>
-Published : save() / new CID, same URI
+Published : saveIPFS() / new CID, same URI
 
 [*] -down-> Unsaved : create
-Unsaved -right-> Stored : save()\n[CID mode]
-Unsaved -up-> Published : save()\n[IPNS mode]
+Unsaved -right-> Stored : saveIPFS()\n[CID mode]
+Unsaved -up-> Published : saveIPFS()\n[IPNS mode]
 Published -[hidden]down-> Stored
 @enduml

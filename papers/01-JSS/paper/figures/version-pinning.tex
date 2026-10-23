@@ -4,6 +4,17 @@
 % centered over that width, so panel (a) and panel (b) line up.
 % Positions use explicit anchors, because the positioning keys reset the anchor.
 \documentclass[tikz,border=2pt]{standalone}
+% All text is Times New Roman, as in the UML figures, and \texttt and \textsf
+% print in it too. fontspec loads the system font, so the file compiles with
+% LuaLaTeX. Math takes its digits from Times New Roman and its other symbols,
+% such as the minus sign, from TeX Gyre Termes Math.
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\setsansfont{Times New Roman}
+\setmonofont{Times New Roman}
+\usepackage{unicode-math}
+\setmathfont{TeX Gyre Termes Math}
+\setmathfont[range=up/num]{Times New Roman}
 \usetikzlibrary{arrows.meta,calc}
 
 \definecolor{ink}{HTML}{0B0B0B}
@@ -43,8 +54,8 @@
 \node[immutable] (B1) at ($(A.north east)+(\gap,0)$) {\textbf{ipfs://QmB1}\\[-1pt]\scriptsize B, version 1};
 \node[immutable] (B2) at ($(B1.south west)+(0,-8mm)$) {\textbf{ipfs://QmB2}\\[-1pt]\scriptsize B, version 2};
 \draw[ref] (A.east) -- (A.east-|B1.west);
-\draw[change] (B1.south) -- node[left, font=\scriptsize, text=inksoft, align=right] {save after\\a change} (B2.north);
-\node[note] at ($(A.south west)+(0,-1.5mm)$) {Pinned to version 1 until A is saved with a new reference.};
+\draw[change] (B1.south) -- node[left, font=\scriptsize, text=inksoft, align=right] {publication\\after a change} (B2.north);
+\node[note] at ($(A.south west)+(0,-1.5mm)$) {Pinned to version 1 until A is published with a new reference.};
 
 \end{tikzpicture}
 \end{document}

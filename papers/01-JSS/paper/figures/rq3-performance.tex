@@ -6,6 +6,17 @@
 % page). Line style and marker separate save from load, so the figure stays
 % readable without color. The same values appear in Table tab:rq3.
 \documentclass[border=2pt]{standalone}
+% All text is Times New Roman, as in the UML figures, and \texttt and \textsf
+% print in it too. fontspec loads the system font, so the file compiles with
+% LuaLaTeX. Math takes its digits from Times New Roman and its other symbols,
+% such as the minus sign, from TeX Gyre Termes Math.
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\setsansfont{Times New Roman}
+\setmonofont{Times New Roman}
+\usepackage{unicode-math}
+\setmathfont{TeX Gyre Termes Math}
+\setmathfont[range=up/num]{Times New Roman}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 
