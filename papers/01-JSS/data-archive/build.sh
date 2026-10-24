@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Builds the research data archive of the JSS paper "Towards Decentralized Model
 # Persistence" for upload to Zenodo. The archive goes to $OUT, outside the
-# repository, and holds the MoDisco models, the BPMN collections whose terms allow
-# redistribution, the evaluation results, and the source code of the three
-# repositories at their current commits.
+# repository, and holds the MoDisco models, the generated models of the timed
+# benchmarks, the BPMN collections whose terms allow redistribution, the
+# evaluation results, and the source code of the three repositories at their
+# current commits.
 #
 #   papers/01-JSS/data-archive/build.sh
 #
@@ -30,6 +31,9 @@ tar -C "$DATASETS" -czf "$OUT/modisco-jdt-models.tar.gz" \
   "$MODISCO/eclipse.jdt.debug" "$MODISCO/eclipse.jdt.ui" \
   "$MODISCO/all-repos-merged.xmi" "$MODISCO/all-repos-merged-by-compilation-unit" \
   "$MODISCO/ipfs-cids.md" "$MODISCO/aggregate-metrics-breakdown.csv" "$MODISCO/aggregate-metrics-summary.md"
+
+echo "Generated models of the timed benchmarks"
+tar -C "$ECOREFS/eval/custom_generator" -czf "$OUT/generated-models.tar.gz" output
 
 echo "BPMN collections"
 bpmn_paths=(bpmn/README.md bpmn/_load-check/summary.md bpmn/_load-check/tools bpmn/_load-check/clean/removed-files.tsv)

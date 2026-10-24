@@ -31,5 +31,6 @@ if grep -n '\\todo{' "$OUT/main.tex"; then
 fi
 
 (cd "$OUT" && latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex > build.log 2>&1)
-(cd "$OUT" && latexmk -c > /dev/null 2>&1 && rm -f build.log main.bbl.bak)
+# main.spl is an auxiliary file of elsarticle that latexmk -c leaves behind
+(cd "$OUT" && latexmk -c > /dev/null 2>&1 && rm -f build.log main.bbl.bak main.spl)
 ls -1 "$OUT"
