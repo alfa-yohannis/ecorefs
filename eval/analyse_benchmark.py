@@ -9,12 +9,9 @@ model copy.
 
 Next to each test, the summary gives the matched-pairs rank-biserial correlation
 as the effect size, and paired bootstrap confidence intervals for the mean
-difference and for the ratio of the means. The last section applies the
-practicality threshold of the README: the model size at which the IPFS path takes
-five times as long as the local XMI path.
+difference and for the ratio of the means.
 """
 
-import math
 import pathlib
 
 import numpy
@@ -35,10 +32,6 @@ OPERATIONS = [
 BOOTSTRAP_RESAMPLES = 10_000
 CONFIDENCE_LEVEL = 0.95
 BOOTSTRAP_SEED = 20261023
-
-# The README calls the IPFS path impractical for a model size at which the path
-# takes more than this many times as long as the local path.
-PRACTICALITY_RATIO = 5.0
 
 
 def describe(series):
@@ -111,32 +104,15 @@ def format_interval(interval):
     return f"[{interval[0]:.2f}, {interval[1]:.2f}]"
 
 
-def threshold_size(sizes, ratios):
-    """Return the model size at which the ratio crosses the practicality threshold.
-
-    The ratio falls with the model size, so the function looks for the first pair
-    of neighbouring sizes with the threshold between their ratios and interpolates
-    on logarithmic axes. The result is None when no pair crosses the threshold.
-    """
-    for index in range(len(sizes) - 1):
-        lower_ratio, upper_ratio = ratios[index], ratios[index + 1]
-        if (lower_ratio - PRACTICALITY_RATIO) * (upper_ratio - PRACTICALITY_RATIO) <= 0 and lower_ratio != upper_ratio:
-            fraction = (math.log(lower_ratio) - math.log(PRACTICALITY_RATIO)) / (math.log(lower_ratio) - math.log(upper_ratio))
-            return math.exp(math.log(sizes[index]) + fraction * (math.log(sizes[index + 1]) - math.log(sizes[index])))
-    return None
-
-
 def operation_lines(measurements, operation, xmi_column, ipfs_column):
-    """Return the summary lines of one operation and the ratio per model size."""
+    """Return the summary lines of one operation."""
     lines = [f"## {operation.capitalize()}", ""]
     lines.append("| Elements | XMI file | IPFS | Difference (ms) | Difference 95% CI | Ratio | Ratio 95% CI "
                  "| Wilcoxon p | Rank-biserial r |")
     lines.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- |")
-    ratios = []
     for element_count in sorted(measurements["Elements"].unique()):
         rows = measurements[measurements["Elements"] == element_count]
         result = compare(rows, xmi_column, ipfs_column)
-        ratios.append(result["ratio"])
         lines.append(
             f"| {element_count:,} | {format_statistics(result['xmi'])} | "
             f"{format_statistics(result['ipfs'])} | {result['difference']:.2f} | "
@@ -144,26 +120,6 @@ def operation_lines(measurements, operation, xmi_column, ipfs_column):
             f"{format_interval(result['ratio_interval'])} | {result['p_value']:.2e} | "
             f"{result['effect_size']:.2f} |"
         )
-    lines.append("")
-    return lines, ratios
-
-
-def threshold_lines(sizes, ratios_by_operation):
-    """Return the summary lines on the practicality threshold of the README."""
-    lines = ["## Practicality threshold", ""]
-    lines.append(f"The README calls the IPFS path impractical where the path takes more than "
-                 f"{PRACTICALITY_RATIO:g} times as long as the local XMI path.")
-    lines.append("")
-    for operation, ratios in ratios_by_operation.items():
-        size = threshold_size(sizes, ratios)
-        if size is None:
-            above = [s for s, r in zip(sizes, ratios) if r > PRACTICALITY_RATIO]
-            verdict = ("above the threshold at every measured size" if len(above) == len(sizes)
-                       else "below the threshold at every measured size")
-            lines.append(f"- {operation.capitalize()}: the ratio stays {verdict}.")
-        else:
-            lines.append(f"- {operation.capitalize()}: the ratio crosses {PRACTICALITY_RATIO:g} at about "
-                         f"{size:,.0f} elements (interpolated on logarithmic axes between the measured sizes).")
     lines.append("")
     return lines
 
@@ -182,13 +138,8 @@ def main():
                  f"come from {BOOTSTRAP_RESAMPLES:,} paired bootstrap resamples (seed {BOOTSTRAP_SEED}).")
     lines.append("")
 
-    sizes = sorted(measurements["Elements"].unique())
-    ratios_by_operation = {}
     for operation, xmi_column, ipfs_column in OPERATIONS:
-        operation_summary, ratios = operation_lines(measurements, operation, xmi_column, ipfs_column)
-        lines.extend(operation_summary)
-        ratios_by_operation[operation] = ratios
-    lines.extend(threshold_lines(sizes, ratios_by_operation))
+        lines.extend(operation_lines(measurements, operation, xmi_column, ipfs_column))
 
     SUMMARY_FILE.write_text("\n".join(lines), encoding="utf-8")
     print("\n".join(lines))

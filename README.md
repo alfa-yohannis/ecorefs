@@ -120,10 +120,10 @@ Evaluation plan:
 | Environment | Local IPFS node (Kubo) in Docker, to isolate network variability |
 | Repetitions | 30 runs per configuration, reported as mean and standard deviation |
 | Statistical test | Wilcoxon signed-rank test or paired t-test |
-| Practicality threshold | The model size at which IPFS takes more than 5 times as long as local I/O |
+| Practicality | The time that IPFS adds to a save and a load, compared with the sizes of real models |
 | Success criteria | A clear performance profile and guidance on when content-addressed persistence is practical |
 
-The expected result is an IPFS latency curve above the file system curve, growing with model size. The practicality threshold marks the size where IPFS stops being practical.
+The expected result was an IPFS latency curve above the file system curve, growing with model size. The measured curve has a different shape. Up to 10,000 elements, a save through IPFS took 40 to 43 ms longer than a save to a local XMI file, mostly because the node waits for the disk while it records the pin. The ratio to a local save is therefore largest for the smallest models, so the evaluation judges practicality by the added time in milliseconds.
 
 ### Summary
 
@@ -225,7 +225,7 @@ Some metamodels keep the location of another model in a plain attribute, such as
 
 Results:
 
-- `eval/results/benchmark_summary.md`: the RQ3 benchmark with the Wilcoxon tests, effect sizes, bootstrap intervals and the practicality threshold, written by `eval/analyse_benchmark.py` from `eval/results/benchmark_metrics.csv`; `eval/results/benchmark_environment.txt` records the machine of the run
+- `eval/results/benchmark_summary.md`: the RQ3 benchmark with the Wilcoxon tests, effect sizes and bootstrap intervals, written by `eval/analyse_benchmark.py` from `eval/results/benchmark_metrics.csv`; `eval/results/benchmark_environment.txt` records the machine of the run
 - `eval/results/rq3-add-probe`: the output of the add probe on each machine
 - `eval/results/bpmn-rq1` and `eval/results/bpmn-rq2`: the round trip of 11,486 real BPMN models and the cascades on real structures
 - `eval/results/baselines`: the comparison with Git, an sshfs share and NeoEMF

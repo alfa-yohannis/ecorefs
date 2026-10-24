@@ -23,10 +23,3 @@ Values are mean / median / standard deviation in milliseconds. The confidence in
 | 10,000 | 7.86 / 7.96 / 0.36 | 9.20 / 8.96 / 0.89 | 1.34 | [1.08, 1.62] | 1.17 | [1.14, 1.21] | 1.86e-09 | 1.00 |
 | 100,000 | 75.18 / 73.83 / 2.57 | 92.14 / 91.00 / 3.95 | 16.96 | [15.35, 18.61] | 1.23 | [1.20, 1.25] | 1.86e-09 | 1.00 |
 | 500,000 | 399.85 / 396.92 / 18.05 | 503.75 / 506.65 / 21.96 | 103.90 | [95.05, 113.11] | 1.26 | [1.24, 1.29] | 1.86e-09 | 1.00 |
-
-## Practicality threshold
-
-The README calls the IPFS path impractical where the path takes more than 5 times as long as the local XMI path.
-
-- Save: the ratio crosses 5 at about 47,678 elements (interpolated on logarithmic axes between the measured sizes).
-- Load: the ratio stays below the threshold at every measured size.
