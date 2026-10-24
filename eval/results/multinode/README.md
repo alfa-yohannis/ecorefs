@@ -9,13 +9,9 @@ Results of the multi-node experiment in `eval/multinode` (see the README there f
 | `environment.txt` | settings of the run and versions of the host, Docker, Kubo, Java and the jars |
 | `run.log` | everything the run printed |
 
-The full run has not been made yet. Start it on a quiet machine with
+The full run of the paper is run `20261023-204918` (`bash eval/multinode/run.sh`). It ran on 2026-10-23 from 20:49 to 23:52 on the HP Envy of the timed benchmarks (Intel Core i9-11900H, 32 GB, Ubuntu 24.04.5, Docker 29.8.2, Kubo 0.40.1, OpenJDK 21.0.12), right after the RQ3 benchmark and the baselines and with the other services of the machine stopped. It wrote 4,800 rows: per topology and profile, 30 measured iterations of each of the five models, 30 BPMN files and 30 IPNS publications. Every fetch and resolution in the peered topology started with a connection to mn-a, and none in the dht topology did. `run.log` stays out of git, like the other logs. The paper reports the EMF loads (`load_c`) of the models with 10,000 and 500,000 elements in `tab:multinode` and the IPNS visibility in the text.
 
-```sh
-bash eval/multinode/run.sh
-```
-
-`validation/` holds the last quick run (`run.sh --quick`, run `20261023-095500`) and `probe-large-models.csv`, one iteration of the three largest models used to estimate the duration.
+`validation/` holds the last quick run on the laptop (`run.sh --quick`, run `20261023-095500`) and `probe-large-models.csv`, one iteration of the three largest models used to estimate the duration.
 
 ## Columns of metrics.csv
 
@@ -69,4 +65,4 @@ The estimate comes from the probe and the validation. Per topology and profile i
 | peered | 3 min | 3 min | 18 min | 31 min |
 | dht | 18 min | 20 min | 40 min | 65 min |
 
-In total about 3 h 20 min. Since the fetches of the largest model vary by several seconds, plan for 3 to 4.5 hours. Without `wan100` (`PROFILES="none lan wan50"`) the run takes about 1 h 45 min. The full run uses a fixed heap of 8 GB like the RQ3 benchmark; the probe loaded the largest model with 2 GB, so `HEAP=4g` also works if memory is short.
+In total about 3 h 20 min; the full run on the HP Envy took 3 h 3 min. Since the fetches of the largest model vary by several seconds, plan for 3 to 4.5 hours. Without `wan100` (`PROFILES="none lan wan50"`) the run takes about 1 h 45 min. The full run uses a fixed heap of 8 GB like the RQ3 benchmark; the probe loaded the largest model with 2 GB, so `HEAP=4g` also works if memory is short.

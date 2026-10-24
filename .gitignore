@@ -40,6 +40,10 @@ docker/kubo/swarm.key
 # Benchmark Output Logs
 *.log
 *.csv
+# The measurements behind the paper's tables stay in the repository
+!eval/results/benchmark_metrics.csv
+!eval/results/baselines/*.csv
+!eval/results/multinode/**/*.csv
 
 # IDE Configurations
 .idea/

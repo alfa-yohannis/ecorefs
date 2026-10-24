@@ -1,0 +1,14 @@
+host: HP-ENVY, Linux 6.8.0-124-generic x86_64 GNU/Linux
+os: Ubuntu 24.04.5 LTS
+cpu: 11th Gen Intel(R) Core(TM) i9-11900H @ 2.50GHz, 16 logical CPUs
+memory: 30Gi
+cpu governor: performance, energy preference: performance
+on AC power: 1, battery: Full
+disk of the work files: ext4
+docker: 29.8.2, kubo image: ipfs/kubo:v0.40.1
+benchmark jvm: openjdk version "21.0.12.1" 2026-08-18
+maven jdk: openjdk version "17.0.20.1" 2026-08-18
+maven: Apache Maven 3.9.10 (5f519b97e944483d878815739f519b2eade0a91d)
+ecorefs commit: f64b379deaf8ca3fe32554b48530c3d178ec10a3
+load before the runs: 0.36 0.35 0.29 1/752 382925
+running containers: 
